@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+.env
+venv/
+.env*/
+pytest_cache/
+# OS files
+.DS_Store
+config/config.json
