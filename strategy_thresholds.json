@@ -1,0 +1,15 @@
+{
+  "MACDDivergenceStrategy": 1.0,
+  "null": 0.0,
+  "TrendPullbackStrategy": 0.2,
+  "MicroBreakoutScalpingStrategy": 1.0,
+  "EMACrossoverScalpingStrategy": 1.0,
+  "VWAPReversionStrategy": 0.2,
+  "DeltaDivergenceScalpingStrategy": 0.8,
+  "LondonBreakoutStrategy": 1.0,
+  "VolumeBreakoutStrategy": 1.0,
+  "OrderBlockScalpingStrategy": 1.0,
+  "SupplyDemandSwingStrategy": 1.0,
+  "FibonacciSwingStrategy": 1.0,
+  "SupertrendADXRSIStrategy": 0.2
+}

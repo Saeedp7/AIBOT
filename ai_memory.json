@@ -1,0 +1,12 @@
+{
+    "EMACrossoverScalpingStrategy": 0.05999999999999906,
+    "OrderBlockScalpingStrategy": 0.8899999999999999,
+    "SupplyDemandSwingStrategy": 0.995,
+    "MicroBreakoutScalpingStrategy": 0.249999999999999,
+    "VolumeBreakoutStrategy": 0.0,
+    "MACDDivergenceStrategy": 0.14999999999999897,
+    "VWAPReversionStrategy": 0.6100000000000001,
+    "DeltaDivergenceScalpingStrategy": 0.8950000000000004,
+    "TrendPullbackStrategy": 0.9049999999999999,
+    "LondonBreakoutStrategy": 0.19999999999999918
+}
