@@ -1,8 +1,20 @@
-from config.settings import LOT_SIZE
+import pandas as pd
+from config.settings import (
+    LOT_SIZE,
+    USE_ATR_SL,
+    ATR_PERIOD,
+    ATR_MULTIPLIER,
+)
 from connectors.mt5_connector import symbol_info_tick
 
 
-def calculate_lot_size(balance: float, sl_distance: float, risk_percent: float, symbol: str) -> float:
+def calculate_lot_size(
+    balance: float,
+    sl_distance: float,
+    risk_percent: float,
+    symbol: str,
+    market_data: pd.DataFrame | None = None,
+) -> float:
     """Calculate lot size based on SL distance and risk percentage."""
     info = symbol_info_tick(symbol)
     if not info:
@@ -18,6 +30,13 @@ def calculate_lot_size(balance: float, sl_distance: float, risk_percent: float, 
     if tick_size <= 0 or tick_value <= 0 or contract_size <= 0:
         print(f"⚠️ Invalid trading parameters for {symbol}. Using fallback LOT_SIZE.")
         return LOT_SIZE
+   
+    # Optionally use ATR to override SL distance
+    if USE_ATR_SL and isinstance(market_data, pd.DataFrame):
+        if all(col in market_data.columns for col in ["high", "low", "close"]):
+            atr = calculate_atr(market_data, ATR_PERIOD).iloc[-1]
+            if pd.notna(atr) and atr > 0:
+                sl_distance = atr * ATR_MULTIPLIER
 
     risk_amount = balance * (risk_percent / 100.0)
     sl_ticks = sl_distance / tick_size

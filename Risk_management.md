@@ -52,11 +52,16 @@ STOP_LOSS_PERCENT = 1.5
 
 ## 🎯 Multi-Level TP Logic
 
-Enabled for strategies that support scaling out profits.
+Enabled for strategies that support scaling out profits. The bot now creates **3
+to 5** TP levels based on strategy profile and volatility. Levels are spaced from
+the entry price using either ATR multiples or fixed percentages:
 
-* **TP1** — 33% closed at +1%
-* **TP2** — 33% closed at +1.5%
-* **TP3** — Final 34% at +2%
+* **TP1** — around +1% or *1× ATR*
+* **TP2** — around +1.5% or *2× ATR*
+* **TP3** — around +2% or *3× ATR*
+* **TP4** — +2.5% (*optional*)
+* **TP5** — +3% (*optional*)
+
 
 Once TP1 is hit:
 
@@ -108,6 +113,6 @@ You can extend or override:
 
 For advanced setups:
 
-* Use ATR-based SL/TP
+* Use ATR-based SL/TP (`USE_ATR_SL`, `ATR_PERIOD`, `ATR_MULTIPLIER` in `config/settings.py`)
 * Enforce time-based stopouts
 * Add volatility-based filters

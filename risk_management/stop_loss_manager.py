@@ -1,6 +1,7 @@
 # risk_management/stop_loss_manager.py
 
 import numpy as np
+from utils.indicators import calculate_atr
 
 def calculate_sl_tp(entry_price, direction, sl_percent=1.5, tp_percent=2.0):
     """Basic SL/TP calculator for fixed %."""
@@ -31,20 +32,30 @@ def determine_sl_tp(strategy_name, entry_price, direction, market_data):
         regime = 'volatile'
     else:
         regime = 'ranging'
+    atr_series = calculate_atr(market_data, period=14).dropna()
+    atr = float(atr_series.iloc[-1]) if not atr_series.empty else None
+
+    if atr and atr > 0:
+        base_tp = atr
+        base_sl = atr
+    else:
+        base_tp = entry_price * 0.01
+        base_sl = entry_price * 0.015
 
     if 'scalping' in strategy_name.lower():
-        sl_pips = 3.0
-        tp_steps = [3, 5, 7, 10, 15]
+        num_tps = 3
     elif 'swing' in strategy_name.lower():
-        sl_pips = 30.0
-        tp_steps = [30, 50, 75, 100, 120]
+        num_tps = 5
     else:  # day trading
-        sl_pips = 10.0
-        tp_steps = [10, 20, 30, 40, 50]
+        num_tps = 4
+
+    if regime == 'volatile':
+        num_tps = min(5, num_tps + 1)
+    num_tps = max(3, min(num_tps, 5))
 
     multiplier = 1 if direction == 'buy' else -1
-    stop_loss = round(entry_price - multiplier * sl_pips, 2)
-    take_profits = [round(entry_price + multiplier * tp, 2) for tp in tp_steps]
+    stop_loss = round(entry_price - multiplier * base_sl, 2)
+    take_profits = [round(entry_price + multiplier * base_tp * (i + 1), 2) for i in range(num_tps)]
 
     return stop_loss, take_profits, regime
 

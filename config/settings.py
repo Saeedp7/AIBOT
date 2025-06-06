@@ -45,3 +45,8 @@ ACTIVE_SYMBOLS_TIMEFRAMES = {symbol: TIMEFRAMES for symbol in SYMBOLS}
 # Backtest date range
 BACKTEST_START_DATE = "2025-06-01"
 BACKTEST_END_DATE = "2025-06-06"
+
+# --- ATR-based SL Settings ---
+USE_ATR_SL = True
+ATR_PERIOD = 14
+ATR_MULTIPLIER = 1.5
