@@ -15,7 +15,7 @@ SYMBOLS = ["XAUUSD.", "BTCUSD.", "ETHUSD.", "NDXUSD.", "DJIUSD."]
 TIMEFRAMES = ["M5", "M15", "H1", "H4"]
 SYMBOL = os.getenv('TRADE_SYMBOL', 'XAUUSD.')
 CHECK_INTERVAL_SECONDS = 60
-TIMEFRAME = os.getenv('TRADE_TIMEFRAME', 'M1')  # Default to 1-minute
+TIMEFRAME = os.getenv('TRADE_TIMEFRAME', 'M5')  # Default to 1-minute
 LOT_SIZE = float(os.getenv('LOT_SIZE', 0.1))
 
 # --- Risk Management Settings ---

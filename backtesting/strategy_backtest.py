@@ -4,6 +4,8 @@ from __future__ import annotations
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+
 """Simple backtester evaluating all available strategies.
 
 This module loads OHLCV data for a single symbol and timeframe,

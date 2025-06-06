@@ -16,6 +16,7 @@ class VWAPReversionStrategy:
         data = data.sort_index()
 
         # Calculate VWAP
+        data.index = data.index.tz_localize(None)
         data.loc[:, 'vwap'] = ta.vwap(high=data['high'], low=data['low'], close=data['close'], volume=data['volume'])
 
         last_price = data['close'].iloc[-1]

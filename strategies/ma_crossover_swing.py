@@ -29,5 +29,6 @@ class MACrossoverSwingStrategy:
         return self.signal == 'sell'
 
     def check_signal(self, df: pd.DataFrame) -> str | None:
+        df = df.copy(deep=True)
         self.analyze(df)
         return self.signal
