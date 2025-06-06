@@ -10,8 +10,8 @@ class TrendPullbackStrategy:
         if len(data) < 50:
             return
 
-        data['ema_20'] = ta.ema(data['close'], length=20)
-        data['ema_50'] = ta.ema(data['close'], length=50)
+        data.loc[:, 'ema_20'] = ta.ema(data['close'], length=20)
+        data.loc[:, 'ema_50'] = ta.ema(data['close'], length=50)
 
         if data['ema_20'].iloc[-1] > data['ema_50'].iloc[-1] and data['close'].iloc[-1] < data['ema_20'].iloc[-1]:
             self.signal = 'buy'

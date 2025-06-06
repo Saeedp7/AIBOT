@@ -10,8 +10,8 @@ class EMACrossoverScalpingStrategy:
         if len(data) < 50:
             return
 
-        data['ema_fast'] = ta.ema(data['close'], length=9)
-        data['ema_slow'] = ta.ema(data['close'], length=21)
+        data.loc[:, 'ema_fast'] = ta.ema(data['close'], length=9)
+        data.loc[:, 'ema_slow'] = ta.ema(data['close'], length=21)
 
         if data['ema_fast'].iloc[-2] < data['ema_slow'].iloc[-2] and data['ema_fast'].iloc[-1] > data['ema_slow'].iloc[-1]:
             self.signal = 'buy'

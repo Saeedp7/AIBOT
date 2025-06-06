@@ -16,8 +16,8 @@ class TrendFollowingStrategy:
             return
         data = data.copy()  # FULLY copy first
 
-        data['fast_ma'] = calculate_sma(data['close'], self.fast_period)
-        data['slow_ma'] = calculate_sma(data['close'], self.slow_period)
+        data.loc[:, 'fast_ma'] = calculate_sma(data['close'], self.fast_period)
+        data.loc[:, 'slow_ma'] = calculate_sma(data['close'], self.slow_period)
 
         if data['fast_ma'].iloc[-2] < data['slow_ma'].iloc[-2] and data['fast_ma'].iloc[-1] > data['slow_ma'].iloc[-1]:
             self.last_signal = "buy"

@@ -10,8 +10,8 @@ class MACrossoverSwingStrategy:
         if len(data) < 200:
             return
 
-        data['ma_50'] = ta.sma(data['close'], length=50)
-        data['ma_200'] = ta.sma(data['close'], length=200)
+        data.loc[:, 'ma_50'] = ta.sma(data['close'], length=50)
+        data.loc[:, 'ma_200'] = ta.sma(data['close'], length=200)
 
         data = data.dropna(subset=['ma_50', 'ma_200'])
         if len(data) < 2:

@@ -11,8 +11,8 @@ class MACDDivergenceStrategy:
             return
 
         macd = ta.macd(data['close'])
-        data['macd'] = macd['MACD_12_26_9']
-        data['macd_signal'] = macd['MACDs_12_26_9']
+        data.loc[:, 'macd'] = macd['MACD_12_26_9']
+        data.loc[:, 'macd_signal'] = macd['MACDs_12_26_9']
 
         if data['macd'].iloc[-2] < data['macd_signal'].iloc[-2] and data['macd'].iloc[-1] > data['macd_signal'].iloc[-1]:
             self.signal = 'buy'

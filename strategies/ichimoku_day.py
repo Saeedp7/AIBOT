@@ -29,7 +29,7 @@ class IchimokuDayStrategy:
             if df is not None:
                 for col in df.columns:
                     if col not in data.columns:
-                        data[col] = df[col]
+                        data.loc[:, col] = df[col]
 
         required = ['ITS_9', 'KJS_26', 'SSA_9_26_52', 'SSB_9_26_52']
         if not all(col in data.columns for col in required):
