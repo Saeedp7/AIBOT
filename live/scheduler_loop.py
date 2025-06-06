@@ -14,6 +14,8 @@ from config.settings import (
     CHECK_INTERVAL_SECONDS,
     MAX_RISK_PER_TRADE,
     MAGIC_NUMBER,
+    DAILY_LOSS_LIMIT_PERCENT,
+    MAX_TRADES_PER_DAY,
 )
 from data.data_collection import collect_ohlcv_data
 from data.preprocessing import preprocess_ohlcv_data
@@ -23,8 +25,13 @@ from ai_engine.strategy_selector import load_scores, get_best_signal
 from ai_engine.score_updater import update_scores
 from risk_management.stop_loss_manager import determine_sl_tp
 from risk_management.lot_sizing_module import calculate_lot_size
+from risk_management.daily_guard import DailyGuard
 from connectors.mt5_connector import get_account_info
 
+daily_guard = DailyGuard(
+    loss_limit_percent=DAILY_LOSS_LIMIT_PERCENT,
+    max_trades=MAX_TRADES_PER_DAY,
+)
 
 def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> bool:
     if not mt5.initialize():
@@ -92,6 +99,10 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         print(f"ℹ️ No action for {symbol} {timeframe}")
         return
 
+    if daily_guard.hit_limits():
+        print("🚫 Daily risk guard triggered.")
+        return
+
     entry = df["close"].iloc[-1]
     best_strat = max((k for k, v in signals.items() if v == decision),
                      key=lambda s: scores.get(s, {}).get("recent_score", 0.0),
@@ -106,7 +117,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
 
     print(f"📈 {symbol} {timeframe} → {decision.upper()} @ {entry} | SL: {sl} TP1: {tp_levels[0]} Lot: {lot}")
     if execute_trade(decision, symbol, lot, sl, tp_levels[0]):
-        # Update AI memory after successful execution
+        daily_guard.record_trade(0)
         result_metrics = {best_strat: {"win_rate": 50.0, "recent_score": 0.9, "regime_fit": 1.0}}  # TODO: dynamic score
         update_scores(result_metrics)
 

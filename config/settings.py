@@ -22,6 +22,8 @@ LOT_SIZE = float(os.getenv('LOT_SIZE', 0.1))
 MAX_RISK_PER_TRADE = float(os.getenv('MAX_RISK', 0.01))  # 1% default
 STOP_LOSS_MULTIPLIER = float(os.getenv('SL_MULTIPLIER', 1.5))
 TAKE_PROFIT_MULTIPLIER = float(os.getenv('TP_MULTIPLIER', 2.0))
+DAILY_LOSS_LIMIT_PERCENT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', 5.0))
+MAX_TRADES_PER_DAY = int(os.getenv('MAX_TRADES_PER_DAY', 20))
 
 # --- Misc Settings ---
 MAGIC_NUMBER = int(os.getenv('MAGIC_NUMBER', 123456))
