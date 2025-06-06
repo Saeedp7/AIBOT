@@ -2,3 +2,9 @@ pandas
 pandas_ta
 MetaTrader5
 requests
+pandas
+numpy
+ta
+matplotlib
+scikit-learn
+flask
