@@ -6,7 +6,7 @@ from config.settings import (
     ATR_MULTIPLIER,
 )
 from connectors.mt5_connector import symbol_info_tick
-
+from utils.indicators import calculate_atr
 
 def calculate_lot_size(
     balance: float,

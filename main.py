@@ -2,7 +2,6 @@
 
 from connectors.mt5_connector import initialize_mt5, shutdown_mt5
 from data.chart_data_handler import get_ohlcv, get_latest_price
-from strategies import StrategyRegistry
 from execution.order_manager import execute_fake_order
 from config.settings import SYMBOL, LOT_SIZE, TIMEFRAME
 
@@ -12,9 +11,6 @@ def run_bot():
     try:
         print("🟢 Initializing MT5...")
         initialize_mt5()
-
-        strategy = StrategyRegistry.get_best_strategy(SYMBOL, TIMEFRAME)
-        print(f"📊 Strategy Selected: {strategy.name()}")
 
         while True:
             print("🔄 Checking market...")
