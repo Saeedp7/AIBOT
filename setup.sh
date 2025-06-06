@@ -11,6 +11,7 @@ sudo apt-get install -y python3 python3-pip python3-venv build-essential
 echo "🐍 Creating and activating Python virtual environment..."
 python3 -m venv venv
 source venv/bin/activate
+pip install pandas
 
 # 3. Install Required Python Packages (excluding MetaTrader5 for Codex/Linux)
 echo "📦 Installing required Python libraries (MetaTrader5 skipped)..."
