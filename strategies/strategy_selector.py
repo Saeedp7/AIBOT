@@ -20,6 +20,10 @@ from strategies.fibonacci_swing import FibonacciSwingStrategy
 from strategies.london_breakout import LondonBreakoutStrategy
 from strategies.ma_crossover_swing import MACrossoverSwingStrategy
 from strategies.supertrend_adx_rsi_strategy import SupertrendADXRSIStrategy
+from strategies.breakout_strategy import BreakoutStrategy
+from strategies.mean_reversion import MeanReversionStrategy
+from strategies.trend_following import TrendFollowingStrategy
+
 
 class StrategySelector:
     def __init__(self):
@@ -38,6 +42,9 @@ class StrategySelector:
             LondonBreakoutStrategy(),
             MACrossoverSwingStrategy(),
             SupertrendADXRSIStrategy(),
+            BreakoutStrategy(),
+            MeanReversionStrategy(),
+           TrendFollowingStrategy(),
         ]
         self.cooldowns = {}
         self.strategy_memory = load_strategy_scores()
