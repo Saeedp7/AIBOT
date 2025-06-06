@@ -1,4 +1,5 @@
 pandas
+pandas_ta
 numpy
 ta
 flask
