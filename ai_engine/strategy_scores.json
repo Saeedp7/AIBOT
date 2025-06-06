@@ -1,7 +1,10 @@
 {
   "VWAPReversionStrategy": {
     "score": 3.9932655539223996,
-    "last_updated": 1746804649.053205
+    "last_updated": 1746804649.053205,
+    "win_rate": 14.0,
+    "recent_score": 0.24,
+    "regime_fit": 1.0
   },
   "TrendPullbackStrategy": {
     "score": 5.571444877783671,
@@ -42,5 +45,10 @@
   "SupertrendADXRSIStrategy": {
     "score": 1.0,
     "last_updated": 1746820334.4022744
+  },
+  "BreakoutStrategy": {
+    "win_rate": 9.0,
+    "recent_score": 0.12,
+    "regime_fit": 1.0
   }
 }
