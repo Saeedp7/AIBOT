@@ -1,3 +1,5 @@
+import pandas as pd
+
 class VolumeBreakoutStrategy:
     def __init__(self):
         self.signal = None
@@ -19,3 +21,7 @@ class VolumeBreakoutStrategy:
 
     def should_sell(self):
         return self.signal == 'sell'
+
+    def check_signal(self, df: pd.DataFrame) -> str | None:
+        self.analyze(df)
+        return self.signal

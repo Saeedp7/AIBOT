@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 class DeltaDivergenceScalpingStrategy:
     def __init__(self):
         self.signal = None
@@ -18,3 +21,7 @@ class DeltaDivergenceScalpingStrategy:
 
     def should_sell(self):
         return self.signal == 'sell'
+
+    def check_signal(self, df: pd.DataFrame) -> str | None:
+        self.analyze(df)
+        return self.signal

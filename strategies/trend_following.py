@@ -32,3 +32,7 @@ class TrendFollowingStrategy:
 
     def should_sell(self):
         return self.last_signal == "sell"
+
+    def check_signal(self, df: pd.DataFrame) -> str | None:
+        self.analyze(df)
+        return self.last_signal

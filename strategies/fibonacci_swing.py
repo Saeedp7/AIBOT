@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 
 class FibonacciSwingStrategy:
@@ -26,3 +27,7 @@ class FibonacciSwingStrategy:
 
     def should_sell(self):
         return self.signal == 'sell'
+
+    def check_signal(self, df: pd.DataFrame) -> str | None:
+        self.analyze(df)
+        return self.signal
