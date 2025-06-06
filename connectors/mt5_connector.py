@@ -26,22 +26,21 @@ def get_account_info():
         raise Exception(f"❌ Failed to retrieve account info: {error}")
     return info
 
-def is_connected():
+def is_connected() -> bool:
     """Check if MT5 is still connected."""
     return mt5.terminal_info() is not None
 
-def symbol_info_tick(symbol):
+def symbol_info_tick(symbol: str):
     """Get full symbol info from MT5"""
     info = mt5.symbol_info(symbol)
     if info is None:
         print(f"⚠️ Failed to get symbol info for {symbol}")
     return info
 
-def get_symbol_price(symbol):
+def get_symbol_price(symbol: str):
     """Returns the latest bid/ask mid-price for a symbol"""
     tick = mt5.symbol_info_tick(symbol)
     if tick:
         return round((tick.bid + tick.ask) / 2, 2)
-    else:
-        print(f"⚠️ No tick data for {symbol}")
-        return None
+    print(f"⚠️ No tick data for {symbol}")
+    return None

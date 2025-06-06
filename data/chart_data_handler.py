@@ -29,7 +29,7 @@ BINANCE_TIMEFRAME_MAPPING = {
 }
 
 def get_ohlcv(symbol=SYMBOL, timeframe=TIMEFRAME, start=None, end=None, num_bars=500):
-    """Fetch OHLCV historical data with optional date range."""
+    """Fetch OHLCV data from MT5 with optional date range."""
     tf = TIMEFRAME_MAPPING.get(timeframe)
     if tf is None:
         raise ValueError(f"Unsupported timeframe: {timeframe}")
@@ -62,7 +62,7 @@ def get_latest_price(symbol=SYMBOL):
     return {
         'bid': tick.bid,
         'ask': tick.ask,
-        'last': (tick.bid + tick.ask) / 2
+        'last': (tick.bid + tick.ask) / 2,
     }
 
 
@@ -73,46 +73,46 @@ def get_binance_ohlcv(symbol, timeframe, start=None, end=None, limit=500):
     if interval is None:
         raise ValueError(f"Unsupported timeframe: {timeframe}")
 
-    url = "https://api.binance.com/api/v3/klines"
+    url = 'https://api.binance.com/api/v3/klines'
     params = {
-        "symbol": symbol,
-        "interval": interval,
-        "limit": limit,
+        'symbol': symbol,
+        'interval': interval,
+        'limit': limit,
     }
 
     if start:
-        params["startTime"] = int(pd.to_datetime(start).timestamp() * 1000)
+        params['startTime'] = int(pd.to_datetime(start).timestamp() * 1000)
     if end:
-        params["endTime"] = int(pd.to_datetime(end).timestamp() * 1000)
+        params['endTime'] = int(pd.to_datetime(end).timestamp() * 1000)
 
     response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     raw = response.json()
 
     columns = [
-        "open_time",
-        "open",
-        "high",
-        "low",
-        "close",
-        "volume",
-        "close_time",
-        "quote_asset_volume",
-        "number_of_trades",
-        "taker_base_vol",
-        "taker_quote_vol",
-        "ignore",
+        'open_time',
+        'open',
+        'high',
+        'low',
+        'close',
+        'volume',
+        'close_time',
+        'quote_asset_volume',
+        'number_of_trades',
+        'taker_base_vol',
+        'taker_quote_vol',
+        'ignore',
     ]
     df = pd.DataFrame(raw, columns=columns)
-    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
-    df.set_index("open_time", inplace=True)
-    numeric_cols = ["open", "high", "low", "close", "volume"]
+    df['open_time'] = pd.to_datetime(df['open_time'], unit='ms')
+    df.set_index('open_time', inplace=True)
+    numeric_cols = ['open', 'high', 'low', 'close', 'volume']
     df[numeric_cols] = df[numeric_cols].astype(float)
-    df["delta"] = df["volume"].diff().fillna(0)
+    df['delta'] = df['volume'].diff().fillna(0)
     return df
 
 
-def load_multi_ohlcv(symbols, timeframes, source="MT5", start=None, end=None, num_bars=500, to_csv=False, csv_dir="data/historical"):
+def load_multi_ohlcv(symbols, timeframes, source='MT5', start=None, end=None, num_bars=500, to_csv=False, csv_dir='data/historical'):
     """Load OHLCV data for multiple symbols/timeframes from MT5 or Binance."""
     data = {}
     if to_csv:
@@ -121,13 +121,13 @@ def load_multi_ohlcv(symbols, timeframes, source="MT5", start=None, end=None, nu
     for symbol in symbols:
         data[symbol] = {}
         for tf in timeframes:
-            if source.upper() == "BINANCE":
+            if source.upper() == 'BINANCE':
                 df = get_binance_ohlcv(symbol, tf, start=start, end=end, limit=num_bars)
             else:
                 df = get_ohlcv(symbol, tf, start=start, end=end, num_bars=num_bars)
             data[symbol][tf] = df
             if to_csv:
-                filename = f"{symbol}_{tf}.csv".replace("/", "")
+                filename = f"{symbol}_{tf}.csv".replace('/', '')
                 df.to_csv(os.path.join(csv_dir, filename))
 
     return data

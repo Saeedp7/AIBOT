@@ -1,4 +1,3 @@
-
 ## Running the project
 
 1. Install the required dependencies:
@@ -18,15 +17,23 @@
    ```bash
    python backtesting/live_simulator.py
    ```
+
 5. To download historical OHLCV data for all configured symbols/timeframes:
    ```bash
    python data/bulk_data_fetch.py --source MT5 --to-csv
    ```
    Use `--source BINANCE` for Binance data or customize symbols and timeframes
    via additional flags, e.g.:
+   Use `--source BINANCE` for Binance data or customize symbols and timeframes via additional flags:
    ```bash
    python data/bulk_data_fetch.py --source BINANCE --symbols BTCUSDT ETHUSDT \
        --timeframes M5 H1 --to-csv
+   ```
+
+The tests under `test_*.py` require the MetaTrader5 module and will fail if it is not available.
+6. Alternatively, use `data/ohlcv_collector.py` which exposes the same functionality as a module:
+   ```bash
+   python data/ohlcv_collector.py --source MT5 --limit 200
    ```
 
 The tests under `test_*.py` require the MetaTrader5 module and will fail if it is not available.

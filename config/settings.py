@@ -1,6 +1,7 @@
 # config/settings.py
 
 import os
+from itertools import product
 
 # --- Broker API Credentials ---
 API_LOGIN = int(os.getenv('MT5_LOGIN', 235934))
@@ -32,11 +33,7 @@ SYMBOL_OVERRIDES = {
     "EURUSD": {"tick_size": 0.0001, "tick_value": 1.0, "contract_size": 100000},
 }
 
-from itertools import product
-
-ACTIVE_SYMBOLS_TIMEFRAMES = {
-    symbol: TIMEFRAMES for symbol in SYMBOLS
-}
+ACTIVE_SYMBOLS_TIMEFRAMES = {symbol: TIMEFRAMES for symbol in SYMBOLS}
 
 # Backtest date range
 BACKTEST_START_DATE = "2025-06-01"
