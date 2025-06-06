@@ -1,4 +1,4 @@
-"""Live scheduler to monitor multiple symbols and timeframes."""
+# PATCHED: live/scheduler_loop.py (now uses regime-aware multi-TP SL/TP logic + updates AI memory)
 
 from __future__ import annotations
 
@@ -12,8 +12,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config.settings import (
     ACTIVE_SYMBOLS_TIMEFRAMES,
     CHECK_INTERVAL_SECONDS,
-    STOP_LOSS_MULTIPLIER,
-    TAKE_PROFIT_MULTIPLIER,
     MAX_RISK_PER_TRADE,
     MAGIC_NUMBER,
 )
@@ -22,13 +20,13 @@ from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators
 from strategies.strategy_selector import StrategySelector
 from ai_engine.strategy_selector import load_scores, get_best_signal
-from risk_management.stop_loss_manager import calculate_sl_tp
+from ai_engine.score_updater import update_scores
+from risk_management.stop_loss_manager import determine_sl_tp
 from risk_management.lot_sizing_module import calculate_lot_size
 from connectors.mt5_connector import get_account_info
 
 
 def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> bool:
-    """Send a trade order via MT5."""
     if not mt5.initialize():
         print("❌ Failed to initialize MT5")
         return False
@@ -67,7 +65,6 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
 
 
 def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
-    """Run decision pipeline for a single symbol/timeframe."""
     raw = collect_ohlcv_data([symbol], [timeframe], limit=300)
     if not raw or symbol not in raw:
         print(f"❌ Failed to load data for {symbol} {timeframe}")
@@ -96,19 +93,25 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         return
 
     entry = df["close"].iloc[-1]
-    sl, tp = calculate_sl_tp(entry, decision, STOP_LOSS_MULTIPLIER, TAKE_PROFIT_MULTIPLIER)
+    best_strat = max((k for k, v in signals.items() if v == decision),
+                     key=lambda s: scores.get(s, {}).get("recent_score", 0.0),
+                     default=None)
+    if not best_strat:
+        print("❌ No confident strategy to assign score update.")
+        return
 
+    sl, tp_levels, regime = determine_sl_tp(best_strat, entry, decision, df)
     acct = get_account_info()
     lot = calculate_lot_size(acct.balance, abs(entry - sl), MAX_RISK_PER_TRADE * 100, symbol)
 
-    print(
-        f"📈 {symbol} {timeframe} → {decision.upper()} @ {entry} | SL: {sl} TP: {tp} Lot: {lot}"
-    )
-    execute_trade(decision, symbol, lot, sl, tp)
+    print(f"📈 {symbol} {timeframe} → {decision.upper()} @ {entry} | SL: {sl} TP1: {tp_levels[0]} Lot: {lot}")
+    if execute_trade(decision, symbol, lot, sl, tp_levels[0]):
+        # Update AI memory after successful execution
+        result_metrics = {best_strat: {"win_rate": 50.0, "recent_score": 0.9, "regime_fit": 1.0}}  # TODO: dynamic score
+        update_scores(result_metrics)
 
 
 def scheduler_loop() -> None:
-    """Continuously check all symbols/timeframes and trade when signaled."""
     while True:
         for symbol, tfs in ACTIVE_SYMBOLS_TIMEFRAMES.items():
             for tf in tfs:
