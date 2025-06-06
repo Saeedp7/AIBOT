@@ -1,25 +1,32 @@
+# CodexTest.py — Reusable AI Bot Diagnostic & Strategy Test Suite
+
 from config.settings import SYMBOL, TIMEFRAME
 from data.data_collection import collect_ohlcv_data
 from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators
 from strategies.strategy_selector import StrategySelector
 from ai_engine.strategy_selector import load_scores, get_best_signal
-from risk_management.stop_loss_manager import calculate_sl_tp
+from risk_management.stop_loss_manager import determine_sl_tp
 from risk_management.lot_sizing_module import calculate_lot_size
 from connectors.mt5_connector import get_account_info
 from risk_management.daily_guard import DailyGuard
 
 import MetaTrader5 as mt5
 import os
+import json
 
-# Step 1: Fetch and prepare data
+# ───────────────────────────────
+# 📥 Step 1: Fetch & Prepare Data
+# ───────────────────────────────
 print("📥 Collecting data...")
 raw = collect_ohlcv_data([SYMBOL], [TIMEFRAME], limit=300)
 clean = preprocess_ohlcv_data(raw)
 enriched = add_indicators(clean)
 df = enriched[SYMBOL][TIMEFRAME]
 
-# Step 2: Run strategy selector
+# ───────────────────────────────
+# 🔍 Step 2: Run Strategy Signals
+# ───────────────────────────────
 print("🔍 Running strategy signal check...")
 selector = StrategySelector()
 signals = selector.check_all(df)
@@ -27,31 +34,26 @@ print("\n📊 Signals:")
 for name, signal in signals.items():
     print(f"{name:35}: {signal}")
 
-# Step 3: AI selects best decision
+# ───────────────────────────────
+# 🧠 Step 3: AI Decision
+# ───────────────────────────────
 scores = load_scores()
 final_decision = get_best_signal(signals, scores)
-print(f"\n✅ Final AI Decision (fallback-safe):", final_decision or "buy")
+print(f"\n✅ Final AI Decision (fallback-safe): {final_decision or 'buy'}")
 
-# Step 4: Position sizing test
+# ───────────────────────────────
+# 💠 Step 4: Position Sizing Test
+# ───────────────────────────────
 print("\n💠 Testing position sizing...")
 acct = get_account_info()
 entry = df["close"].iloc[-1]
 
 try:
-    result = calculate_sl_tp(entry, final_decision or "buy", 1.5, 2.0)
-    print("🩠 Raw SL/TP result:", result)
+    # Use the updated AI-aware SL/TP generator
+    sl, tp_levels, regime = determine_sl_tp("AutoStrategy", entry, final_decision or "buy", df)
+    print("🩠 Raw SL/TP result:", (sl, tp_levels, regime))
 
-    if isinstance(result, tuple):
-        if len(result) == 3:
-            sl, tp_levels, regime = result
-        elif len(result) == 2:
-            sl, tp_levels = result
-            regime = "unknown"
-        else:
-            raise ValueError("Unexpected return format from calculate_sl_tp")
-    else:
-        raise ValueError("SL/TP result must be a tuple")
-
+    # Ensure TP levels are always a list
     if not isinstance(tp_levels, list):
         tp_levels = [tp_levels]
 
@@ -73,20 +75,24 @@ try:
 except Exception as e:
     print("❌ SL/TP calculation error:", str(e))
 
-# Step 5: DailyGuard mock test
+# ───────────────────────────────
+# 🛡️ Step 5: DailyGuard Mock Test
+# ───────────────────────────────
 print("\n🛡️ Testing DailyGuard mock logic...")
-test_path = "logs/test_guard_log.json"
-
+mock_path = "logs/test_guard_log.json"
 try:
-    guard = DailyGuard(data_file=test_path)
-    mock_pnl = -55.0
-    guard.record_trade(mock_pnl)
+    os.makedirs("logs", exist_ok=True)
+    guard = DailyGuard(data_file=mock_path)
+
+    # Simulate a loss trade
+    guard.record_trade(pnl=-55.0)
 
     if guard.hit_limits():
         print("❌ DailyGuard blocked further trades as expected (hit loss limit or max trades).")
     else:
         print("✅ DailyGuard allows trading — within safe daily limits.")
-
+except Exception as e:
+    print("❌ DailyGuard test error:", str(e))
 finally:
-    if os.path.exists(test_path):
-        os.remove(test_path)
+    if os.path.exists(mock_path):
+        os.remove(mock_path)

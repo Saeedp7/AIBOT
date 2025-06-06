@@ -57,6 +57,10 @@ def determine_sl_tp(strategy_name, entry_price, direction, market_data):
     stop_loss = round(entry_price - multiplier * base_sl, 2)
     take_profits = [round(entry_price + multiplier * base_tp * (i + 1), 2) for i in range(num_tps)]
 
+    # Ensure it's a list
+    if not isinstance(take_profits, list):
+        take_profits = [take_profits]
+
     return stop_loss, take_profits, regime
 
 
