@@ -11,9 +11,15 @@ sudo apt-get install -y python3 python3-pip python3-venv build-essential
 echo "🐍 Creating and activating Python virtual environment..."
 python3 -m venv venv
 source venv/bin/activate
+
+# 3. Install Pip Essentials + Bootstrap Safety
+echo "🔄 Bootstrapping Python packages..."
+pip install --upgrade pip setuptools wheel
+
+# 4. Install pandas early to avoid test import errors
 pip install pandas
 
-# 3. Install Required Python Packages (excluding MetaTrader5 for Codex/Linux)
+# 5. Install All Dependencies (excluding MetaTrader5 for Codex/Linux)
 echo "📦 Installing required Python libraries (MetaTrader5 skipped)..."
 if [ ! -f requirements.txt ]; then
   echo "❌ Error: requirements.txt not found!"
@@ -21,11 +27,10 @@ if [ ! -f requirements.txt ]; then
 fi
 
 grep -v 'MetaTrader5' requirements.txt > temp_requirements.txt
-pip install --upgrade pip setuptools wheel
 pip install -r temp_requirements.txt
 rm temp_requirements.txt
 
-# 4. Create Default Config File (if not present)
+# 6. Create Default Config File (if not present)
 echo "🔐 Checking for config/config.json..."
 mkdir -p config
 if [ ! -f config/config.json ]; then
@@ -40,7 +45,7 @@ else
   echo "✅ Found existing config/config.json"
 fi
 
-# 5. Final Notices for Developer
+# 7. Final Developer Notices
 echo ""
 echo "⚠️ NOTICE: MetaTrader5 package is excluded due to Linux/Codex environment."
 echo "💡 You can still develop, test, and backtest all non-MT5 logic."
