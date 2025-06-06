@@ -61,7 +61,9 @@ Enabled for strategies that support scaling out profits.
 Once TP1 is hit:
 
 * Stop Loss is moved to **entry (breakeven)**
-  Once TP2 is hit:
+
+Once TP2 is hit:
+
 * Stop Loss moves to **TP1 level**
 
 ---
@@ -74,6 +76,8 @@ The breakeven feature automatically protects floating profits:
 * If price hits TP2, SL = TP1
 * Ensures worst-case outcome is still profit
 
+The `BreakEvenManager` module tracks these levels and updates the stop loss
+accordingly during an open trade.
 ---
 
 ## 🔒 Daily Loss Protection

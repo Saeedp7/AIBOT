@@ -28,9 +28,16 @@ MAGIC_NUMBER = int(os.getenv('MAGIC_NUMBER', 123456))
 
 # --- Optional fallback per-symbol overrides (future extension) ---
 SYMBOL_OVERRIDES = {
-    "XAUUSD": {"tick_size": 0.01, "tick_value": 0.01, "contract_size": 100},
-    "BTCUSD": {"tick_size": 0.01, "tick_value": 0.01, "contract_size": 1},
-    "EURUSD": {"tick_size": 0.0001, "tick_value": 1.0, "contract_size": 100000},
+    "XAUUSD.": {
+        "tick_size": 0.01,
+        "tick_value": 1.0,
+        "contract_size": 100
+    },
+    "BTCUSD.": {
+        "tick_size": 0.01,
+        "tick_value": 1.0,
+        "contract_size": 1
+    }
 }
 
 ACTIVE_SYMBOLS_TIMEFRAMES = {symbol: TIMEFRAMES for symbol in SYMBOLS}

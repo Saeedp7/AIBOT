@@ -1,16 +1,9 @@
-from ai_engine.score_updater import update_scores, _load_json
+import MetaTrader5 as mt5
+from risk_management.lot_sizing_module import calculate_lot_size
 
-# Simulated performance results
-new_results = {
-    "VWAPReversionStrategy": {"win_rate": 70.0, "recent_score": 1.2, "regime_fit": 1.0},
-    "BreakoutStrategy": {"win_rate": 45.0, "recent_score": 0.6}
-}
+mt5.initialize()  # Must be called here
 
-print("🧪 Before update:")
-print(_load_json("ai_engine/strategy_scores.json"))
+lot = calculate_lot_size(100100, 10, 3.0, "XAUUSD.")
+print("✅ Calculated lot size:", lot)
 
-# Run the update
-update_scores(new_results)
-
-print("\n✅ After update:")
-print(_load_json("ai_engine/strategy_scores.json"))
+mt5.shutdown()  # Always close when done
