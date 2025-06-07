@@ -10,3 +10,8 @@ pytest_cache/
 # OS files
 .DS_Store
 config/config.json
+
+# Log and data files
+logs/
+backtesting/logs/
+*.csv
