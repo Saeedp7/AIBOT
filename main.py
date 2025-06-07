@@ -10,7 +10,23 @@ LOT_SIZE = float(get_config("LOT_SIZE", 0.1))
 TIMEFRAME = get_config("TRADE_TIMEFRAME", "M5")
 
 import time
+from strategies.strategy_selector import StrategySelector
 
+
+class StrategyManager:
+    """Simple wrapper providing a generate_signal() interface."""
+
+    def __init__(self, timeframe: str) -> None:
+        self.selector = StrategySelector()
+        self.timeframe = timeframe
+
+    def generate_signal(self, df):
+        multi_tf_data = {self.timeframe: df}
+        strategy = self.selector.select_strategy(multi_tf_data)
+        return getattr(strategy, "signal", None) if strategy else None
+
+
+strategy = StrategyManager(TIMEFRAME)
 def run_bot():
     try:
         print("🟢 Initializing MT5...")
