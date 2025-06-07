@@ -3,7 +3,11 @@
 from connectors.mt5_connector import initialize_mt5, shutdown_mt5
 from data.chart_data_handler import get_ohlcv, get_latest_price
 from execution.order_manager import execute_fake_order
-from config.settings import SYMBOL, LOT_SIZE, TIMEFRAME
+from config.manager import get_config
+
+SYMBOL = get_config("TRADE_SYMBOL", "BTCUSD.")
+LOT_SIZE = float(get_config("LOT_SIZE", 0.1))
+TIMEFRAME = get_config("TRADE_TIMEFRAME", "M5")
 
 import time
 

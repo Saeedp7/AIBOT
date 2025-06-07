@@ -1,6 +1,9 @@
 # CodexTest.py — Reusable AI Bot Diagnostic & Strategy Test Suite
 
-from config.settings import SYMBOL, TIMEFRAME
+from config.manager import get_config
+
+SYMBOL = get_config("TRADE_SYMBOL", "BTCUSD.")
+TIMEFRAME = get_config("TRADE_TIMEFRAME", "M5")
 from data.data_collection import collect_ohlcv_data
 from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators

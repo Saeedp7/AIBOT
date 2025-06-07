@@ -10,15 +10,17 @@ import MetaTrader5 as mt5
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from config.settings import (
-    ACTIVE_SYMBOLS_TIMEFRAMES,
-    CHECK_INTERVAL_SECONDS,
-    MAX_RISK_PER_TRADE,
-    MAGIC_NUMBER,
-    DAILY_LOSS_LIMIT_PERCENT,
-    MAX_TRADES_PER_DAY,
-    LIVE_MODE,
-)
+from config.manager import get_config
+
+SYMBOLS = get_config("SYMBOLS", "XAUUSD.,BTCUSD.,ETHUSD.,NDXUSD.,DJIUSD.").split(",")
+TIMEFRAMES = get_config("TIMEFRAMES", "M1,M5,M15,H1,H4").split(",")
+ACTIVE_SYMBOLS_TIMEFRAMES = {symbol: TIMEFRAMES for symbol in SYMBOLS}
+CHECK_INTERVAL_SECONDS = int(get_config("CHECK_INTERVAL_SECONDS", 60))
+MAX_RISK_PER_TRADE = float(get_config("MAX_RISK", 0.01))
+MAGIC_NUMBER = int(get_config("MAGIC_NUMBER", 123456))
+DAILY_LOSS_LIMIT_PERCENT = float(get_config("DAILY_LOSS_LIMIT_PERCENT", 5.0))
+MAX_TRADES_PER_DAY = int(get_config("MAX_TRADES_PER_DAY", 20))
+LIVE_MODE = get_config("LIVE_MODE", "false")
 from data.data_collection import collect_ohlcv_data
 from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators

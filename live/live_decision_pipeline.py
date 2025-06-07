@@ -15,15 +15,14 @@ from indicators.indicator_engine import add_indicators
 from strategies.strategy_selector import StrategySelector
 from ai_engine.strategy_selector import load_scores, get_best_signal
 from risk_management.stop_loss_manager import calculate_sl_tp
-from config.settings import (
-    SYMBOL,
-    TIMEFRAME,
-    LOT_SIZE,
-    STOP_LOSS_MULTIPLIER,
-    TAKE_PROFIT_MULTIPLIER,
-    MAGIC_NUMBER,
-)
+from config.manager import get_config
 
+SYMBOL = get_config("TRADE_SYMBOL", "BTCUSD.")
+TIMEFRAME = get_config("TRADE_TIMEFRAME", "M5")
+LOT_SIZE = float(get_config("LOT_SIZE", 0.1))
+STOP_LOSS_MULTIPLIER = float(get_config("SL_MULTIPLIER", 1.5))
+TAKE_PROFIT_MULTIPLIER = float(get_config("TP_MULTIPLIER", 2.0))
+MAGIC_NUMBER = int(get_config("MAGIC_NUMBER", 123456))
 
 def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> bool:
     """Send a trade order via MT5."""

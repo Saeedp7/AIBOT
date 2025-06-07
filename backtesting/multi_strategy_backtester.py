@@ -3,7 +3,12 @@ import time
 from data.chart_data_handler import get_ohlcv
 from ai_engine.decision_engine import evaluate_signals
 from execution.order_manager import execute_fake_order
-from config.settings import SYMBOLS, TIMEFRAMES, BACKTEST_START_DATE,BACKTEST_END_DATE
+from config.manager import get_config
+
+SYMBOLS = get_config("SYMBOLS", "XAUUSD.,BTCUSD.,ETHUSD.,NDXUSD.,DJIUSD.").split(",")
+TIMEFRAMES = get_config("TIMEFRAMES", "M1,M5,M15,H1,H4").split(",")
+BACKTEST_START_DATE = get_config("BACKTEST_START_DATE", "2025-06-01")
+BACKTEST_END_DATE = get_config("BACKTEST_END_DATE", "2025-06-06")
 
 from strategies.strategy_selector import StrategySelector   # فرض بر تابعی که همه استراتژی‌ها رو لود می‌کنه
 

@@ -2,7 +2,10 @@ import time
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from config.settings import SYMBOL, CHECK_INTERVAL_SECONDS
+from config.manager import get_config
+
+SYMBOL = get_config("TRADE_SYMBOL", "BTCUSD.")
+CHECK_INTERVAL_SECONDS = int(get_config("CHECK_INTERVAL_SECONDS", 60))
 from connectors.mt5_connector import initialize_mt5, shutdown_mt5, get_symbol_price
 from strategies.strategy_selector import StrategySelector
 from execution.order_manager import execute_fake_order

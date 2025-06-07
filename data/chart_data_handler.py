@@ -4,7 +4,10 @@ import MetaTrader5 as mt5
 import pandas as pd
 import requests
 import os
-from config.settings import SYMBOL, TIMEFRAME
+from config.manager import get_config
+
+SYMBOL = get_config("TRADE_SYMBOL", "BTCUSD.")
+TIMEFRAME = get_config("TRADE_TIMEFRAME", "M5")
 
 # Map timeframe strings to MT5 constants
 TIMEFRAME_MAPPING = {

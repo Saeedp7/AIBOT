@@ -1,10 +1,10 @@
 import pandas as pd
-from config.settings import (
-    LOT_SIZE,
-    USE_ATR_SL,
-    ATR_PERIOD,
-    ATR_MULTIPLIER,
-)
+from config.manager import get_config
+
+LOT_SIZE = float(get_config("LOT_SIZE", 0.1))
+USE_ATR_SL = get_config("USE_ATR_SL", "True").lower() == "true"
+ATR_PERIOD = int(get_config("ATR_PERIOD", 14))
+ATR_MULTIPLIER = float(get_config("ATR_MULTIPLIER", 1.5))
 from connectors.mt5_connector import symbol_info_tick
 from utils.indicators import calculate_atr
 

@@ -8,7 +8,10 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from connectors.mt5_connector import initialize_mt5, shutdown_mt5, is_connected
 from data.chart_data_handler import load_multi_ohlcv
-from config.settings import SYMBOLS, TIMEFRAMES
+from config.manager import get_config
+
+SYMBOLS = get_config("SYMBOLS", "XAUUSD.,BTCUSD.,ETHUSD.,NDXUSD.,DJIUSD.").split(",")
+TIMEFRAMES = get_config("TIMEFRAMES", "M1,M5,M15,H1,H4").split(",")
 
 
 def collect_ohlcv_data(
