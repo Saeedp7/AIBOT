@@ -1,19 +1,24 @@
+# test_env_config.py
 import os
-from dotenv import load_dotenv
-from monitoring import alert_manager
+from config.manager import get_config
 
-# Load environment variables from .env file (if available)
-load_dotenv()
+def test_env_loading():
+    print("🔧 Testing .env loading via get_config()...")
 
-# Run each alert function as a test
-print("🔔 Testing alert_trade_opened...")
-alert_manager.alert_trade_opened("XAUUSD", "M15", "buy", entry=2323.5, sl=2318.0, tp=2335.0)
+    test_keys = [
+        "MT5_LOGIN",
+        "MT5_PASSWORD",
+        "MT5_SERVER",
+        "LIVE_MODE",
+        "SYMBOLS",
+        "TIMEFRAMES",
+        "TELEGRAM_BOT_TOKEN",
+        "DISCORD_WEBHOOK_URL"
+    ]
 
-print("🔔 Testing alert_sl_moved...")
-alert_manager.alert_sl_moved("XAUUSD", "M15", new_sl=2325.0)
+    for key in test_keys:
+        val = get_config(key)
+        print(f"✅ {key} = {val if val else '⚠️ Not Set'}")
 
-print("🔔 Testing alert_trade_closed...")
-alert_manager.alert_trade_closed("XAUUSD", "M15", reason="TP Hit")
-
-print("🔔 Testing alert_daily_guard...")
-alert_manager.alert_daily_guard("Max trades per day reached.")
+if __name__ == "__main__":
+    test_env_loading()
