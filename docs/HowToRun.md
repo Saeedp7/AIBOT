@@ -17,10 +17,11 @@
    ```bash
    python backtesting/live_simulator.py
    ```
-5. To run the real-time scheduler in dry-run mode set `LIVE_MODE=False` in `config/settings.py`.
-   Trades will be logged to `logs/trade_simulated.json` without being executed.
+5. To run the real-time scheduler in dry-run mode set the environment variable
+   ``LIVE_MODE=false``. Trades will be logged to ``logs/trade_simulated.json``
+   without being executed.
 
-5. To download historical OHLCV data for all configured symbols/timeframes:
+6. To download historical OHLCV data for all configured symbols/timeframes:
    ```bash
    python data/data_collection.py --source MT5 --to-csv
    ```
@@ -33,7 +34,7 @@
    ```
 
 The tests under `test_*.py` require the MetaTrader5 module and will fail if it is not available.
-6.  The same script can fetch a limited number of bars without saving to CSV:
+7.  The same script can fetch a limited number of bars without saving to CSV:
    ```bash
    python data/data_collection.py --source MT5 --limit 200
    ```

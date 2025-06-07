@@ -68,9 +68,8 @@ python main.py
 python -m backtesting.multi_strategy_backtester
 ```
 ### 5. Live Simulation
-
-Set `LIVE_MODE=False` in `config/settings.py` to test the loop without placing real orders. Simulated trades are saved to `logs/trade_simulated.json`.
-
+Set the ``LIVE_MODE`` environment variable to ``false`` to test the loop without
+placing real orders. Simulated trades are saved to ``logs/trade_simulated.json``.
 ```json
 [
   {"time": "2025-06-15 14:32:01", "symbol": "XAUUSD.", "direction": "buy", "volume": 0.1}
