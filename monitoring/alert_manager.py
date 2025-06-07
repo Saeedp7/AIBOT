@@ -21,7 +21,6 @@ def _send_telegram(message: str) -> bool:
 
 def _notify(message: str) -> None:
     _send_telegram(message)
-    _send_discord(message)
 
 
 def alert_trade_opened(symbol: str, timeframe: str, direction: str, entry: float, sl: float, tp: float) -> None:
