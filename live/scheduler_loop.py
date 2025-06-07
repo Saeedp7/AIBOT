@@ -32,6 +32,12 @@ from connectors.mt5_connector import get_account_info
 from utils.trade_journal import record_trade, update_trade, load_history
 from utils.logger import log_trade_action
 from risk_management.breakeven_manager import BreakEvenManager
+from monitoring.alert_manager import (
+    alert_trade_opened,
+    alert_sl_moved,
+    alert_trade_closed,
+    alert_daily_guard,
+)
 
 daily_guard = DailyGuard(
     loss_limit_percent=DAILY_LOSS_LIMIT_PERCENT,
@@ -102,6 +108,7 @@ def run_open_trade_manager() -> None:
                     trade["sl"] = trade["tp_levels"][next_idx - 1]
                 log_trade_action(f"{trade['symbol']} {trade['timeframe']} TP{next_idx+1} hit, SL moved to {trade['sl']}")
                 trade_journal[trade["id"]]["modified"] = True
+                alert_sl_moved(trade["symbol"], trade["timeframe"], trade["sl"])
 
         stop_hit = price >= trade["sl"] if trade["direction"] == "sell" else price <= trade["sl"]
         if stop_hit:
@@ -109,11 +116,13 @@ def run_open_trade_manager() -> None:
             trade_journal[trade["id"]]["closed"] = True
             open_trades.remove(trade)
             trade_cache.discard((trade["symbol"], trade["timeframe"]))
+            alert_trade_closed(trade["symbol"], trade["timeframe"], "stop_hit")
 
 
 def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
     if daily_guard.hit_limits():
         print("🚫 Daily risk guard triggered.")
+        alert_daily_guard("limits hit")
         return
 
     if (symbol, timeframe) in trade_cache:
@@ -178,6 +187,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
             ticket=ticket,
             timestamp=datetime.utcnow().isoformat() + "Z",
         )
+        alert_trade_opened(symbol, timeframe, decision, entry, sl, tp_levels[0])
 
 
 def run_live_trade_manager() -> None:
@@ -214,6 +224,7 @@ def run_live_trade_manager() -> None:
                     f"SL moved to breakeven for {pos.symbol} on {rec['timeframe']} by TradeManager"
                 )
                 update_trade(ticket, sl=new_sl, sl_moved=True)
+                alert_sl_moved(pos.symbol, rec["timeframe"], new_sl)
                 if new_sl == rec["entry"] and rec.get("result") == "open":
                     update_trade(ticket, result="TP1 hit")
                     update_strategy_score(rec["strategy"], "win", regime=rec.get("regime", ""))
@@ -244,6 +255,7 @@ def run_live_trade_manager() -> None:
                 update_trade(ticket, result="closed_early", closed_early=True)
                 update_strategy_score(rec["strategy"], "loss", regime=rec.get("regime", ""))
                 executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
+                alert_trade_closed(pos.symbol, rec["timeframe"], "closed_early")
     mt5.shutdown()
 
 

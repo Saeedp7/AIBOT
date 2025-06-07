@@ -1,26 +1,19 @@
-# test_strategy.py
+import os
+from dotenv import load_dotenv
+from monitoring import alert_manager
 
-from connectors.mt5_connector import initialize_mt5, shutdown_mt5
-from data.chart_data_handler import get_ohlcv
-from strategies.trend_following import TrendFollowingStrategy
+# Load environment variables from .env file (if available)
+load_dotenv()
 
-def test_strategy():
-    try:
-        initialize_mt5()
-        data = get_ohlcv(num_bars=100)
-        strategy = TrendFollowingStrategy(fast_period=10, slow_period=30)
-        strategy.analyze(data)
+# Run each alert function as a test
+print("🔔 Testing alert_trade_opened...")
+alert_manager.alert_trade_opened("XAUUSD", "M15", "buy", entry=2323.5, sl=2318.0, tp=2335.0)
 
-        if strategy.should_buy():
-            print("📈 BUY Signal detected!")
-        elif strategy.should_sell():
-            print("📉 SELL Signal detected!")
-        else:
-            print("❓ No clear signal.")
-    except Exception as e:
-        print(e)
-    finally:
-        shutdown_mt5()
+print("🔔 Testing alert_sl_moved...")
+alert_manager.alert_sl_moved("XAUUSD", "M15", new_sl=2325.0)
 
-if __name__ == "__main__":
-    test_strategy()
+print("🔔 Testing alert_trade_closed...")
+alert_manager.alert_trade_closed("XAUUSD", "M15", reason="TP Hit")
+
+print("🔔 Testing alert_daily_guard...")
+alert_manager.alert_daily_guard("Max trades per day reached.")
