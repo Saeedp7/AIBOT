@@ -1,10 +1,8 @@
 import json
 import os
-import sys
 from collections import defaultdict
 from datetime import datetime
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 LOG_FILE = "decision_log.json"
 THRESHOLD_FILE = "strategy_thresholds.json"
 

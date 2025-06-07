@@ -1,12 +1,8 @@
 """End-to-end live decision pipeline for automated trading with debug output."""
 
 from __future__ import annotations
-import os
-import sys
 import json
 import MetaTrader5 as mt5
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from data.data_collection import collect_ohlcv_data
 from data.preprocessing import preprocess_ohlcv_data

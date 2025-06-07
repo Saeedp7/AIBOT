@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-import os
-import sys
+
 import time
 from datetime import datetime
 import MetaTrader5 as mt5
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from config.manager import get_config
 

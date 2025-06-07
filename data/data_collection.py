@@ -3,9 +3,6 @@
 from typing import Dict
 import argparse
 import pandas as pd
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from connectors.mt5_connector import initialize_mt5, shutdown_mt5, is_connected
 from data.chart_data_handler import load_multi_ohlcv
 from config.manager import get_config
