@@ -83,7 +83,7 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
     return None
 
 
-def run_trade_manager() -> None:
+def run_open_trade_manager() -> None:
     """Update open trades: breakeven and trailing stops."""
     for trade in list(open_trades):
         tick = mt5.symbol_info_tick(trade["symbol"])
@@ -180,7 +180,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         )
 
 
-def run_trade_manager() -> None:
+def run_live_trade_manager() -> None:
     """Monitor open positions and adjust stops or close early."""
     if not mt5.initialize():
         return
@@ -246,37 +246,11 @@ def run_trade_manager() -> None:
                 executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
     mt5.shutdown()
 
-    trade_id = len(trade_journal) + 1
-    trade_data = {
-        "id": trade_id,
-        "symbol": symbol,
-        "timeframe": timeframe,
-        "direction": decision,
-        "entry": entry,
-        "lot": lot,
-        "sl": sl,
-        "tp_levels": tp_levels,
-    }
-
-    success = True
-    if LIVE_MODE:
-        success = execute_trade(decision, symbol, lot, sl, tp_levels[0])
-    else:
-        log_simulated_trade(trade_data)
-
-    if success:
-        log_trade_action(f"OPEN {decision.upper()} {symbol} {timeframe} lot {lot} @ {entry}")
-        daily_guard.record_trade(0)
-        trade_cache.add((symbol, timeframe))
-        open_trades.append({**trade_data, "tp_hit_index": -1})
-        trade_journal[trade_id] = {"modified": False, "closed": False}
-        result_metrics = {best_strat: {"win_rate": 50.0, "recent_score": 0.9, "regime_fit": 1.0}}
-        update_scores(result_metrics)
-
 
 def scheduler_loop() -> None:
     while True:
-        run_trade_manager()
+        run_open_trade_manager()
+        run_live_trade_manager()
         for symbol, tfs in ACTIVE_SYMBOLS_TIMEFRAMES.items():
             for tf in tfs:
                 process_symbol_timeframe(symbol, tf)
