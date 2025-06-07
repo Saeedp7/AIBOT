@@ -66,6 +66,30 @@ def update_scores(results: Dict[str, dict], score_path: str = DEFAULT_SCORE_PATH
 
     _save_json(scores, score_path)
 
+def update_strategy_score(strategy_name: str, result: str, regime: str,
+                          score_path: str = DEFAULT_SCORE_PATH) -> None:
+    """Convenience wrapper to update a single strategy based on a trade result.
+
+    Parameters
+    ----------
+    strategy_name : str
+        Name of the strategy being evaluated.
+    result : str
+        Outcome string such as ``"TP1 hit"`` or ``"SL hit"``.
+    regime : str
+        Market regime label used during the trade (``"trending"``, ``"ranging"``,
+        etc.).
+    score_path : str, optional
+        Path to the JSON score file.
+    """
+    outcome_win = str(result).lower().startswith("tp") or result.lower() == "win"
+    delta_metrics = {
+        "win_rate": 100.0 if outcome_win else 0.0,
+        "recent_score": 1.0 if outcome_win else 0.0,
+        "regime_fit": 1.0 if outcome_win else 0.5,
+    }
+    update_scores({strategy_name: delta_metrics}, score_path)
+
 
 if __name__ == "__main__":
     example = {
@@ -74,3 +98,4 @@ if __name__ == "__main__":
     }
     update_scores(example)
     print("Updated strategy scores.")
+    

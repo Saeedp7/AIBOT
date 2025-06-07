@@ -67,6 +67,27 @@ python main.py
 # Backtest mode
 python -m backtesting.multi_strategy_backtester
 ```
+### 5. Live Simulation
+
+Set `LIVE_MODE=False` in `config/settings.py` to test the loop without placing real orders. Simulated trades are saved to `logs/trade_simulated.json`.
+
+```json
+[
+  {"time": "2025-06-15 14:32:01", "symbol": "XAUUSD.", "direction": "buy", "volume": 0.1}
+]
+```
+
+Trade manager actions go to `logs/trade_actions.log`:
+
+```
+[2025-06-15 14:35:00] XAUUSD. TP1 hit, SL moved to breakeven
+```
+
+If the daily risk guard blocks trading, an entry appears in `logs/risk_guard.log`:
+
+```
+[2025-06-15 18:00:00] Trade count limit hit: 20 >= 20
+```
 
 ---
 

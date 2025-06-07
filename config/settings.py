@@ -12,8 +12,8 @@ API_PATH = os.getenv('MT5_PATH', r'C:\Program Files\MetaTrader 5\terminal64.exe'
 # --- Trading Settings ---
 # config/settings.py
 SYMBOLS = ["XAUUSD.", "BTCUSD.", "ETHUSD.", "NDXUSD.", "DJIUSD."]
-TIMEFRAMES = ["M5", "M15", "H1", "H4"]
-SYMBOL = os.getenv('TRADE_SYMBOL', 'XAUUSD.')
+TIMEFRAMES = ["M1", "M5", "M15", "H1", "H4"]
+SYMBOL = os.getenv('TRADE_SYMBOL', 'BTCUSD.')
 CHECK_INTERVAL_SECONDS = 60
 TIMEFRAME = os.getenv('TRADE_TIMEFRAME', 'M5')  # Default to 1-minute
 LOT_SIZE = float(os.getenv('LOT_SIZE', 0.1))
@@ -27,7 +27,8 @@ MAX_TRADES_PER_DAY = int(os.getenv('MAX_TRADES_PER_DAY', 20))
 
 # --- Misc Settings ---
 MAGIC_NUMBER = int(os.getenv('MAGIC_NUMBER', 123456))
-
+# Toggle real order execution. Set to False for simulation/dry-run.
+LIVE_MODE = 'false'
 # --- Optional fallback per-symbol overrides (future extension) ---
 SYMBOL_OVERRIDES = {
     "XAUUSD.": {

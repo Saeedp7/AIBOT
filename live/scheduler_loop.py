@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sys
 import time
+from datetime import datetime
 import MetaTrader5 as mt5
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -16,33 +17,44 @@ from config.settings import (
     MAGIC_NUMBER,
     DAILY_LOSS_LIMIT_PERCENT,
     MAX_TRADES_PER_DAY,
+    LIVE_MODE,
 )
 from data.data_collection import collect_ohlcv_data
 from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators
 from strategies.strategy_selector import StrategySelector
 from ai_engine.strategy_selector import load_scores, get_best_signal
-from ai_engine.score_updater import update_scores
+from ai_engine.score_updater import update_scores, update_strategy_score
 from risk_management.stop_loss_manager import determine_sl_tp
 from risk_management.lot_sizing_module import calculate_lot_size
 from risk_management.daily_guard import DailyGuard
 from connectors.mt5_connector import get_account_info
+from utils.trade_journal import record_trade, update_trade, load_history
+from utils.logger import log_trade_action
+from risk_management.breakeven_manager import BreakEvenManager
 
 daily_guard = DailyGuard(
     loss_limit_percent=DAILY_LOSS_LIMIT_PERCENT,
     max_trades=MAX_TRADES_PER_DAY,
 )
 
-def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> bool:
+open_trades: list[dict] = []
+trade_cache: set[tuple[str, str]] = set()
+trade_journal: dict[int, dict] = {}
+
+# Track open trades to avoid duplicates per symbol/timeframe
+executed_trades: dict[str, dict[str, int]] = {}
+
+def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> int | None:
     if not mt5.initialize():
         print("❌ Failed to initialize MT5")
-        return False
+        return None
 
     price = mt5.symbol_info_tick(symbol)
     if price is None:
         print(f"⚠️ No price data for {symbol}")
         mt5.shutdown()
-        return False
+        return None
 
     deal_type = mt5.ORDER_TYPE_BUY if direction == "buy" else mt5.ORDER_TYPE_SELL
     entry_price = price.ask if direction == "buy" else price.bid
@@ -66,12 +78,50 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
 
     if result and result.retcode == mt5.TRADE_RETCODE_DONE:
         print(f"✅ Trade executed: ticket {result.order}")
-        return True
+        return result.order
     print(f"❌ Trade failed: {result}")
-    return False
+    return None
+
+
+def run_trade_manager() -> None:
+    """Update open trades: breakeven and trailing stops."""
+    for trade in list(open_trades):
+        tick = mt5.symbol_info_tick(trade["symbol"])
+        if not tick:
+            continue
+        price = tick.bid if trade["direction"] == "sell" else tick.ask
+        next_idx = trade.get("tp_hit_index", -1) + 1
+        if next_idx < len(trade["tp_levels"]):
+            target = trade["tp_levels"][next_idx]
+            hit = price <= target if trade["direction"] == "sell" else price >= target
+            if hit:
+                trade["tp_hit_index"] = next_idx
+                if next_idx == 0:
+                    trade["sl"] = trade["entry"]
+                else:
+                    trade["sl"] = trade["tp_levels"][next_idx - 1]
+                log_trade_action(f"{trade['symbol']} {trade['timeframe']} TP{next_idx+1} hit, SL moved to {trade['sl']}")
+                trade_journal[trade["id"]]["modified"] = True
+
+        stop_hit = price >= trade["sl"] if trade["direction"] == "sell" else price <= trade["sl"]
+        if stop_hit:
+            log_trade_action(f"Close {trade['symbol']} {trade['timeframe']} @ {price}")
+            trade_journal[trade["id"]]["closed"] = True
+            open_trades.remove(trade)
+            trade_cache.discard((trade["symbol"], trade["timeframe"]))
 
 
 def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
+    if daily_guard.hit_limits():
+        print("🚫 Daily risk guard triggered.")
+        return
+
+    if (symbol, timeframe) in trade_cache:
+        print(f"⏳ Trade already open for {symbol} {timeframe}")
+        return
+    if executed_trades.get(symbol, {}).get(timeframe):
+        print(f"⏳ Existing trade for {symbol} {timeframe}, skipping execution")
+        return
     raw = collect_ohlcv_data([symbol], [timeframe], limit=300)
     if not raw or symbol not in raw:
         print(f"❌ Failed to load data for {symbol} {timeframe}")
@@ -99,9 +149,6 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         print(f"ℹ️ No action for {symbol} {timeframe}")
         return
 
-    if daily_guard.hit_limits():
-        print("🚫 Daily risk guard triggered.")
-        return
 
     entry = df["close"].iloc[-1]
     best_strat = max((k for k, v in signals.items() if v == decision),
@@ -116,14 +163,120 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
     lot = calculate_lot_size(acct.balance, abs(entry - sl), MAX_RISK_PER_TRADE * 100, symbol)
 
     print(f"📈 {symbol} {timeframe} → {decision.upper()} @ {entry} | SL: {sl} TP1: {tp_levels[0]} Lot: {lot}")
-    if execute_trade(decision, symbol, lot, sl, tp_levels[0]):
+    ticket = execute_trade(decision, symbol, lot, sl, tp_levels[0])
+    if ticket:
         daily_guard.record_trade(0)
-        result_metrics = {best_strat: {"win_rate": 50.0, "recent_score": 0.9, "regime_fit": 1.0}}  # TODO: dynamic score
+        executed_trades.setdefault(symbol, {})[timeframe] = ticket
+        record_trade(
+            symbol=symbol,
+            timeframe=timeframe,
+            entry=entry,
+            sl=sl,
+            tps=tp_levels,
+            strategy=best_strat,
+            result="open",
+            ticket=ticket,
+            timestamp=datetime.utcnow().isoformat() + "Z",
+        )
+
+
+def run_trade_manager() -> None:
+    """Monitor open positions and adjust stops or close early."""
+    if not mt5.initialize():
+        return
+    positions = mt5.positions_get()
+    history = {t["ticket"]: t for t in load_history()}
+    if positions is None:
+        mt5.shutdown()
+        return
+    for pos in positions:
+        ticket = pos.ticket
+        rec = history.get(ticket)
+        if not rec:
+            continue
+        direction = "buy" if pos.type == mt5.POSITION_TYPE_BUY else "sell"
+        tick = mt5.symbol_info_tick(pos.symbol)
+        if not tick:
+            continue
+        price = tick.bid if direction == "sell" else tick.ask
+        bem = BreakEvenManager(rec["entry"], direction, pos.sl, rec.get("tp", []))
+        new_sl = bem.update_stop_loss(price)
+        if new_sl != pos.sl:
+            req = {
+                "action": mt5.TRADE_ACTION_SLTP,
+                "position": ticket,
+                "sl": new_sl,
+                "tp": pos.tp,
+            }
+            res = mt5.order_send(req)
+            if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                log_trade_action(
+                    f"SL moved to breakeven for {pos.symbol} on {rec['timeframe']} by TradeManager"
+                )
+                update_trade(ticket, sl=new_sl, sl_moved=True)
+                if new_sl == rec["entry"] and rec.get("result") == "open":
+                    update_trade(ticket, result="TP1 hit")
+                    update_strategy_score(rec["strategy"], "win", regime=rec.get("regime", ""))
+        # simple reversal check
+        if direction == "buy" and price < rec["entry"] - (rec["entry"] - rec["sl"]):
+            close_type = mt5.ORDER_TYPE_SELL
+        elif direction == "sell" and price > rec["entry"] + (rec["sl"] - rec["entry"]):
+            close_type = mt5.ORDER_TYPE_BUY
+        else:
+            close_type = None
+        if close_type is not None:
+            close_req = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": pos.symbol,
+                "volume": pos.volume,
+                "type": close_type,
+                "position": ticket,
+                "price": price,
+                "deviation": 20,
+                "magic": MAGIC_NUMBER,
+                "comment": "TradeManager close",
+            }
+            res = mt5.order_send(close_req)
+            if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                log_trade_action(
+                    f"Trade closed early on trend reversal: {pos.symbol} {rec['timeframe']}"
+                )
+                update_trade(ticket, result="closed_early", closed_early=True)
+                update_strategy_score(rec["strategy"], "loss", regime=rec.get("regime", ""))
+                executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
+    mt5.shutdown()
+
+    trade_id = len(trade_journal) + 1
+    trade_data = {
+        "id": trade_id,
+        "symbol": symbol,
+        "timeframe": timeframe,
+        "direction": decision,
+        "entry": entry,
+        "lot": lot,
+        "sl": sl,
+        "tp_levels": tp_levels,
+    }
+
+    success = True
+    if LIVE_MODE:
+        success = execute_trade(decision, symbol, lot, sl, tp_levels[0])
+    else:
+        log_simulated_trade(trade_data)
+
+    if success:
+        log_trade_action(f"OPEN {decision.upper()} {symbol} {timeframe} lot {lot} @ {entry}")
+        daily_guard.record_trade(0)
+        trade_cache.add((symbol, timeframe))
+        open_trades.append({**trade_data, "tp_hit_index": -1})
+        trade_journal[trade_id] = {"modified": False, "closed": False}
+        result_metrics = {best_strat: {"win_rate": 50.0, "recent_score": 0.9, "regime_fit": 1.0}}
         update_scores(result_metrics)
 
 
 def scheduler_loop() -> None:
     while True:
+        run_trade_manager()
         for symbol, tfs in ACTIVE_SYMBOLS_TIMEFRAMES.items():
             for tf in tfs:
                 process_symbol_timeframe(symbol, tf)

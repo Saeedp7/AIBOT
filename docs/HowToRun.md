@@ -17,6 +17,8 @@
    ```bash
    python backtesting/live_simulator.py
    ```
+5. To run the real-time scheduler in dry-run mode set `LIVE_MODE=False` in `config/settings.py`.
+   Trades will be logged to `logs/trade_simulated.json` without being executed.
 
 5. To download historical OHLCV data for all configured symbols/timeframes:
    ```bash

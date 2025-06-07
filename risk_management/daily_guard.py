@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime, timezone
 from typing import Optional
+from utils.logger import log_risk_guard
 
 try:
     from connectors.mt5_connector import get_account_info
@@ -67,8 +68,14 @@ class DailyGuard:
         pnl = float(self.state.get("pnl", 0.0))
         pnl_percent = (pnl / balance * 100) if balance > 0 else 0.0
         if pnl_percent <= -self.loss_limit_percent:
+            log_risk_guard(
+                f"Loss limit hit: {pnl_percent:.2f}% <= -{self.loss_limit_percent}%"
+            )
             return True
         if int(self.state.get("trades", 0)) >= self.max_trades:
+            log_risk_guard(
+                f"Trade count limit hit: {self.state.get('trades', 0)} >= {self.max_trades}"
+            )
             return True
         return False
 
