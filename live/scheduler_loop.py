@@ -278,7 +278,7 @@ def run_live_trade_manager() -> None:
                 update_trade(ticket, sl=new_sl, sl_moved=True)
                 alert_sl_moved(pos.symbol, rec["timeframe"], new_sl)
                 if new_sl == rec["entry"] and rec.get("result") == "open":
-                    update_trade(ticket, result="TP1 hit")
+                    update_trade(ticket, result="TP1 hit", hit="TP1")
                     update_strategy_score(rec["strategy"], "win", regime=rec.get("regime", ""))
         # simple reversal check
         if direction == "buy" and price < rec["entry"] - (rec["entry"] - rec["sl"]):
@@ -304,7 +304,24 @@ def run_live_trade_manager() -> None:
                 log_trade_action(
                     f"Trade closed early on trend reversal: {pos.symbol} {rec['timeframe']}"
                 )
-                update_trade(ticket, result="closed_early", closed_early=True)
+                close_ts = datetime.utcnow().isoformat() + "Z"
+                open_ts = datetime.fromisoformat(rec["timestamp"].replace("Z", "+00:00"))
+                dur = (datetime.utcnow() - open_ts).total_seconds()
+                pct = (
+                    (price - rec["entry"]) / rec["entry"] * 100
+                    if direction == "buy"
+                    else (rec["entry"] - price) / rec["entry"] * 100
+                )
+                update_trade(
+                    ticket,
+                    result="closed_early",
+                    closed_early=True,
+                    exit=price,
+                    close_time=close_ts,
+                    duration=dur,
+                    profit_pct=pct,
+                    hit="closed_early",
+                )
                 update_strategy_score(rec["strategy"], "loss", regime=rec.get("regime", ""))
                 executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
                 alert_trade_closed(pos.symbol, rec["timeframe"], "closed_early")
