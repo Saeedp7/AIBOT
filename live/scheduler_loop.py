@@ -22,6 +22,7 @@ MAGIC_NUMBER = int(get_config("MAGIC_NUMBER", 123456))
 DAILY_LOSS_LIMIT_PERCENT = float(get_config("DAILY_LOSS_LIMIT_PERCENT", 5.0))
 MAX_TRADES_PER_DAY = int(get_config("MAX_TRADES_PER_DAY", 20))
 LIVE_MODE = get_config("LIVE_MODE", "false")
+CONFIDENCE_THRESHOLD = float(get_config("CONFIDENCE_THRESHOLD", 0.5))
 from data.chart_data_handler import load_multi_ohlcv
 from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators
@@ -210,6 +211,21 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
                      default=None)
     if not best_strat:
         logger.error("No confident strategy to assign score update")
+        return
+
+    metrics = scores.get(best_strat, {})
+    confidence = (
+        float(metrics.get("recent_score", 0.0))
+        * float(metrics.get("regime_fit", 0.0))
+        * float(metrics.get("win_rate", 0.0))
+    )
+    log_trade_action(
+        f"Confidence {confidence:.4f} for {symbol} {timeframe} using {best_strat}"
+    )
+    if confidence < CONFIDENCE_THRESHOLD:
+        log_trade_action(
+            f"Skipping trade for {symbol} {timeframe}: confidence {confidence:.4f} < {CONFIDENCE_THRESHOLD}"
+        )
         return
 
     sl, tp_levels, regime = determine_sl_tp(best_strat, entry, decision, df)
