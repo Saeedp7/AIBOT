@@ -66,9 +66,14 @@ def update_scores(results: Dict[str, dict], score_path: str = DEFAULT_SCORE_PATH
 
     _save_json(scores, score_path)
 
-def update_strategy_score(strategy_name: str, result: str, regime: str,
-                          score_path: str = DEFAULT_SCORE_PATH) -> None:
-    """Convenience wrapper to update a single strategy based on a trade result.
+def update_strategy_score(
+    strategy_name: str,
+    result: str,
+    regime: str,
+    score_path: str = DEFAULT_SCORE_PATH,
+    decay: float = 0.8,
+) -> None:
+    """Update nested regime metrics for ``strategy_name``.
 
     Parameters
     ----------
@@ -81,14 +86,33 @@ def update_strategy_score(strategy_name: str, result: str, regime: str,
         etc.).
     score_path : str, optional
         Path to the JSON score file.
-    """
+        decay : float, optional
+        Exponential smoothing decay factor. ``0.8`` keeps 80% of the previous
+        value.
+    """   
+    scores = _load_json(score_path)
+    regime = regime or "unknown"
+    strat_data = scores.get(strategy_name, {})
+    metrics = strat_data.get(
+        regime,
+        {"win_rate": 0.0, "recent_score": 0.0, "regime_fit": 1.0},
+    )
+
     outcome_win = str(result).lower().startswith("tp") or result.lower() == "win"
-    delta_metrics = {
+    new_values  = {
         "win_rate": 100.0 if outcome_win else 0.0,
         "recent_score": 1.0 if outcome_win else 0.0,
         "regime_fit": 1.0 if outcome_win else 0.5,
     }
-    update_scores({strategy_name: delta_metrics}, score_path)
+
+    for key, val in new_values.items():
+        base = 1.0 if key == "regime_fit" else 0.0
+        prev = float(metrics.get(key, base))
+        metrics[key] = decay * prev + (1 - decay) * val
+
+    strat_data[regime] = metrics
+    scores[strategy_name] = strat_data
+    _save_json(scores, score_path)
 
 
 if __name__ == "__main__":
@@ -98,4 +122,3 @@ if __name__ == "__main__":
     }
     update_scores(example)
     print("Updated strategy scores.")
-    

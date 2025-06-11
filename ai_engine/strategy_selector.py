@@ -15,12 +15,37 @@ DEFAULT_THRESHOLD = 0.9
 
 
 def load_scores(path: str = DEFAULT_SCORE_PATH) -> Dict[str, dict]:
-    """Load strategy score data from JSON file."""
+    """Load strategy score data supporting nested regime metrics."""
     try:
         with open(path, "r") as f:
-            return json.load(f)
+            raw = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
+    aggregated: Dict[str, dict] = {}
+    for strat, meta in raw.items():
+        if isinstance(meta, dict) and meta:
+            first_val = next(iter(meta.values()))
+            if isinstance(first_val, dict) and "win_rate" in first_val:
+                wins = recents = fits = 0.0
+                count = 0
+                for m in meta.values():
+                    wins += float(m.get("win_rate", 0.0))
+                    recents += float(m.get("recent_score", 0.0))
+                    fits += float(m.get("regime_fit", 0.0))
+                    count += 1
+                if count:
+                    aggregated[strat] = {
+                        "win_rate": wins / count,
+                        "recent_score": recents / count,
+                        "regime_fit": fits / count,
+                    }
+                else:
+                    aggregated[strat] = {}
+                continue
+        aggregated[strat] = meta
+
+    return aggregated
+
 
 
 # We import json after defining load_scores to keep imports grouped at top
