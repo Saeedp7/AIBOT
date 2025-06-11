@@ -114,11 +114,20 @@ def update_strategy_score(
     scores[strategy_name] = strat_data
     _save_json(scores, score_path)
 
+def load_scores(path: str = DEFAULT_SCORE_PATH) -> Dict[str, dict]:
+    """Load score metrics from ``path``."""
+    return _load_json(path)
+
+
+def get_strategy_win_rate(strategy_name: str, path: str = DEFAULT_SCORE_PATH) -> float:
+    """Return win rate percentage for ``strategy_name`` from the score file."""
+    return float(load_scores(path).get(strategy_name, {}).get("win_rate", 0.0))
+
 
 if __name__ == "__main__":
     example = {
         "VWAPReversionStrategy": {"win_rate": 60.0, "recent_score": 0.9, "regime_fit": 1.0},
-        "OrderBlockScalpingStrategy": {"win_rate": 55.0, "recent_score": 0.8}
+        "OrderBlockScalpingStrategy": {"win_rate": 55.0, "recent_score": 0.8},
     }
     update_scores(example)
     print("Updated strategy scores.")

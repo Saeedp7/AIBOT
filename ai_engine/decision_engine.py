@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import datetime
-from ai_engine.strategy_scorer import load_strategy_scores
+from ai_engine.score_updater import load_scores
 from ai_engine.sentiment_analyzer import fetch_forex_factory_news, analyze_sentiment
 from ai_engine.context_profiler import detect_support_resistance_levels, is_price_near_level
 from ai_engine.parameter_optimizer import log_trade_decision, suggest_thresholds, load_strategy_thresholds
@@ -34,7 +34,7 @@ def should_execute_trade(currency: str, current_time: datetime):
 def evaluate_signals(strategy_signals: dict, market_regime: str,
                      currency: str = "USD", market_data: pd.DataFrame = None, symbol: str = "XAUUSD"):
 
-    strategy_scores = load_strategy_scores()
+    strategy_scores = load_scores()
     price = market_data['close'].iloc[-1]
     support, resistance = detect_support_resistance_levels(market_data)
 

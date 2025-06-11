@@ -6,7 +6,7 @@ from collections import defaultdict
 
 def generate_daily_summary():
     log_file = "trade_logs.csv"
-    score_file = "strategy_score.json"
+    score_file = os.path.join("ai_engine", "strategy_scores.json")
 
     trades = []
     if os.path.exists(log_file):
@@ -63,8 +63,13 @@ def generate_daily_summary():
         with open(score_file, "r") as f:
             scores = json.load(f)
             for strat, s in scores.items():
-                wr = (s['wins'] / s['total']) * 100 if s['total'] > 0 else 0
-                print(f"    {strat}: {s['wins']}W / {s['losses']}L → {round(wr, 2)}% win rate")
+                if {'wins', 'losses', 'total'} <= s.keys():
+                    wr = (s['wins'] / s['total']) * 100 if s['total'] > 0 else 0
+                    print(f"    {strat}: {s['wins']}W / {s['losses']}L → {round(wr, 2)}% win rate")
+                else:
+                    win_rate = s.get('win_rate', 0.0)
+                    recent = s.get('recent_score', 0.0)
+                    print(f"    {strat}: win_rate={win_rate}% recent={recent}")
 
     # Save summary to file
     date_str = datetime.now().strftime("%Y-%m-%d")

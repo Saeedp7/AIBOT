@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from data.chart_data_handler import get_ohlcv
 from risk_management.stop_loss_manager import get_required_timeframes
-from ai_engine.strategy_scorer import get_strategy_win_rate, load_strategy_scores
+from ai_engine.score_updater import get_strategy_win_rate, load_scores
 import numpy as np
 
 # Import all 13 strategies
@@ -47,7 +47,7 @@ class StrategySelector:
            TrendFollowingStrategy(),
         ]
         self.cooldowns = {}
-        self.strategy_memory = load_strategy_scores()
+        self.strategy_memory = load_scores()
 
     def fetch_multitimeframe_data(self, timeframes):
         tf_data = {}

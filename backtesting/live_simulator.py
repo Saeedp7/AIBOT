@@ -9,7 +9,7 @@ from strategies.strategy_selector import StrategySelector
 from execution.order_manager import execute_fake_order
 from risk_management.position_sizer import calculate_position_size_and_targets
 from utils.trade_logger import log_trade
-from ai_engine.strategy_scorer import update_strategy_score
+from ai_engine.score_updater import update_strategy_score
 from datetime import datetime
 from utils.summary_reporter import generate_daily_summary
 
