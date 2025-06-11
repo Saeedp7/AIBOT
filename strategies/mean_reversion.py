@@ -1,7 +1,7 @@
 import pandas as pd
+from .base import BaseStrategy
 
-
-class MeanReversionStrategy:
+class MeanReversionStrategy(BaseStrategy):
     """Mean reversion strategy using RSI and EMA indicators."""
 
     def __init__(self) -> None:
@@ -32,5 +32,9 @@ class MeanReversionStrategy:
         return self.signal == "sell"
 
     def check_signal(self, df: pd.DataFrame) -> str | None:
+        self.analyze(df)
+        return self.signal
+
+    def generate_signal(self, df: pd.DataFrame) -> str | None:
         self.analyze(df)
         return self.signal

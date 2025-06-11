@@ -2,8 +2,9 @@
 
 import pandas as pd
 from utils.indicators import calculate_sma
+from .base import BaseStrategy
 
-class TrendFollowingStrategy:
+class TrendFollowingStrategy(BaseStrategy):
     def __init__(self, fast_period=10, slow_period=30):
         self.fast_period = fast_period
         self.slow_period = slow_period
@@ -34,5 +35,9 @@ class TrendFollowingStrategy:
         return self.last_signal == "sell"
 
     def check_signal(self, df: pd.DataFrame) -> str | None:
+        self.analyze(df)
+        return self.last_signal
+
+    def generate_signal(self, df: pd.DataFrame) -> str | None:
         self.analyze(df)
         return self.last_signal

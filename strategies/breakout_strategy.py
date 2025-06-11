@@ -1,7 +1,7 @@
 import pandas as pd
+from .base import BaseStrategy
 
-
-class BreakoutStrategy:
+class BreakoutStrategy(BaseStrategy):
     """Simple breakout strategy using pre-computed indicator columns."""
 
     def __init__(self, lookback: int = 20) -> None:
@@ -39,5 +39,9 @@ class BreakoutStrategy:
 
     def check_signal(self, df: pd.DataFrame) -> str | None:
         """Public method used by external modules."""
+        self.analyze(df)
+        return self.signal
+
+    def generate_signal(self, df: pd.DataFrame) -> str | None:
         self.analyze(df)
         return self.signal

@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
+from .base import BaseStrategy
 
-class FibonacciSwingStrategy:
+class FibonacciSwingStrategy(BaseStrategy):
     def __init__(self):
         self.signal = None
 
@@ -29,5 +30,9 @@ class FibonacciSwingStrategy:
         return self.signal == 'sell'
 
     def check_signal(self, df: pd.DataFrame) -> str | None:
+        self.analyze(df)
+        return self.signal
+
+    def generate_signal(self, df: pd.DataFrame) -> str | None:
         self.analyze(df)
         return self.signal

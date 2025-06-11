@@ -1,6 +1,7 @@
 import pandas as pd
+from .base import BaseStrategy
 
-class LondonBreakoutStrategy:
+class LondonBreakoutStrategy(BaseStrategy):
     def __init__(self):
         self.signal = None
 
@@ -24,5 +25,9 @@ class LondonBreakoutStrategy:
         return self.signal == 'sell'
 
     def check_signal(self, df: pd.DataFrame) -> str | None:
+        self.analyze(df)
+        return self.signal
+
+    def generate_signal(self, df: pd.DataFrame) -> str | None:
         self.analyze(df)
         return self.signal

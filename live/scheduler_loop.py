@@ -26,7 +26,8 @@ from data.chart_data_handler import load_multi_ohlcv
 from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators
 from strategies.strategy_selector import StrategySelector
-from ai_engine.strategy_selector import load_scores, get_best_signal
+from agents.strategy_selector_agent import StrategySelectorAgent
+from ai_engine.strategy_selector import load_scores
 from ai_engine.score_updater import update_strategy_score
 from risk_management.core import prepare_trade_parameters
 from risk_management.daily_guard import DailyGuard
@@ -57,7 +58,7 @@ daily_guard = DailyGuard(
 
 
 trade_cache: set[tuple[str, str]] = set()
-
+strategy_selector_agent = StrategySelectorAgent(StrategySelector().strategies)
 
 # Track open trades to avoid duplicates per symbol/timeframe
 executed_trades: dict[str, dict[str, int]] = {}
@@ -130,31 +131,14 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         logger.warning("No cached data for %s %s", symbol, timeframe)
         return
 
-    selector = StrategySelector()
-    signals: dict[str, str | None] = {}
-    for strat in selector.strategies:
-        name = strat.__class__.__name__
-        try:
-            signals[name] = strat.check_signal(df)
-        except Exception as exc:
-            logger.warning("%s failed: %s", name, exc)
-            signals[name] = None
-
-    scores = load_scores()
-    decision = get_best_signal(signals, scores)
-    if decision not in ("buy", "sell"):
+    decision, best_strat, market_regime = strategy_selector_agent.select(symbol, timeframe)
+    if decision not in ("buy", "sell") or not best_strat:
         logger.info("No action for %s %s", symbol, timeframe)
         return
 
 
     entry = df["close"].iloc[-1]
-    best_strat = max((k for k, v in signals.items() if v == decision),
-                     key=lambda s: scores.get(s, {}).get("recent_score", 0.0),
-                     default=None)
-    if not best_strat:
-        logger.error("No confident strategy to assign score update")
-        return
-
+    scores = load_scores()
     metrics = scores.get(best_strat, {})
     confidence = (
         float(metrics.get("recent_score", 0.0))
