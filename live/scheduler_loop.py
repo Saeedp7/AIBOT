@@ -131,11 +131,40 @@ def run_open_trade_manager() -> None:
                 log_trade_action(f"{trade['symbol']} {trade['timeframe']} TP{next_idx+1} hit, SL moved to {trade['sl']}")
                 trade_journal[trade["id"]]["modified"] = True
                 alert_sl_moved(trade["symbol"], trade["timeframe"], trade["sl"])
+                if next_idx == len(trade["tp_levels"]) - 1:
+                    profit_pct = (
+                        (price - trade["entry"]) / trade["entry"]
+                        if trade["direction"] == "buy"
+                        else (trade["entry"] - price) / trade["entry"]
+                    ) * 100
+                    update_trade(
+                        trade["id"],
+                        exit=price,
+                        close_time=datetime.utcnow().isoformat() + "Z",
+                        result="tp_final_hit",
+                        profit_pct=round(profit_pct, 2),
+                    )
+                    open_trades.remove(trade)
+                    trade_cache.discard((trade["symbol"], trade["timeframe"]))
+                    alert_trade_closed(trade["symbol"], trade["timeframe"], "tp_final_hit")
+                    continue
 
         stop_hit = price >= trade["sl"] if trade["direction"] == "sell" else price <= trade["sl"]
         if stop_hit:
             log_trade_action(f"Close {trade['symbol']} {trade['timeframe']} @ {price}")
             trade_journal[trade["id"]]["closed"] = True
+            profit_pct = (
+                (price - trade["entry"]) / trade["entry"]
+                if trade["direction"] == "buy"
+                else (trade["entry"] - price) / trade["entry"]
+            ) * 100
+            update_trade(
+                trade["id"],
+                exit=price,
+                close_time=datetime.utcnow().isoformat() + "Z",
+                result="stop_hit",
+                profit_pct=round(profit_pct, 2),
+            )
             open_trades.remove(trade)
             trade_cache.discard((trade["symbol"], trade["timeframe"]))
             alert_trade_closed(trade["symbol"], trade["timeframe"], "stop_hit")
@@ -211,6 +240,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
             result="open",
             ticket=ticket,
             timestamp=datetime.utcnow().isoformat() + "Z",
+            regime=regime,
         )
         alert_trade_opened(symbol, timeframe, decision, entry, sl, tp_levels[0])
 

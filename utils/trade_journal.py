@@ -35,6 +35,7 @@ def record_trade(
     strategy: str,
     result: str,
     ticket: int,
+    regime: str | None = None,
     sl_moved: bool = False,
     closed_early: bool = False,
     timestamp: str | None = None,
@@ -42,29 +43,46 @@ def record_trade(
     """Append a trade entry to the history log."""
     history = _load_history()
     timestamp = timestamp or datetime.utcnow().isoformat() + "Z"
-    history.append(
-        {
-            "symbol": symbol,
-            "timeframe": timeframe,
-            "strategy": strategy,
-            "entry": entry,
-            "sl": sl,
-            "tp": tps,
-            "result": result,
-            "sl_moved": sl_moved,
-            "closed_early": closed_early,
-            "ticket": ticket,
-            "timestamp": timestamp,
-        }
-    )
+    trade = {
+        "symbol": symbol,
+        "timeframe": timeframe,
+        "strategy": strategy,
+        "entry": entry,
+        "sl": sl,
+        "tp": tps,
+        "result": result,
+        "sl_moved": sl_moved,
+        "closed_early": closed_early,
+        "ticket": ticket,
+        "timestamp": timestamp,
+    }
+    if regime is not None:
+        trade["regime"] = regime
+    history.append(trade)
     _save_history(history)
 
 
-def update_trade(ticket: int, **updates: Any) -> None:
+def update_trade(
+    ticket: int,
+    *,
+    exit: float | None = None,
+    close_time: str | None = None,
+    result: str | None = None,
+    profit_pct: float | None = None,
+    **updates: Any,
+) -> None:
     """Update an existing trade entry by ticket."""
     history = _load_history()
     for trade in history:
         if trade.get("ticket") == ticket:
+            if exit is not None:
+                trade["exit"] = exit
+            if close_time is not None:
+                trade["close_time"] = close_time
+            if result is not None:
+                trade["result"] = result
+            if profit_pct is not None:
+                trade["profit_pct"] = profit_pct
             trade.update(updates)
             break
     _save_history(history)

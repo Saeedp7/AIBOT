@@ -58,3 +58,15 @@ else:
 # Final state
 print(f"📊 DailyGuard after trade: Trades={daily_guard.state['trades']}," 
       f" PnL={daily_guard.state['pnl']}, CanTrade={daily_guard.can_trade()}")
+
+from utils.trade_journal import update_trade
+
+update_trade(
+    ticket=123456,  # fake ticket from simulation
+    result="TP3 hit",
+    exit_price=2380.25,
+    exit_time="2025-06-08T04:00:00Z",
+    profit_pct=2.7,
+    closed_early=False,
+)
+
