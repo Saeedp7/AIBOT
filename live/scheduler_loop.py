@@ -21,7 +21,6 @@ MAX_RISK_PER_TRADE = float(get_config("MAX_RISK", 0.01))
 MAGIC_NUMBER = int(get_config("MAGIC_NUMBER", 123456))
 DAILY_LOSS_LIMIT_PERCENT = float(get_config("DAILY_LOSS_LIMIT_PERCENT", 5.0))
 MAX_TRADES_PER_DAY = int(get_config("MAX_TRADES_PER_DAY", 20))
-LIVE_MODE = get_config("LIVE_MODE", "false")
 CONFIDENCE_THRESHOLD = float(get_config("CONFIDENCE_THRESHOLD", 0.5))
 from data.chart_data_handler import load_multi_ohlcv
 from data.preprocessing import preprocess_ohlcv_data
@@ -29,13 +28,13 @@ from indicators.indicator_engine import add_indicators
 from strategies.strategy_selector import StrategySelector
 from ai_engine.strategy_selector import load_scores, get_best_signal
 from ai_engine.score_updater import update_strategy_score
-from risk_management.stop_loss_manager import determine_sl_tp
-from risk_management.lot_sizing_module import calculate_lot_size
+from risk_management.core import prepare_trade_parameters
 from risk_management.daily_guard import DailyGuard
 from connectors.mt5_connector import get_account_info
 from utils.trade_journal import record_trade, update_trade, load_history
 from utils.logger import log_trade_action
 from risk_management.breakeven_manager import BreakEvenManager
+from execution.order_manager import execute_fake_order
 from monitoring.alert_manager import (
     alert_trade_opened,
     alert_sl_moved,
@@ -80,15 +79,17 @@ def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:
     indicator_cache[(symbol, timeframe)] = enriched[symbol][timeframe]
 
 def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> int | None:
-
     price = mt5.symbol_info_tick(symbol)
     if price is None:
         logging.warning(f"No price data for {symbol}")
         return None
 
-    deal_type = mt5.ORDER_TYPE_BUY if direction == "buy" else mt5.ORDER_TYPE_SELL
     entry_price = price.ask if direction == "buy" else price.bid
+    if get_config("LIVE_MODE", "false").lower() != "true":
+        execute_fake_order(direction, symbol, lot, entry_price, sl=sl, tp=tp)
+        return int(time.time())
 
+    deal_type = mt5.ORDER_TYPE_BUY if direction == "buy" else mt5.ORDER_TYPE_SELL
     request = {
         "action": mt5.TRADE_ACTION_DEAL,
         "symbol": symbol,
@@ -169,9 +170,21 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         )
         return
 
-    sl, tp_levels, regime = determine_sl_tp(best_strat, entry, decision, df)
     acct = mt5.account_info()
-    lot = calculate_lot_size(acct.balance, abs(entry - sl), MAX_RISK_PER_TRADE * 100, symbol)
+    prep = prepare_trade_parameters(
+        symbol=symbol,
+        strategy_name=best_strat,
+        direction=decision,
+        entry_price=entry,
+        market_data=df,
+        account_balance=acct.balance,
+        risk_percent=MAX_RISK_PER_TRADE * 100,
+        guard=daily_guard,
+    )
+    if not prep:
+        logger.info("Risk guard prevented trade for %s %s", symbol, timeframe)
+        return
+    lot, sl, tp_levels, _bem, regime = prep
 
     logger.info(
         "%s %s → %s @ %s | SL: %s TP1: %s Lot: %s",
@@ -199,6 +212,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
             timestamp=datetime.utcnow().isoformat() + "Z",
             regime=regime,
         )
+        trade_cache.add((symbol, timeframe))
         alert_trade_opened(symbol, timeframe, decision, entry, sl, tp_levels[0])
 
 
@@ -208,6 +222,12 @@ def run_live_trade_manager() -> None:
     history = {t["ticket"]: t for t in load_history()}
     if positions is None:
         return
+    open_tickets = {p.ticket for p in positions}
+    for sym, tf_map in list(executed_trades.items()):
+        for tf, tkt in list(tf_map.items()):
+            if tkt not in open_tickets:
+                tf_map.pop(tf, None)
+                trade_cache.discard((sym, tf))
     for pos in positions:
         ticket = pos.ticket
         rec = history.get(ticket)
@@ -281,6 +301,7 @@ def run_live_trade_manager() -> None:
                 )
                 update_strategy_score(rec["strategy"], "loss", regime=rec.get("regime", ""))
                 executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
+                trade_cache.discard((pos.symbol, rec["timeframe"]))
                 alert_trade_closed(pos.symbol, rec["timeframe"], "closed_early")
 
 

@@ -7,6 +7,8 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List
 
+from ai_engine.score_updater import update_strategy_score
+
 HISTORY_PATH = "logs/trade_history.json"
 
 
@@ -92,6 +94,15 @@ def update_trade(
                 trade["close_time"] = close_time
             if result is not None:
                 trade["result"] = result
+                if result.lower() != "open":
+                    outcome = (
+                        "win" if str(result).lower().startswith("tp") else "loss"
+                    )
+                    update_strategy_score(
+                        trade.get("strategy", ""),
+                        outcome,
+                        regime=trade.get("regime", ""),
+                    )
             if profit_pct is not None:
                 trade["profit_pct"] = profit_pct
             trade.update(updates)

@@ -6,9 +6,10 @@ from risk_management.daily_guard import DailyGuard
 from connectors.mt5_connector import get_account_info
 from risk_management.lot_sizing_module import calculate_lot_size
 from risk_management.stop_loss_manager import determine_sl_tp
-from utils.trade_journal import record_trade
+from utils.trade_journal import record_trade, update_trade
 from utils.logger import log_trade_action
 from monitoring.alert_manager import alert_trade_opened
+import time
 
 SYMBOL = get_config("FORCE_TRADE_SYMBOL", "BTCUSD.")
 TIMEFRAME = get_config("FORCE_TRADE_TIMEFRAME", "M5")
@@ -38,6 +39,8 @@ else:
 
     # Record trade
     trade_id = int(datetime.now(timezone.utc).timestamp())
+    timestamp = datetime.now(timezone.utc).isoformat() + "Z"
+
     record_trade(
         symbol=SYMBOL,
         timeframe=TIMEFRAME,
@@ -47,26 +50,36 @@ else:
         strategy=STRATEGY,
         result="open",
         ticket=trade_id,
-        timestamp=datetime.now(timezone.utc).isoformat() + "Z",
+        timestamp=timestamp,
+        regime=REGIME,
     )
-    log_trade_action(f"📥 FORCED TRADE {SYMBOL} {TIMEFRAME} @ {ENTRY} | SL: {sl} | TP1: {tp_levels[0]}")
+
+    # Also simulate a skipped trade for confidence test
+    low_confidence = 0.12
+    log_trade_action(
+        f"Confidence {low_confidence:.4f} for {SYMBOL} {TIMEFRAME} using DummyLowConfidenceStrategy"
+    )
+    log_trade_action(
+        f"Skipping trade for {SYMBOL} {TIMEFRAME}: confidence {low_confidence:.4f} < 0.5"
+    )
+
+
     alert_trade_opened(SYMBOL, TIMEFRAME, DIRECTION, ENTRY, sl, tp_levels[0])
     daily_guard.record_trade(-100)  # Simulate forced PnL impact
 
     print(f"✅ Forced trade simulated and logged.")
 
+    # Simulate closing the trade after a delay
+    time.sleep(0.5)
+    update_trade(
+        ticket=trade_id,
+        result="TP3 hit",
+        exit=tp_levels[2],
+        close_time=datetime.now(timezone.utc).isoformat() + "Z",
+        profit_pct=2.7,
+        closed_early=False,
+    )
+
 # Final state
 print(f"📊 DailyGuard after trade: Trades={daily_guard.state['trades']}," 
       f" PnL={daily_guard.state['pnl']}, CanTrade={daily_guard.can_trade()}")
-
-from utils.trade_journal import update_trade
-
-update_trade(
-    ticket=123456,  # fake ticket from simulation
-    result="TP3 hit",
-    exit_price=2380.25,
-    exit_time="2025-06-08T04:00:00Z",
-    profit_pct=2.7,
-    closed_early=False,
-)
-
