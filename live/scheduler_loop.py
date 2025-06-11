@@ -31,6 +31,7 @@ from ai_engine.strategy_selector import load_scores
 from ai_engine.score_updater import update_strategy_score
 from risk_management.core import prepare_trade_parameters
 from risk_management.daily_guard import DailyGuard
+from risk_management.exposure_guard import ExposureGuard
 from connectors.mt5_connector import get_account_info
 from utils.trade_journal import record_trade, update_trade, load_history
 from utils.logger import log_trade_action
@@ -62,6 +63,9 @@ strategy_selector_agent = StrategySelectorAgent(StrategySelector().strategies)
 
 # Track open trades to avoid duplicates per symbol/timeframe
 executed_trades: dict[str, dict[str, int]] = {}
+
+# Exposure guard to manage per-symbol stacking
+exposure_guard = ExposureGuard()
 
 # Cache OHLCV and indicator data per symbol/timeframe
 ohlcv_cache: Dict[Tuple[str, str], pd.DataFrame] = {}
@@ -153,6 +157,11 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
             f"Skipping trade for {symbol} {timeframe}: confidence {confidence:.4f} < {CONFIDENCE_THRESHOLD}"
         )
         return
+    if not exposure_guard.allow(symbol, timeframe, decision, confidence):
+        log_trade_action(
+            f"🚫 Exposure guard blocked trade: {symbol} {timeframe} {decision}"
+        )
+        return
 
     acct = mt5.account_info()
     prep = prepare_trade_parameters(
@@ -183,6 +192,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
     ticket = execute_trade(decision, symbol, lot, sl, tp_levels[0])
     if ticket:
         daily_guard.record_trade(0)
+        exposure_guard.record(symbol, timeframe, decision, confidence)
         executed_trades.setdefault(symbol, {})[timeframe] = ticket
         record_trade(
             symbol=symbol,
@@ -212,6 +222,7 @@ def run_live_trade_manager() -> None:
             if tkt not in open_tickets:
                 tf_map.pop(tf, None)
                 trade_cache.discard((sym, tf))
+                exposure_guard.remove(sym, tf)
     for pos in positions:
         ticket = pos.ticket
         rec = history.get(ticket)
@@ -286,6 +297,7 @@ def run_live_trade_manager() -> None:
                 update_strategy_score(rec["strategy"], "loss", regime=rec.get("regime", ""))
                 executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
                 trade_cache.discard((pos.symbol, rec["timeframe"]))
+                exposure_guard.remove(pos.symbol, rec["timeframe"])
                 alert_trade_closed(pos.symbol, rec["timeframe"], "closed_early")
 
 

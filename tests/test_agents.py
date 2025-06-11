@@ -6,7 +6,7 @@ from agents.market_scanner_agent import MarketScannerAgent
 from agents.streak_guard import StreakGuard
 from strategies.base import BaseStrategy
 from utils import trade_journal
-
+from ai_engine.score_manager import update_scores_from_trade_history
 
 def test_streak_guard_blocks(tmp_path, monkeypatch):
     hist = [
@@ -60,3 +60,47 @@ def test_strategy_selector_agent(tmp_path, monkeypatch):
     assert decision == "buy"
     assert strat_name == "GoodStrategy"
     assert regime == "trending"
+
+
+def test_score_decay_and_regimes(tmp_path, monkeypatch):
+    hist_path = tmp_path / "hist.json"
+    score_path = tmp_path / "scores.json"
+
+    trades = [
+        {"ticket": 1, "strategy": "Strat", "result": "TP1 hit", "regime": "trending"},
+    ]
+    with open(hist_path, "w") as f:
+        json.dump(trades, f)
+
+    update_scores_from_trade_history(history_path=str(hist_path), score_path=str(score_path), alpha=0.5)
+    with open(score_path) as f:
+        scores = json.load(f)
+    first = scores["Strat"]["trending"]["recent_score"]
+
+    trades.append({"ticket": 2, "strategy": "Strat", "result": "SL hit", "regime": "trending"})
+    with open(hist_path, "w") as f:
+        json.dump(trades, f)
+    update_scores_from_trade_history(history_path=str(hist_path), score_path=str(score_path), alpha=0.5)
+    with open(score_path) as f:
+        scores = json.load(f)
+    second = scores["Strat"]["trending"]["recent_score"]
+
+    trades.append({"ticket": 3, "strategy": "Strat", "result": "TP3 hit", "regime": "trending"})
+    with open(hist_path, "w") as f:
+        json.dump(trades, f)
+    update_scores_from_trade_history(history_path=str(hist_path), score_path=str(score_path), alpha=0.5)
+    with open(score_path) as f:
+        scores = json.load(f)
+    third = scores["Strat"]["trending"]["recent_score"]
+
+    trades.append({"ticket": 4, "strategy": "Strat", "result": "TP2 hit", "regime": "ranging"})
+    with open(hist_path, "w") as f:
+        json.dump(trades, f)
+    update_scores_from_trade_history(history_path=str(hist_path), score_path=str(score_path), alpha=0.5)
+    with open(score_path) as f:
+        scores = json.load(f)
+
+    assert second < first
+    assert third > second
+    assert "ranging" in scores["Strat"]
+    assert scores["Strat"]["trending"]["win_rate"] > 60

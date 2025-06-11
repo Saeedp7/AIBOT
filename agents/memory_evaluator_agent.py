@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Set
 
-from utils.trade_journal import load_history
-from ai_engine.score_updater import update_strategy_score
+from utils.trade_journal import HISTORY_PATH
+from ai_engine.score_manager import update_scores_from_trade_history
 
 
 class MemoryEvaluatorAgent:
@@ -14,11 +14,4 @@ class MemoryEvaluatorAgent:
         self.processed: Set[int] = set()
 
     def run(self) -> None:
-        history = load_history()
-        for trade in history:
-            ticket = trade.get("ticket")
-            if ticket in self.processed or trade.get("result") in (None, "open"):
-                continue
-            outcome = "win" if str(trade.get("result", "")).lower().startswith("tp") else "loss"
-            update_strategy_score(trade.get("strategy", ""), outcome, regime=trade.get("regime", ""), score_path=self.score_path)
-            self.processed.add(ticket)
+        update_scores_from_trade_history(history_path=HISTORY_PATH, score_path=self.score_path)

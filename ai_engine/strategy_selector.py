@@ -15,12 +15,12 @@ DEFAULT_THRESHOLD = 0.9
 
 
 def load_scores(path: str = DEFAULT_SCORE_PATH) -> Dict[str, dict]:
-    """Load strategy score data supporting nested regime metrics."""
+    """Return mapping of strategy names to unified score metrics."""
     try:
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             raw = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        raw = {}
     aggregated: Dict[str, dict] = {}
     for strat, meta in raw.items():
         if isinstance(meta, dict) and meta:
@@ -39,11 +39,19 @@ def load_scores(path: str = DEFAULT_SCORE_PATH) -> Dict[str, dict]:
                         "recent_score": recents / count,
                         "regime_fit": fits / count,
                     }
-                else:
-                    aggregated[strat] = {}
                 continue
-        aggregated[strat] = meta
 
+            aggregated[strat] = {
+                "win_rate": float(meta.get("win_rate", 0.0)),
+                "recent_score": float(meta.get("recent_score", 0.0)),
+                "regime_fit": float(meta.get("regime_fit", 1.0)),
+            }
+        else:
+            aggregated[strat] = {
+                "win_rate": 0.0,
+                "recent_score": 0.0,
+                "regime_fit": 1.0,
+            }
     return aggregated
 
 

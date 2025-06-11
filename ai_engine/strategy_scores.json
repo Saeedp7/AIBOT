@@ -50,5 +50,12 @@
     "win_rate": 9.0,
     "recent_score": 0.12,
     "regime_fit": 1.0
+  },
+  "ManualTriggerTestStrategy": {
+    "bullish": {
+      "win_rate": 48.8,
+      "recent_score": 0.48799999999999993,
+      "regime_fit": 1.0
+    }
   }
 }

@@ -57,6 +57,13 @@ except Exception:
     requests = types.ModuleType("requests")
     requests.post = lambda *a, **k: types.SimpleNamespace(status_code=200)
     sys.modules["requests"] = requests
+# Stub python-dotenv if missing
+try:
+    from dotenv import load_dotenv  # type: ignore
+except Exception:  # pragma: no cover - stub for testing
+    dotenv = types.ModuleType("dotenv")
+    dotenv.load_dotenv = lambda *a, **k: None
+    sys.modules["dotenv"] = dotenv
 
 # Stub other heavy modules
 for name in [
