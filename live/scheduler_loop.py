@@ -56,9 +56,9 @@ daily_guard = DailyGuard(
     max_trades=MAX_TRADES_PER_DAY,
 )
 
-open_trades: list[dict] = []
+
 trade_cache: set[tuple[str, str]] = set()
-trade_journal: dict[int, dict] = {}
+
 
 # Track open trades to avoid duplicates per symbol/timeframe
 executed_trades: dict[str, dict[str, int]] = {}
@@ -110,65 +110,6 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
         return result.order
     logger.error("Trade failed: %s", result)
     return None
-
-
-def run_open_trade_manager() -> None:
-    """Update open trades: breakeven and trailing stops."""
-    for trade in list(open_trades):
-        tick = mt5.symbol_info_tick(trade["symbol"])
-        if not tick:
-            continue
-        price = tick.bid if trade["direction"] == "sell" else tick.ask
-        next_idx = trade.get("tp_hit_index", -1) + 1
-        if next_idx < len(trade["tp_levels"]):
-            target = trade["tp_levels"][next_idx]
-            hit = price <= target if trade["direction"] == "sell" else price >= target
-            if hit:
-                trade["tp_hit_index"] = next_idx
-                if next_idx == 0:
-                    trade["sl"] = trade["entry"]
-                else:
-                    trade["sl"] = trade["tp_levels"][next_idx - 1]
-                log_trade_action(f"{trade['symbol']} {trade['timeframe']} TP{next_idx+1} hit, SL moved to {trade['sl']}")
-                trade_journal[trade["id"]]["modified"] = True
-                alert_sl_moved(trade["symbol"], trade["timeframe"], trade["sl"])
-                if next_idx == len(trade["tp_levels"]) - 1:
-                    profit_pct = (
-                        (price - trade["entry"]) / trade["entry"]
-                        if trade["direction"] == "buy"
-                        else (trade["entry"] - price) / trade["entry"]
-                    ) * 100
-                    update_trade(
-                        trade["id"],
-                        exit=price,
-                        close_time=datetime.utcnow().isoformat() + "Z",
-                        result="tp_final_hit",
-                        profit_pct=round(profit_pct, 2),
-                    )
-                    open_trades.remove(trade)
-                    trade_cache.discard((trade["symbol"], trade["timeframe"]))
-                    alert_trade_closed(trade["symbol"], trade["timeframe"], "tp_final_hit")
-                    continue
-
-        stop_hit = price >= trade["sl"] if trade["direction"] == "sell" else price <= trade["sl"]
-        if stop_hit:
-            log_trade_action(f"Close {trade['symbol']} {trade['timeframe']} @ {price}")
-            trade_journal[trade["id"]]["closed"] = True
-            profit_pct = (
-                (price - trade["entry"]) / trade["entry"]
-                if trade["direction"] == "buy"
-                else (trade["entry"] - price) / trade["entry"]
-            ) * 100
-            update_trade(
-                trade["id"],
-                exit=price,
-                close_time=datetime.utcnow().isoformat() + "Z",
-                result="stop_hit",
-                profit_pct=round(profit_pct, 2),
-            )
-            open_trades.remove(trade)
-            trade_cache.discard((trade["symbol"], trade["timeframe"]))
-            alert_trade_closed(trade["symbol"], trade["timeframe"], "stop_hit")
 
 
 def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
@@ -352,7 +293,6 @@ def scheduler_loop(args: argparse.Namespace) -> None:
             time.sleep(CHECK_INTERVAL_SECONDS)
             continue
         try:
-            run_open_trade_manager()
             run_live_trade_manager()
             for symbol, tfs in ACTIVE_SYMBOLS_TIMEFRAMES.items():
                 for tf in tfs:
