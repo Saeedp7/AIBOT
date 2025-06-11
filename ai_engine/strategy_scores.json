@@ -1,61 +1,9 @@
 {
-  "VWAPReversionStrategy": {
-    "score": 3.9932655539223996,
-    "last_updated": 1746804649.053205,
-    "win_rate": 14.0,
-    "recent_score": 0.24,
-    "regime_fit": 1.0
-  },
-  "TrendPullbackStrategy": {
-    "score": 5.571444877783671,
-    "last_updated": 1746810844.3164928
-  },
-  "SupplyDemandSwingStrategy": {
-    "score": 20.0,
-    "last_updated": 1746810844.3174903
-  },
-  "DeltaDivergenceScalpingStrategy": {
-    "score": 12.448950311512734,
-    "last_updated": 1746808214.1693892
-  },
-  "OrderBlockScalpingStrategy": {
-    "score": 8.405928072082581,
-    "last_updated": 1746820334.3972867
-  },
-  "MicroBreakoutScalpingStrategy": {
-    "score": 5.123641777102554,
-    "last_updated": 1746820334.3982842
-  },
-  "LondonBreakoutStrategy": {
-    "score": 14.087478011543077,
-    "last_updated": 1746820334.4012775
-  },
-  "MACDDivergenceStrategy": {
-    "score": 5.123678725453482,
-    "last_updated": 1746820334.3962903
-  },
-  "VolumeBreakoutStrategy": {
-    "score": 2.641140162796908,
-    "last_updated": 1746820334.3992827
-  },
-  "FibonacciSwingStrategy": {
-    "score": 1.9155534722898162,
-    "last_updated": 1746810844.318488
-  },
-  "SupertrendADXRSIStrategy": {
-    "score": 1.0,
-    "last_updated": 1746820334.4022744
-  },
-  "BreakoutStrategy": {
-    "win_rate": 9.0,
-    "recent_score": 0.12,
-    "regime_fit": 1.0
-  },
   "ManualTriggerTestStrategy": {
     "bullish": {
-      "win_rate": 48.8,
-      "recent_score": 0.48799999999999993,
-      "regime_fit": 1.0
+      "win_rate": 100.0,
+      "recent_score": 0.9760000000000001,
+      "regime_fit": 0.9760000000000001
     }
   }
 }

@@ -27,12 +27,19 @@ _OUTCOME_WEIGHTS = {
 
 def _load_json(path: str) -> List[dict] | Dict[str, dict]:
     if not os.path.exists(path):
-        return [] if path.endswith(".json") else {}
+        return [] if path.endswith("json") and "history" in path else {}
     try:
         with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            loaded = json.load(f)
+            # Add type check safeguard
+            if isinstance(loaded, dict):
+                return loaded
+            elif isinstance(loaded, list):
+                return loaded
+            else:
+                return {} if "score" in path else []
     except (json.JSONDecodeError, OSError):
-        return [] if path.endswith(".json") else {}
+        return {} if "score" in path else []
 
 
 def _save_json(data: Dict[str, dict], path: str) -> None:
