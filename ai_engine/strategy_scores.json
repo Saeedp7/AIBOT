@@ -1,9 +1,104 @@
 {
-  "Sample": {
-    "unknown": {
-      "win_rate": 100.0,
-      "recent_score": 0.2,
-      "regime_fit": 0.2
-    }
+  "BreakoutStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "DeltaDivergenceScalpingStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "EMACrossoverScalpingStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "FibonacciSwingStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "IchimokuDayStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "LondonBreakoutStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "MACDDivergenceStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "MACrossoverSwingStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "MeanReversionStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "MicroBreakoutScalpingStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "OrderBlockScalpingStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "SupertrendADXRSIStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "SupplyDemandSwingStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "TrendFollowingStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "TrendPullbackStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "VolumeBreakoutStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
+  },
+  "VWAPReversionStrategy": {
+    "recent_score": 1.0,
+    "win_rate": 0.5,
+    "regime_fit": 1.0,
+    "decay": 0.99
   }
 }
