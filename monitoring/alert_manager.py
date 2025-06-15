@@ -1,10 +1,9 @@
-import os
-
 import requests
 
-TELEGRAM_BOT_TOKEN="7706210508:AAFlcTMjy1TFO6wnUxF2KU151LYUz4x7Vmo"
-TELEGRAM_CHAT_ID="904725653"
+from config.manager import get_config
 
+TELEGRAM_BOT_TOKEN = get_config("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = get_config("TELEGRAM_CHAT_ID", "")
 
 def _send_telegram(message: str) -> bool:
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
@@ -13,7 +12,6 @@ def _send_telegram(message: str) -> bool:
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
     try:
         resp = requests.post(url, json=payload, timeout=10)
-        print(resp)
         return resp.status_code == 200
     except Exception:
         return False
