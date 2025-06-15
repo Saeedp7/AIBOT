@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timezone
 from typing import Optional
 from utils.logger import log_risk_guard
+from monitoring.alert_manager import alert_daily_guard
 
 try:
     from connectors.mt5_connector import get_account_info
@@ -71,11 +72,13 @@ class DailyGuard:
             log_risk_guard(
                 f"Loss limit hit: {pnl_percent:.2f}% <= -{self.loss_limit_percent}%"
             )
+            alert_daily_guard("loss_limit")
             return True
         if int(self.state.get("trades", 0)) >= self.max_trades:
             log_risk_guard(
                 f"Trade count limit hit: {self.state.get('trades', 0)} >= {self.max_trades}"
             )
+            alert_daily_guard("trade_count")            
             return True
         return False
 

@@ -24,9 +24,9 @@ def shutdown_mt5():
     print("🛑 MT5 connection closed.")
 
 def get_account_info():
-    if not mt5.initialize():
+    if not hasattr(mt5, "initialize") or not mt5.initialize():
         raise Exception("❌ Failed to initialize MT5")
-    info = mt5.account_info()
+    info = getattr(mt5, "account_info", lambda: None)()
     if info is None:
         error = mt5.last_error()
         raise Exception(f"❌ Failed to retrieve account info: {error}")

@@ -43,6 +43,9 @@ from monitoring.alert_manager import (
     alert_trade_closed,
     alert_daily_guard,
 )
+from execution.spread_guard import spread_within_limit
+from risk_management.session_guard import session_allowed
+from recovery.restart_manager import recover_state
 logger = logging.getLogger("scheduler")
 
 
@@ -61,11 +64,11 @@ daily_guard = DailyGuard(
 trade_cache: set[tuple[str, str]] = set()
 strategy_selector_agent = StrategySelectorAgent(StrategySelector().strategies)
 
-# Track open trades to avoid duplicates per symbol/timeframe
-executed_trades: dict[str, dict[str, int]] = {}
-
-# Exposure guard to manage per-symbol stacking
-exposure_guard = ExposureGuard()
+# Restore state from previous session if possible
+executed_trades, exposure_guard = recover_state()
+for sym, tf_map in executed_trades.items():
+    for tf in tf_map:
+        trade_cache.add((sym, tf))
 
 # Cache OHLCV and indicator data per symbol/timeframe
 ohlcv_cache: Dict[Tuple[str, str], pd.DataFrame] = {}
@@ -92,6 +95,7 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
     entry_price = price.ask if direction == "buy" else price.bid
     if get_config("LIVE_MODE", "false").lower() != "true":
         execute_fake_order(direction, symbol, lot, entry_price, sl=sl, tp=tp)
+        alert_trade_opened(symbol, "sim", direction, entry_price, sl, tp)
         return int(time.time())
 
     deal_type = mt5.ORDER_TYPE_BUY if direction == "buy" else mt5.ORDER_TYPE_SELL
@@ -113,6 +117,7 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
 
     if result and result.retcode == mt5.TRADE_RETCODE_DONE:
         logger.info("Trade executed: ticket %s", result.order)
+        alert_trade_opened(symbol, "live", direction, entry_price, sl, tp)
         return result.order
     logger.error("Trade failed: %s", result)
     return None
@@ -138,6 +143,14 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
     decision, best_strat, market_regime = strategy_selector_agent.select(symbol, timeframe)
     if decision not in ("buy", "sell") or not best_strat:
         logger.info("No action for %s %s", symbol, timeframe)
+        return
+
+    if not session_allowed():
+        logger.info("Session guard blocked trading for %s %s", symbol, timeframe)
+        return
+
+    if not spread_within_limit(symbol):
+        logger.info("Spread guard blocked trade for %s", symbol)
         return
 
 
@@ -207,7 +220,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
             regime=regime,
         )
         trade_cache.add((symbol, timeframe))
-        alert_trade_opened(symbol, timeframe, decision, entry, sl, tp_levels[0])
+
 
 
 def run_live_trade_manager() -> None:

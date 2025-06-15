@@ -18,6 +18,12 @@ except ImportError:
     mt5.symbol_info = lambda x: {"name": x}
     mt5.symbol_info_tick = lambda x: types.SimpleNamespace(ask=1.0, bid=1.0)
     # basic timeframe constants
+    mt5.account_info = lambda: types.SimpleNamespace(balance=10000)
+    mt5.positions_get = lambda: []
+    mt5.symbol_select = lambda *a, **k: True
+    mt5.copy_rates_from_pos = lambda *a, **k: [
+        {"time": 0, "open": 0, "high": 0, "low": 0, "close": 0, "tick_volume": 0}
+    ]
     mt5.TIMEFRAME_M1 = 1
     mt5.TIMEFRAME_M5 = 5
     mt5.TIMEFRAME_M15 = 15

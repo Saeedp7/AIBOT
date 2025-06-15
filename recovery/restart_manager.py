@@ -1,0 +1,31 @@
+"""Crash recovery utilities for live trading."""
+
+from __future__ import annotations
+
+import MetaTrader5 as mt5
+
+from utils.trade_journal import load_history
+from risk_management.exposure_guard import ExposureGuard
+
+
+def recover_state():
+    """Restore executed trades and exposure guard from MT5 and history."""
+    executed: dict[str, dict[str, int]] = {}
+    exposure = ExposureGuard()
+
+    if not hasattr(mt5, "initialize") or not mt5.initialize():
+        return executed, exposure
+
+    positions = getattr(mt5, "positions_get", lambda: None)()
+    history = {t.get("ticket"): t for t in load_history() if t.get("result") == "open"}
+    if positions:
+        for pos in positions:
+            ticket = pos.ticket
+            symbol = pos.symbol
+            direction = "buy" if pos.type == mt5.POSITION_TYPE_BUY else "sell"
+            rec = history.get(ticket)
+            timeframe = rec.get("timeframe") if rec else ""
+            executed.setdefault(symbol, {})[timeframe] = ticket
+            exposure.record(symbol, timeframe, direction, 1.0)
+    mt5.shutdown()
+    return executed, exposure
