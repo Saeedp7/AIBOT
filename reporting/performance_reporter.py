@@ -36,7 +36,7 @@ def compute_summary(history: List[Dict[str, Any]]) -> Dict[str, Dict[str, Dict[s
         if result.startswith("tp") or result == "win":
             rec["wins"] += 1
         rec["pnl_total"] += float(trade.get("profit_pct", 0.0))
-        rec["duration_total"] += float(trade.get("duration", 0.0))
+        rec["duration_total"] += float(trade.get("duration") or 0.0)
 
     for strat_map in summary.values():
         for sym_map in strat_map.values():
