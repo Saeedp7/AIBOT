@@ -10,11 +10,20 @@ API_PATH = get_config("MT5_PATH", r"C:\\Program Files\\MetaTrader 5\\terminal64.
 
 def initialize_mt5():
     """Initialize MetaTrader5 connection."""
-    if not mt5.initialize(path=API_PATH, login=API_LOGIN, password=API_PASSWORD, server=API_SERVER):
+    if not mt5.initialize(
+        path=API_PATH, login=API_LOGIN, password=API_PASSWORD, server=API_SERVER
+    ):
         error = mt5.last_error()
-        print(f"❌ Failed to initialize MT5: {error}")
+        print(f"❌ MT5 Connection Failed: {error}")
         return False
-    print("✅ MT5 initialized successfully.")
+    info = mt5.account_info()
+    if info is not None:
+        acc_type = "Demo" if "demo" in str(info.server).lower() else "Real"
+        print(
+            f"✅ Connected to MT5: {acc_type} | Account: {info.login} | Balance: ${info.balance:,.2f}"
+        )
+    else:
+        print("✅ MT5 initialized successfully.")
     return True
 
 
