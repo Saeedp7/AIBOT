@@ -29,7 +29,7 @@ MAX_TRADES_PER_DAY = int(os.getenv('MAX_TRADES_PER_DAY', 20))
 MAGIC_NUMBER = int(os.getenv('MAGIC_NUMBER', 123456))
 # Toggle real order execution. The LIVE_MODE environment variable should be
 # set to 'true' or 'false'. Any value other than 'true' is treated as False.
-LIVE_MODE = os.getenv('LIVE_MODE', 'false').lower() == 'true'
+LIVE_MODE = os.getenv('LIVE_MODE', 'true').lower() == 'true'
 # --- Optional fallback per-symbol overrides (future extension) ---
 SYMBOL_OVERRIDES = {
     "XAUUSD.": {

@@ -145,7 +145,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         logger.info("No action for %s %s", symbol, timeframe)
         return
 
-    if not session_allowed():
+    if not session_allowed(symbol):
         logger.info("Session guard blocked trading for %s %s", symbol, timeframe)
         return
 
@@ -318,6 +318,7 @@ def scheduler_loop(args: argparse.Namespace) -> None:
     level = logging.DEBUG if args.debug else (logging.ERROR if args.silent else logging.INFO)
     logging.basicConfig(level=level, format="%(asctime)s - %(levelname)s - %(message)s")
     while True:
+        print("🔁 Loop is running...")
         if not mt5.initialize():
             logger.error("Failed to initialize MT5")
             time.sleep(CHECK_INTERVAL_SECONDS)

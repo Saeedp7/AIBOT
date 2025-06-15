@@ -1,14 +1,2 @@
 {
-  "TrendPullbackStrategy": 0.2,
-  "null": 0.0,
-  "OrderBlockScalpingStrategy": 0.0,
-  "SupplyDemandSwingStrategy": 0.0,
-  "EMACrossoverScalpingStrategy": 0.7,
-  "MACDDivergenceStrategy": 0.7,
-  "VWAPReversionStrategy": 0.41,
-  "DeltaDivergenceScalpingStrategy": 0.87,
-  "MicroBreakoutScalpingStrategy": 1.0,
-  "LondonBreakoutStrategy": 1.0,
-  "FibonacciSwingStrategy": 0.0,
-  "VolumeBreakoutStrategy": 0.53
 }
