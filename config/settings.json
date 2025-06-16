@@ -6,7 +6,14 @@
   "TIMEFRAMES": "M1,M5,M15,H1,H4",
   "CHECK_INTERVAL_SECONDS": "60",
   "FILLING_MODE_OVERRIDES": {
-  "XAUUSD.": 1
-}
+    "XAUUSD.": 1
+  },
+  "commission_rules": {
+    "BTCUSD": { "type": "percent", "value": 0.04 },
+    "ETHUSD": { "type": "percent", "value": 0.04 },
+    "XAUUSD": { "type": "tier", "tiers": [ [0, 6, 0], [6, 10000, 5] ] },
+    "DJIUSD": { "type": "tier", "tiers": [ [0, 2, 0], [2, 10000, 6] ] },
+    "NDXUSD": { "type": "tier", "tiers": [ [0, 2, 0], [2, 10000, 6] ] }
+  }
 }
 

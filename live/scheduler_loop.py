@@ -30,6 +30,7 @@ from agents.strategy_selector_agent import StrategySelectorAgent
 from ai_engine.strategy_selector import load_scores
 from ai_engine.score_updater import update_strategy_score
 from risk_management.core import prepare_trade_parameters
+from risk_management.commission_calculator import estimate_commission
 from risk_management.daily_guard import DailyGuard
 from risk_management.exposure_guard import ExposureGuard
 from connectors.mt5_connector import get_account_info
@@ -207,7 +208,16 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         logger.info("Risk guard prevented trade for %s %s", symbol, timeframe)
         return
     lot, sl, tp_levels, _bem, regime = prep
+    commission = estimate_commission(symbol, lot)
+    tp_usd = abs(tp_levels[0] - entry) * lot * 100000.0
+    sl_usd = abs(entry - sl) * lot * 100000.0
+    adjusted_tp = (tp_usd + commission) / (lot * 100000.0)
+    adjusted_sl = (sl_usd + commission) / (lot * 100000.0)
+    direction_mult = 1 if decision == "buy" else -1
+    tp_levels[0] = round(entry + direction_mult * adjusted_tp, 2)
+    sl = round(entry - direction_mult * adjusted_sl, 2)
 
+    logger.info(f"Estimated commission for {symbol}: ${commission:.2f}")
     logger.info(
         "%s %s → %s @ %s | SL: %s TP1: %s Lot: %s",
         symbol,
