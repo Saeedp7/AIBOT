@@ -1,104 +1,128 @@
 {
   "BreakoutStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "DeltaDivergenceScalpingStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "EMACrossoverScalpingStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "FibonacciSwingStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "IchimokuDayStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "LondonBreakoutStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "MACDDivergenceStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "MACrossoverSwingStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "MeanReversionStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "MicroBreakoutScalpingStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "OrderBlockScalpingStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "SupertrendADXRSIStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "SupplyDemandSwingStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "TrendFollowingStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "TrendPullbackStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "VolumeBreakoutStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
   },
   "VWAPReversionStrategy": {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99
+    "unknown": {
+      "win_rate": 0.5,
+      "recent_score": 0.01,
+      "regime_fit": 0.01
+    }
+  },
+  "Sample": {
+    "unknown": {
+      "win_rate": 100.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
+    }
   }
 }

@@ -14,6 +14,7 @@ from typing import Dict, List, Tuple
 
 DEFAULT_HISTORY_PATH = "logs/trade_history.json"
 DEFAULT_SCORE_PATH = "ai_engine/strategy_scores.json"
+MIN_SCORE = 0.01  # Prevent scores from decaying to useless values
 
 # Scoring weights for trade outcomes
 _OUTCOME_WEIGHTS = {
@@ -25,19 +26,27 @@ _OUTCOME_WEIGHTS = {
 }
 
 
+def _upgrade_legacy_scores(scores: Dict[str, dict]) -> Dict[str, dict]:
+    """Return ``scores`` with legacy single-level metrics converted."""
+    for strat, data in list(scores.items()):
+        if isinstance(data, dict) and any(k in data for k in ("win_rate", "recent_score", "regime_fit")):
+            if not any(isinstance(v, dict) for v in data.values()):
+                metrics = {
+                    "win_rate": float(data.get("win_rate", 0.0)),
+                    "recent_score": float(data.get("recent_score", 1.0)),
+                    "regime_fit": float(data.get("regime_fit", 1.0)),
+                }
+                scores[strat] = {"unknown": metrics}
+    return scores
+
+
 def _load_json(path: str) -> List[dict] | Dict[str, dict]:
     if not os.path.exists(path):
         return [] if path.endswith("json") and "history" in path else {}
     try:
         with open(path, "r", encoding="utf-8") as f:
             loaded = json.load(f)
-            # Add type check safeguard
-            if isinstance(loaded, dict):
-                return loaded
-            elif isinstance(loaded, list):
-                return loaded
-            else:
-                return {} if "score" in path else []
+            return loaded if isinstance(loaded, (dict, list)) else {}
     except (json.JSONDecodeError, OSError):
         return {} if "score" in path else []
 
@@ -69,22 +78,10 @@ def update_scores_from_trade_history(
     *,
     alpha: float = 0.2,
 ) -> None:
-    """Update strategy metrics using ``trade_history.json``.
+    """Update strategy metrics using ``trade_history.json``."""
+    history: List[dict] = _load_json(history_path)  # type: ignore
+    scores: Dict[str, dict] = _upgrade_legacy_scores(_load_json(score_path))  # type: ignore
 
-    Parameters
-    ----------
-    history_path : str
-        Location of the trade history JSON file.
-    score_path : str
-        Destination path for the updated score file.
-    alpha : float, optional
-        Smoothing factor for the ``recent_score``.
-    """
-
-    history: List[dict] = _load_json(history_path)  # type: ignore[assignment]
-    scores: Dict[str, dict] = _load_json(score_path)  # type: ignore[assignment]
-
-    # temporary containers
     temp: Dict[Tuple[str, str], List[float]] = {}
     recent: Dict[Tuple[str, str], float] = {}
 
@@ -96,13 +93,13 @@ def update_scores_from_trade_history(
         value = _score_from_result(trade.get("result"), trade.get("closed_early", False))
         key = (strat, regime)
         temp.setdefault(key, []).append(value)
-        prev = recent.get(key, 0.0)
+        prev = recent.get(key, 1.0)
         recent[key] = alpha * value + (1 - alpha) * prev
 
     for (strat, regime), results in temp.items():
         metrics = scores.setdefault(strat, {}).get(
             regime,
-            {"win_rate": 0.0, "recent_score": 0.0, "regime_fit": 1.0},
+            {"win_rate": 0.0, "recent_score": 1.0, "regime_fit": 1.0},
         )
 
         wins = sum(1 for r in results[-10:] if r > 0)
@@ -112,19 +109,18 @@ def update_scores_from_trade_history(
         recent_score = recent[(strat, regime)]
 
         metrics["win_rate"] = win_rate
-        metrics["recent_score"] = recent_score
-        metrics["regime_fit"] = recent_score
+        metrics["recent_score"] = max(recent_score, MIN_SCORE)
+        metrics["regime_fit"] = max(recent_score, MIN_SCORE)
         scores.setdefault(strat, {})[regime] = metrics
 
-    # apply decay for regimes without new trades
-    for strat, regimes in list(scores.items()):
+    # Apply decay with lower bound
+    for strat, regimes in scores.items():
         if not isinstance(regimes, dict):
             continue
         for reg, metrics in regimes.items():
             if (strat, reg) not in recent:
-                metrics["recent_score"] = (1 - alpha) * float(metrics.get("recent_score", 0.0))
-                metrics["regime_fit"] = (1 - alpha) * float(metrics.get("regime_fit", 1.0))
+                metrics["recent_score"] = max((1 - alpha) * float(metrics.get("recent_score", 1.0)), MIN_SCORE)
+                metrics["regime_fit"] = max((1 - alpha) * float(metrics.get("regime_fit", 1.0)), MIN_SCORE)
                 regimes[reg] = metrics
-        scores[strat] = regimes
 
     _save_json(scores, score_path)

@@ -46,6 +46,7 @@ from monitoring.alert_manager import (
 from execution.spread_guard import spread_within_limit
 from risk_management.session_guard import session_allowed
 from recovery.restart_manager import recover_state
+import MetaTrader5 as mt5
 logger = logging.getLogger("scheduler")
 
 
@@ -99,6 +100,21 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
         return int(time.time())
 
     deal_type = mt5.ORDER_TYPE_BUY if direction == "buy" else mt5.ORDER_TYPE_SELL
+    symbol_info = mt5.symbol_info(symbol)
+    symbol_info = mt5.symbol_info(symbol)
+    type_filling = mt5.ORDER_FILLING_IOC  # default fallback
+
+    # Optional: make it dynamic per-symbol from config
+    override = get_config("FILLING_MODE_OVERRIDES", {})
+    if symbol in override:
+        type_filling = int(override[symbol])
+    elif symbol_info and hasattr(symbol_info, "filling_mode"):
+        if symbol_info.filling_mode in (
+            mt5.ORDER_FILLING_IOC,
+            mt5.ORDER_FILLING_FOK,
+            mt5.ORDER_FILLING_RETURN,
+        ):
+            type_filling = symbol_info.filling_mode
     request = {
         "action": mt5.TRADE_ACTION_DEAL,
         "symbol": symbol,
@@ -111,7 +127,7 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
         "magic": MAGIC_NUMBER,
         "comment": "AI Trade",
         "type_time": mt5.ORDER_TIME_GTC,
-        "type_filling": mt5.ORDER_FILLING_RETURN,
+        "type_filling": type_filling,
     }
     result = mt5.order_send(request)
 
