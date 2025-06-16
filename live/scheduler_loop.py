@@ -30,7 +30,7 @@ from agents.strategy_selector_agent import StrategySelectorAgent
 from ai_engine.strategy_selector import load_scores
 from ai_engine.score_updater import update_strategy_score
 from risk_management.core import prepare_trade_parameters
-from risk_management.commission_calculator import estimate_commission
+from risk_management.commission_calculator import estimate_commission, estimate_swap
 from risk_management.daily_guard import DailyGuard
 from risk_management.exposure_guard import ExposureGuard
 from connectors.mt5_connector import get_account_info
@@ -318,11 +318,16 @@ def run_live_trade_manager() -> None:
                 close_ts = datetime.utcnow().isoformat() + "Z"
                 open_ts = datetime.fromisoformat(rec["timestamp"].replace("Z", "+00:00"))
                 dur = (datetime.utcnow() - open_ts).total_seconds()
-                pct = (
+                gross_pct = (
                     (price - rec["entry"]) / rec["entry"] * 100
                     if direction == "buy"
                     else (rec["entry"] - price) / rec["entry"] * 100
                 )
+                commission = estimate_commission(pos.symbol, pos.volume)
+                swap = estimate_swap(pos.symbol, pos.volume, direction)
+                net_pct = gross_pct - (
+                    (commission + swap) / (rec["entry"] * pos.volume * 100000.0)
+                ) * 100
                 update_trade(
                     ticket,
                     result="closed_early",
@@ -330,10 +335,17 @@ def run_live_trade_manager() -> None:
                     exit=price,
                     close_time=close_ts,
                     duration=dur,
-                    profit_pct=pct,
+                    profit_pct=gross_pct,
+                    net_profit_pct=net_pct,
+                    commission_usd=commission,
+                    swap_usd=swap,
                     hit="closed_early",
                 )
-                update_strategy_score(rec["strategy"], "loss", regime=rec.get("regime", ""))
+                win_condition = net_pct > 0
+                outcome = "win" if win_condition else "loss"
+                update_strategy_score(
+                    rec["strategy"], outcome, regime=rec.get("regime", "")
+                )
                 executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
                 trade_cache.discard((pos.symbol, rec["timeframe"]))
                 exposure_guard.remove(pos.symbol, rec["timeframe"])

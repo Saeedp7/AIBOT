@@ -90,7 +90,11 @@ def update_scores_from_trade_history(
             continue
         strat = trade.get("strategy") or ""
         regime = trade.get("regime") or "unknown"
-        value = _score_from_result(trade.get("result"), trade.get("closed_early", False))
+        result = str(trade.get("result", "")).lower()
+        net_pct = float(trade.get("net_profit_pct", trade.get("profit_pct", 0.0)))
+        if net_pct < 0:
+            result = "loss"
+        value = _score_from_result(result, trade.get("closed_early", False))
         key = (strat, regime)
         temp.setdefault(key, []).append(value)
         prev = recent.get(key, 1.0)

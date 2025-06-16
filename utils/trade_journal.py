@@ -42,6 +42,9 @@ def record_trade(
     close_time: str | None = None,
     duration: float | None = None,
     profit_pct: float | None = None,
+    net_profit_pct: float | None = None,
+    commission_usd: float | None = None,
+    swap_usd: float | None = None,
     hit: str | None = None,
     sl_moved: bool = False,
     closed_early: bool = False,
@@ -63,6 +66,9 @@ def record_trade(
         "close_time": close_time,
         "duration": duration,
         "profit_pct": profit_pct,
+        "net_profit_pct": net_profit_pct,
+        "commission_usd": commission_usd,
+        "swap_usd": swap_usd,
         "hit": hit,
         "sl_moved": sl_moved,
         "closed_early": closed_early,
@@ -82,6 +88,9 @@ def update_trade(
     close_time: str | None = None,
     result: str | None = None,
     profit_pct: float | None = None,
+    net_profit_pct: float | None = None,
+    commission_usd: float | None = None,
+    swap_usd: float | None = None,
     **updates: Any,
 ) -> None:
     """Update an existing trade entry by ticket."""
@@ -95,9 +104,10 @@ def update_trade(
             if result is not None:
                 trade["result"] = result
                 if result.lower() != "open":
-                    outcome = (
-                        "win" if str(result).lower().startswith("tp") else "loss"
-                    )
+                    hit = str(result).lower()
+                    net_val = net_profit_pct if net_profit_pct is not None else trade.get("net_profit_pct", 0)
+                    win_condition = (float(net_val) > 0) or hit.startswith("tp")
+                    outcome = "win" if win_condition else "loss"
                     update_strategy_score(
                         trade.get("strategy", ""),
                         outcome,
@@ -105,6 +115,12 @@ def update_trade(
                     )
             if profit_pct is not None:
                 trade["profit_pct"] = profit_pct
+            if net_profit_pct is not None:
+                trade["net_profit_pct"] = net_profit_pct
+            if commission_usd is not None:
+                trade["commission_usd"] = commission_usd
+            if swap_usd is not None:
+                trade["swap_usd"] = swap_usd
             trade.update(updates)
             break
     _save_history(history)

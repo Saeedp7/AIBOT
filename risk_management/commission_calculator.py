@@ -1,5 +1,5 @@
 from config.manager import get_config
-
+import MetaTrader5 as mt5
 
 def estimate_commission(symbol: str, lot: float) -> float:
     """Estimate broker commission cost in USD for the given symbol and lot."""
@@ -25,3 +25,12 @@ def estimate_commission(symbol: str, lot: float) -> float:
             if lower <= lot <= upper:
                 return float(cost) * lot
     return 0.0
+
+
+def estimate_swap(symbol: str, lot: float, direction: str, days_held: int = 1) -> float:
+    """Estimate swap fees in USD for holding a position overnight."""
+    info = mt5.symbol_info(symbol)
+    if not info:
+        return 0.0
+    swap_rate = info.swap_long if direction.lower() == "buy" else info.swap_short
+    return float(swap_rate) * lot * days_held

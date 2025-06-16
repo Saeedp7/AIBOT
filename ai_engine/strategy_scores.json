@@ -124,5 +124,12 @@
       "recent_score": 1.0,
       "regime_fit": 1.0
     }
+  },
+  "Dummy": {
+    "unknown": {
+      "win_rate": 100.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
+    }
   }
 }
