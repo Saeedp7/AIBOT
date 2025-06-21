@@ -312,7 +312,7 @@ def run_live_trade_manager() -> None:
             hit_tp = price >= tp if direction == "buy" else price <= tp
             if not hit_tp:
                 break
-            close_vol = round(pos.volume * 0.33, 2)
+            close_vol = round(pos.volume * 0.50, 2)
             if close_vol <= 0:
                 break
             close_type = (
