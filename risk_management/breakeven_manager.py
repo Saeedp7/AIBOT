@@ -7,13 +7,20 @@ from typing import List
 class BreakEvenManager:
     """Manage stop loss adjustments after partial take profits."""
 
-    def __init__(self, entry_price: float, direction: str,
-                 stop_loss: float, tp_levels: List[float]):
+    def __init__(
+        self,
+        entry_price: float,
+        direction: str,
+        stop_loss: float,
+        tp_levels: List[float],
+        reached: set[int] | None = None,
+    ):
         self.entry_price = entry_price
         self.direction = direction.lower()
         self.stop_loss = stop_loss
         self.tp_levels = tp_levels
-        self._reached = set()
+        # Persist TP levels that were already hit
+        self._reached = set(reached) if reached else set()
 
     def update_stop_loss(self, current_price: float) -> float:
         """Update stop loss if a new TP level has been reached."""

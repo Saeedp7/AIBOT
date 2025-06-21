@@ -14,7 +14,7 @@ from typing import Dict, List, Tuple
 
 DEFAULT_HISTORY_PATH = "logs/trade_history.json"
 DEFAULT_SCORE_PATH = "ai_engine/strategy_scores.json"
-MIN_SCORE = 0.01  # Prevent scores from decaying to useless values
+MIN_SCORE = 0.5  # Prevent scores from decaying to useless values
 
 # Scoring weights for trade outcomes
 _OUTCOME_WEIGHTS = {

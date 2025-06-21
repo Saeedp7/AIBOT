@@ -228,7 +228,8 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         tp_levels[0],
         lot,
     )
-    ticket = execute_trade(decision, symbol, lot, sl, tp_levels[0])
+    # Execute without TP so trade manager can handle multi-TP logic
+    ticket = execute_trade(decision, symbol, lot, sl, tp=0)
     if ticket:
         daily_guard.record_trade(0)
         exposure_guard.record(symbol, timeframe, decision, confidence)
@@ -272,7 +273,14 @@ def run_live_trade_manager() -> None:
         if not tick:
             continue
         price = tick.bid if direction == "sell" else tick.ask
-        bem = BreakEvenManager(rec["entry"], direction, pos.sl, rec.get("tp", []))
+        reached = {
+                    idx
+                    for idx in range(len(rec.get("tp", [])))
+                    if rec.get(f"tp{idx + 1}_hit")
+                }
+        bem = BreakEvenManager(
+                    rec["entry"], direction, pos.sl, rec.get("tp", []), reached
+                )
         new_sl = bem.update_stop_loss(price)
         if new_sl != pos.sl:
             req = {
@@ -290,7 +298,45 @@ def run_live_trade_manager() -> None:
                 alert_sl_moved(pos.symbol, rec["timeframe"], new_sl)
                 if new_sl == rec["entry"] and rec.get("result") == "open":
                     update_trade(ticket, result="TP1 hit", hit="TP1")
-                    update_strategy_score(rec["strategy"], "win", regime=rec.get("regime", ""))
+                    rec["result"] = "TP1 hit"
+                    rec["tp1_hit"] = True
+                    update_strategy_score(
+                        rec["strategy"], "win", regime=rec.get("regime", "")
+                    )
+        # Handle partial take profits dynamically
+        tps = rec.get("tp", [])
+        for i, tp in enumerate(tps):
+            flag = f"tp{i + 1}_hit"
+            if rec.get(flag):
+                continue
+            hit_tp = price >= tp if direction == "buy" else price <= tp
+            if not hit_tp:
+                break
+            close_vol = round(pos.volume * 0.33, 2)
+            if close_vol <= 0:
+                break
+            close_type = (
+                mt5.ORDER_TYPE_SELL if direction == "buy" else mt5.ORDER_TYPE_BUY
+            )
+            close_req = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": pos.symbol,
+                "volume": close_vol,
+                "type": close_type,
+                "position": ticket,
+                "price": price,
+                "deviation": 20,
+                "magic": MAGIC_NUMBER,
+                "comment": f"TP{i + 1} partial",
+            }
+            res = mt5.order_send(close_req)
+            if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                log_trade_action(
+                    f"Partial TP{i + 1} hit for {pos.symbol} {rec['timeframe']}"
+                )
+                update_trade(ticket, **{flag: True}, hit=f"TP{i + 1}")
+                rec[flag] = True
+            break
         # simple reversal check
         if direction == "buy" and price < rec["entry"] - (rec["entry"] - rec["sl"]):
             close_type = mt5.ORDER_TYPE_SELL
