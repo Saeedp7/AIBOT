@@ -45,7 +45,7 @@ def evaluate_signals(strategy_signals: dict, market_regime: str,
     candidates = []
 
     for strat_name, signal in strategy_signals.items():
-        raw_score = strategy_scores.get(strat_name, 0)
+        raw_score = strategy_scores.get(strat_name, 0.7)
         if isinstance(raw_score, dict):
             score = raw_score.get(market_regime, 0.0)
         else:

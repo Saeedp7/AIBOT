@@ -15,6 +15,7 @@ from typing import Dict, List, Tuple
 DEFAULT_HISTORY_PATH = "logs/trade_history.json"
 DEFAULT_SCORE_PATH = "ai_engine/strategy_scores.json"
 MIN_SCORE = 0.5  # Prevent scores from decaying to useless values
+DECAY_RATE = 0.94  # smoothing factor for score updates
 
 # Scoring weights for trade outcomes
 _OUTCOME_WEIGHTS = {
@@ -76,7 +77,7 @@ def update_scores_from_trade_history(
     history_path: str = DEFAULT_HISTORY_PATH,
     score_path: str = DEFAULT_SCORE_PATH,
     *,
-    alpha: float = 0.2,
+    alpha: float = 1 - DECAY_RATE,
 ) -> None:
     """Update strategy metrics using ``trade_history.json``."""
     history: List[dict] = _load_json(history_path)  # type: ignore

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 
 import time
+import threading
 from datetime import datetime
 import argparse
 import logging
@@ -27,6 +28,8 @@ from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators
 from strategies.strategy_selector import StrategySelector
 from agents.strategy_selector_agent import StrategySelectorAgent
+from agents.risk_manager_agent import RiskManagerAgent
+from agents.trade_monitor_agent import TradeMonitorAgent
 from ai_engine.strategy_selector import load_scores
 from ai_engine.score_updater import update_strategy_score
 from risk_management.core import prepare_trade_parameters
@@ -43,6 +46,7 @@ from monitoring.alert_manager import (
     alert_sl_moved,
     alert_trade_closed,
     alert_daily_guard,
+    retry_failed_alerts,
 )
 from execution.spread_guard import spread_within_limit
 from risk_management.session_guard import session_allowed
@@ -65,6 +69,7 @@ daily_guard = DailyGuard(
 
 trade_cache: set[tuple[str, str]] = set()
 strategy_selector_agent = StrategySelectorAgent(StrategySelector().strategies)
+risk_manager_agent = RiskManagerAgent()
 
 # Restore state from previous session if possible
 executed_trades, exposure_guard = recover_state()
@@ -208,6 +213,10 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         logger.info("Risk guard prevented trade for %s %s", symbol, timeframe)
         return
     lot, sl, tp_levels, _bem, regime = prep
+    ok, reason = risk_manager_agent.validate_trade(symbol, lot)
+    if not ok:
+        logger.info("Trade blocked: %s", reason)
+        return
     commission = estimate_commission(symbol, lot)
     tp_usd = abs(tp_levels[0] - entry) * lot * 100000.0
     sl_usd = abs(entry - sl) * lot * 100000.0
@@ -246,6 +255,8 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
             timestamp=datetime.utcnow().isoformat() + "Z",
             regime=regime,
         )
+        monitor = TradeMonitorAgent(ticket, best_strat, symbol)
+        threading.Thread(target=monitor.wait_and_score, daemon=True).start()
         trade_cache.add((symbol, timeframe))
 
 
@@ -409,6 +420,7 @@ def scheduler_loop(args: argparse.Namespace) -> None:
             continue
         try:
             run_live_trade_manager()
+            retry_failed_alerts()
             for symbol, tfs in ACTIVE_SYMBOLS_TIMEFRAMES.items():
                 for tf in tfs:
                     refresh_data(symbol, tf)
