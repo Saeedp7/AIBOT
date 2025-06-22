@@ -52,6 +52,17 @@ from execution.spread_guard import spread_within_limit
 from risk_management.session_guard import session_allowed
 from recovery.restart_manager import recover_state
 import MetaTrader5 as mt5
+
+
+
+def is_market_open(symbol: str) -> bool:
+    """Return True if the market for the symbol is open and tradeable."""
+    info = mt5.symbol_info(symbol)
+    return (
+        info is not None
+        and info.visible
+        and info.trade_mode == mt5.SYMBOL_TRADE_MODE_FULL
+    )
 logger = logging.getLogger("scheduler")
 
 
@@ -111,7 +122,7 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
     entry_price = price.ask if direction == "buy" else price.bid
 
         # Check SL/TP against minimum stop level
-    min_stop = (getattr(info, 'stops_level', 0) or 0) * info.point  # ✅ Handle missing stops_level safely
+    min_stop = getattr(info, 'stops_level', 10) * info.point  # fallback = 10 points
     if abs(entry_price - sl) < min_stop or abs(entry_price - tp) < min_stop:
         logger.warning(f"Invalid stop levels for {symbol}. SL/TP too close to price.")
         return None
@@ -166,6 +177,9 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
 
 
 def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
+    if not is_market_open(symbol):
+        logger.info(f"Market closed for {symbol}, skipping...")
+        return
     if daily_guard.hit_limits():
         logger.warning("Daily risk guard triggered.")
         alert_daily_guard("limits hit")
