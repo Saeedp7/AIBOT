@@ -1839,7 +1839,7 @@
     "timeframe": "M1",
     "strategy": "MACDDivergenceStrategy",
     "entry": 102843.66,
-    "sl": 102927.71,
+    "sl": 102759.61,
     "tp": [
       102759.61,
       102675.56,
@@ -1855,10 +1855,66 @@
     "net_profit_pct": null,
     "commission_usd": null,
     "swap_usd": null,
+    "hit": "TP1",
+    "sl_moved": true,
+    "closed_early": false,
+    "ticket": 27412364,
+    "timestamp": "2025-06-22T01:11:26.883251Z",
+    "tp1_hit": true
+  },
+  {
+    "symbol": "BTCUSD.",
+    "timeframe": "M5",
+    "strategy": "VWAPReversionStrategy",
+    "entry": 102637.8,
+    "sl": 102939.71,
+    "tp": [
+      102335.89,
+      102033.98,
+      101732.07,
+      101430.16
+    ],
+    "result": "loss",
+    "regime": "ranging",
+    "exit": null,
+    "close_time": "2025-06-22T01:17:48.424258Z",
+    "duration": null,
+    "profit_pct": 0.0,
+    "net_profit_pct": null,
+    "commission_usd": null,
+    "swap_usd": null,
     "hit": null,
     "sl_moved": false,
     "closed_early": false,
-    "ticket": 27412364,
-    "timestamp": "2025-06-22T01:11:26.883251Z"
+    "ticket": 27412366,
+    "timestamp": "2025-06-22T01:17:43.418455Z"
+  },
+  {
+    "symbol": "ETHUSD.",
+    "timeframe": "M5",
+    "strategy": "FibonacciSwingStrategy",
+    "entry": 2284.32,
+    "sl": 2271.39,
+    "tp": [
+      2297.25,
+      2310.18,
+      2323.11,
+      2336.03,
+      2348.96
+    ],
+    "result": "loss",
+    "regime": "ranging",
+    "exit": null,
+    "close_time": "2025-06-22T01:22:10.576854Z",
+    "duration": null,
+    "profit_pct": 0.0,
+    "net_profit_pct": null,
+    "commission_usd": null,
+    "swap_usd": null,
+    "hit": null,
+    "sl_moved": false,
+    "closed_early": false,
+    "ticket": 27412369,
+    "timestamp": "2025-06-22T01:22:05.570595Z"
   }
 ]

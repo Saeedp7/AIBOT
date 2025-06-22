@@ -56,13 +56,29 @@ import MetaTrader5 as mt5
 
 
 def is_market_open(symbol: str) -> bool:
-    """Return True if the market for the symbol is open and tradeable."""
     info = mt5.symbol_info(symbol)
-    return (
-        info is not None
-        and info.visible
-        and info.trade_mode == mt5.SYMBOL_TRADE_MODE_FULL
-    )
+    tick = mt5.symbol_info_tick(symbol)
+
+    if not info or not info.visible:
+        return False
+
+    if info.trade_mode != mt5.SYMBOL_TRADE_MODE_FULL:
+        return False
+
+    # 💡 Allow crypto pairs (BTC, ETH) to bypass bid/ask check
+    if symbol.startswith(("BTC", "ETH")):
+        return True
+
+    # For non-crypto symbols, check valid prices
+    if not tick or tick.bid == 0.0 or tick.ask == 0.0:
+        return False
+
+    # Optional: block trades on Saturday/Sunday for forex/indices
+    from datetime import datetime
+    if not symbol.startswith(("BTC", "ETH")) and datetime.now().weekday() >= 5:
+        return False
+
+    return True
 logger = logging.getLogger("scheduler")
 
 
@@ -122,7 +138,7 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
     entry_price = price.ask if direction == "buy" else price.bid
 
         # Check SL/TP against minimum stop level
-    min_stop = getattr(info, 'stops_level', 10) * info.point  # fallback = 10 points
+    min_stop = getattr(info, 'stops_level', 100) * info.point  # fallback = 100 points
     if abs(entry_price - sl) < min_stop or abs(entry_price - tp) < min_stop:
         logger.warning(f"Invalid stop levels for {symbol}. SL/TP too close to price.")
         return None

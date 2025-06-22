@@ -92,7 +92,8 @@ def update_scores_from_trade_history(
         strat = trade.get("strategy") or ""
         regime = trade.get("regime") or "unknown"
         result = str(trade.get("result", "")).lower()
-        net_pct = float(trade.get("net_profit_pct", trade.get("profit_pct", 0.0)))
+        raw_pct = trade.get("net_profit_pct", trade.get("profit_pct", 0.0))
+        net_pct = float(raw_pct) if raw_pct is not None else 0.0
         if net_pct < 0:
             result = "loss"
         value = _score_from_result(result, trade.get("closed_early", False))

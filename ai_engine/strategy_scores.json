@@ -18,11 +18,6 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
-    },
-    "ranging": {
-      "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
     }
   },
   "FibonacciSwingStrategy": {
@@ -30,6 +25,11 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "ranging": {
+      "win_rate": 0.0,
+      "recent_score": 0.8199999999999998,
+      "regime_fit": 0.8199999999999998
     }
   },
   "IchimokuDayStrategy": {
@@ -49,11 +49,6 @@
   "MACDDivergenceStrategy": {
     "unknown": {
       "win_rate": 0.5,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
-    },
-    "ranging": {
-      "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
     }
@@ -98,11 +93,6 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
-    },
-    "ranging": {
-      "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
     }
   },
   "TrendFollowingStrategy": {
@@ -134,8 +124,8 @@
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
+      "recent_score": 0.8199999999999998,
+      "regime_fit": 0.8199999999999998
     }
   },
   "Sample": {
