@@ -15,10 +15,14 @@ def test_monitor_updates_score(monkeypatch):
 
     monkeypatch.setattr(mt5, "positions_get", fake_positions)
     monkeypatch.setattr(mt5, "history_deals_get", lambda ticket=None: [types.SimpleNamespace(profit=1)], raising=False)
-    monkeypatch.setattr(trade_monitor_agent, "update_strategy_score", lambda s, r: calls.append((s, r)))
+    monkeypatch.setattr(
+        trade_monitor_agent,
+        "update_strategy_score",
+        lambda s, r, regime: calls.append((s, r, regime)),
+    )
     monkeypatch.setattr(trade_monitor_agent, "update_trade", lambda *a, **k: None)
     monkeypatch.setattr(trade_monitor_agent.time, "sleep", lambda s: None)
 
     agent = trade_monitor_agent.TradeMonitorAgent(123, "XAUUSD.", "M5", "Strat", "bull")
     agent.wait_and_score()
-    assert ("Strat", "win") in calls
+    assert ("Strat", "win", "bull") in calls

@@ -1702,7 +1702,7 @@
     "timeframe": "M1",
     "strategy": "VWAPReversionStrategy",
     "entry": 2268.99,
-    "sl": 2268.99,
+    "sl": 2279.82,
     "tp": [
       2279.82,
       2290.65,
@@ -1718,12 +1718,13 @@
     "net_profit_pct": null,
     "commission_usd": null,
     "swap_usd": null,
-    "hit": "TP1",
+    "hit": "TP2",
     "sl_moved": true,
     "closed_early": false,
     "ticket": 27412282,
     "timestamp": "2025-06-22T00:10:45.161822Z",
-    "tp1_hit": true
+    "tp1_hit": true,
+    "tp2_hit": true
   },
   {
     "symbol": "BTCUSD.",

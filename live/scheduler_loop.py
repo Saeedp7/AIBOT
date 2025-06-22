@@ -95,8 +95,11 @@ def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:
 
 def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> int | None:
     info = mt5.symbol_info(symbol)
-    trade_mode = getattr(info, "trade_mode", None) if info else None
-    if trade_mode in (0, 3) or info is None:
+    if not info:
+        logger.error(f"\u26a0\ufe0f Failed to fetch SymbolInfo for {symbol}")
+        return None
+    trade_mode = getattr(info, "trade_mode", None)
+    if trade_mode in (0, 3):
         logger.warning(f"{symbol} not tradeable now (market closed or disabled)")
         return None
 
@@ -108,7 +111,7 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
     entry_price = price.ask if direction == "buy" else price.bid
 
         # Check SL/TP against minimum stop level
-    min_stop = info.stops_level * info.point
+    min_stop = (getattr(info, 'stops_level', 0) or 0) * info.point  # ✅ Handle missing stops_level safely
     if abs(entry_price - sl) < min_stop or abs(entry_price - tp) < min_stop:
         logger.warning(f"Invalid stop levels for {symbol}. SL/TP too close to price.")
         return None
