@@ -52,10 +52,6 @@ def market_is_open(symbol: str) -> Optional[bool]:
 def session_allowed(symbol: str, now: datetime | None = None) -> bool:
     """Return ``True`` if trading is allowed for ``symbol`` at ``now`` (UTC)."""
     now_dt = now if now is not None else datetime.now(timezone.utc)
-    now_t = now_dt.time()
-    for start, end in _BLOCKED:
-        if start <= now_t <= end:
-            return False
     status = market_is_open(symbol)
     if status is False:
         return False

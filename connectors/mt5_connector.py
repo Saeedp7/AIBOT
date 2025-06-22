@@ -3,8 +3,8 @@
 import MetaTrader5 as mt5
 from config.manager import get_config
 
-API_LOGIN = int(get_config("MT5_LOGIN", 235934))
-API_PASSWORD = get_config("MT5_PASSWORD", "36ca9l!F")
+API_LOGIN = int(get_config("MT5_LOGIN", 245905))
+API_PASSWORD = get_config("MT5_PASSWORD", "09ba5x!L")
 API_SERVER = get_config("MT5_SERVER", "AronMarkets-Demo")
 API_PATH = get_config("MT5_PATH", r"C:\\Program Files\\MetaTrader 5\\terminal64.exe")
 

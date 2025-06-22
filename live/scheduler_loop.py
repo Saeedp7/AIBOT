@@ -50,6 +50,7 @@ from monitoring.alert_manager import (
 )
 from execution.spread_guard import spread_within_limit
 from risk_management.session_guard import session_allowed
+from utils.time_utils import session_risk_multiplier
 from recovery.restart_manager import recover_state
 import MetaTrader5 as mt5
 
@@ -193,6 +194,7 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
 
 
 def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
+    logger.info(f"Checking symbol: {symbol}")
     if not is_market_open(symbol):
         logger.info(f"Market closed for {symbol}, skipping...")
         return
@@ -260,6 +262,12 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         logger.info("Session guard blocked trading for %s %s", symbol, timeframe)
         return
     
+    risk_multiplier = session_risk_multiplier(datetime.utcnow())
+    if risk_multiplier < 1.0:
+        logger.info(
+            "Low session active — applying reduced lot size multiplier: %s",
+            risk_multiplier,
+        )
     acct = mt5.account_info()
     prep = prepare_trade_parameters(
         symbol=symbol,
@@ -268,7 +276,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         entry_price=entry,
         market_data=df,
         account_balance=acct.balance,
-        risk_percent=MAX_RISK_PER_TRADE * 100,
+        risk_percent=MAX_RISK_PER_TRADE * 100 * risk_multiplier,
         guard=daily_guard,
     )
     if not prep:

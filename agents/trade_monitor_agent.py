@@ -42,7 +42,13 @@ class TradeMonitorAgent:
 
     def wait_and_score(self) -> None:
         """Block until the trade closes then log the result."""
-        while mt5.positions_get(ticket=self.ticket):
+        while True:
+            positions = mt5.positions_get(ticket=self.ticket)
+            if positions is None:
+                time.sleep(5)
+                continue
+            if not positions:
+                break
             time.sleep(5)
         (
             outcome,

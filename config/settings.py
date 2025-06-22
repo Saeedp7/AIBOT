@@ -4,8 +4,8 @@ import os
 from itertools import product
 
 # --- Broker API Credentials ---
-API_LOGIN = int(os.getenv('MT5_LOGIN', 235934))
-API_PASSWORD = os.getenv('MT5_PASSWORD', '36ca9l!F')
+API_LOGIN = int(os.getenv('MT5_LOGIN', 245905))
+API_PASSWORD = os.getenv('MT5_PASSWORD', '09ba5x!L')
 API_SERVER = os.getenv('MT5_SERVER', 'AronMarkets-Demo')
 API_PATH = os.getenv('MT5_PATH', r'C:\Program Files\MetaTrader 5\terminal64.exe')
 

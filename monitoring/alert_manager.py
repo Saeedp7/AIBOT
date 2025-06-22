@@ -23,8 +23,9 @@ def _send_telegram(message: str) -> bool:
 
 
 def _notify(message: str) -> None:
-    if not _send_telegram(message):
-        telegram_queue.append({"msg": message, "retries": 0, "ts": datetime.utcnow()})
+    print("PM DADAM")
+    # if not _send_telegram(message):
+    #     telegram_queue.append({"msg": message, "retries": 0, "ts": datetime.utcnow()})
 
 
 def retry_failed_alerts() -> None:
