@@ -18,5 +18,3 @@ class ICTSmartMoneyStrategy(BaseStrategy):
         if detect_fvg(df):
             return "buy" if df["close"].iloc[-1] > df["open"].iloc[-1] else "sell"
         return None
-
-strategies/order_block_scalping.py

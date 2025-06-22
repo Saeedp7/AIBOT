@@ -5,47 +5,16 @@ from risk_management.stop_loss_manager import get_required_timeframes
 from ai_engine.score_updater import get_strategy_win_rate, load_scores
 import numpy as np
 
-# Import all 13 strategies
-from strategies.ema_crossover_scalping import EMACrossoverScalpingStrategy
-from strategies.macd_divergence import MACDDivergenceStrategy
-from strategies.ichimoku_day import IchimokuDayStrategy
-from strategies.vwap_reversion import VWAPReversionStrategy
-from strategies.order_block_scalping import OrderBlockScalpingStrategy
-from strategies.micro_breakout_scalping import MicroBreakoutScalpingStrategy
-from strategies.trend_pullback import TrendPullbackStrategy
-from strategies.supply_demand_swing import SupplyDemandSwingStrategy
-from strategies.delta_scalping import DeltaDivergenceScalpingStrategy
-from strategies.volume_breakout import VolumeBreakoutStrategy
-from strategies.fibonacci_swing import FibonacciSwingStrategy
-from strategies.london_breakout import LondonBreakoutStrategy
-from strategies.ma_crossover_swing import MACrossoverSwingStrategy
-from strategies.supertrend_adx_rsi_strategy import SupertrendADXRSIStrategy
-from strategies.breakout_strategy import BreakoutStrategy
-from strategies.mean_reversion import MeanReversionStrategy
-from strategies.trend_following import TrendFollowingStrategy
+from strategies import discover_strategies
+from ai_engine.score_manager import ensure_base_scores
 
 
 class StrategySelector:
     def __init__(self):
-        self.strategies = [
-            EMACrossoverScalpingStrategy(),
-            MACDDivergenceStrategy(),
-            IchimokuDayStrategy(),
-            VWAPReversionStrategy(),
-            OrderBlockScalpingStrategy(),
-            MicroBreakoutScalpingStrategy(),
-            TrendPullbackStrategy(),
-            SupplyDemandSwingStrategy(),
-            DeltaDivergenceScalpingStrategy(),
-            VolumeBreakoutStrategy(),
-            FibonacciSwingStrategy(),
-            LondonBreakoutStrategy(),
-            MACrossoverSwingStrategy(),
-            SupertrendADXRSIStrategy(),
-            BreakoutStrategy(),
-            MeanReversionStrategy(),
-           TrendFollowingStrategy(),
-        ]
+        self.strategies = discover_strategies()
+        ensure_base_scores(
+            [s.__class__.__name__ for s in self.strategies]
+        )
         self.cooldowns = {}
         self.strategy_memory = load_scores()
 

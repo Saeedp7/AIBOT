@@ -69,7 +69,7 @@ class DailyGuard:
         self.reset_if_new_day()
         balance = float(self.state.get("start_balance", 0.0))
         current = None
-        if get_account_info:
+        if self.starting_balance is None and get_account_info:
             try:
                 current = get_account_info().balance
             except Exception:
@@ -79,7 +79,7 @@ class DailyGuard:
         growth_percent = ((current - balance) / balance * 100) if balance > 0 else 0.0
         if growth_percent <= -self.loss_limit_percent:
             log_risk_guard(
-                f"Loss limit hit: {pnl_percent:.2f}% <= -{self.loss_limit_percent}%"
+                f"Loss limit hit: {growth_percent:.2f}% <= -{self.loss_limit_percent}%"
             )
             alert_daily_guard("loss_limit")
             return True

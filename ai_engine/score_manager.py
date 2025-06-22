@@ -59,6 +59,23 @@ def _save_json(data: Dict[str, dict], path: str) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
+def ensure_base_scores(names: List[str], path: str = DEFAULT_SCORE_PATH) -> None:
+    """Ensure ``path`` contains default metrics for all strategy ``names``."""
+    scores: Dict[str, dict] = _load_json(path)  # type: ignore
+    changed = False
+    for name in names:
+        if name not in scores:
+            scores[name] = {
+                "unknown": {
+                    "win_rate": 0.0,
+                    "recent_score": 1.0,
+                    "regime_fit": 1.0,
+                }
+            }
+            changed = True
+    if changed:
+        _save_json(scores, path)
+
 
 def _score_from_result(result: str, closed_early: bool = False) -> float:
     result = str(result).lower()
