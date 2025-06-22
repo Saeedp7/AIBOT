@@ -19,6 +19,6 @@ def test_monitor_updates_score(monkeypatch):
     monkeypatch.setattr(trade_monitor_agent, "update_trade", lambda *a, **k: None)
     monkeypatch.setattr(trade_monitor_agent.time, "sleep", lambda s: None)
 
-    agent = trade_monitor_agent.TradeMonitorAgent(123, "Strat", "XAUUSD.")
+    agent = trade_monitor_agent.TradeMonitorAgent(123, "XAUUSD.", "M5", "Strat", "bull")
     agent.wait_and_score()
     assert ("Strat", "win") in calls

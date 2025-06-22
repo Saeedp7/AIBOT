@@ -94,19 +94,30 @@ def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:
     indicator_cache[(symbol, timeframe)] = enriched[symbol][timeframe]
 
 def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> int | None:
+    info = mt5.symbol_info(symbol)
+    trade_mode = getattr(info, "trade_mode", None) if info else None
+    if trade_mode in (0, 3) or info is None:
+        logger.warning(f"{symbol} not tradeable now (market closed or disabled)")
+        return None
+
     price = mt5.symbol_info_tick(symbol)
     if price is None:
         logging.warning(f"No price data for {symbol}")
         return None
 
     entry_price = price.ask if direction == "buy" else price.bid
+
+        # Check SL/TP against minimum stop level
+    min_stop = info.stops_level * info.point
+    if abs(entry_price - sl) < min_stop or abs(entry_price - tp) < min_stop:
+        logger.warning(f"Invalid stop levels for {symbol}. SL/TP too close to price.")
+        return None
     if get_config("LIVE_MODE", "false").lower() != "true":
         execute_fake_order(direction, symbol, lot, entry_price, sl=sl, tp=tp)
         alert_trade_opened(symbol, "sim", direction, entry_price, sl, tp)
         return int(time.time())
 
     deal_type = mt5.ORDER_TYPE_BUY if direction == "buy" else mt5.ORDER_TYPE_SELL
-    symbol_info = mt5.symbol_info(symbol)
     symbol_info = mt5.symbol_info(symbol)
     type_filling = mt5.ORDER_FILLING_IOC  # default fallback
 
@@ -261,7 +272,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
             timestamp=datetime.utcnow().isoformat() + "Z",
             regime=regime,
         )
-        monitor = TradeMonitorAgent(ticket, best_strat, symbol)
+        monitor = TradeMonitorAgent(ticket, symbol, timeframe, best_strat, regime)
         threading.Thread(target=monitor.wait_and_score, daemon=True).start()
         trade_cache.add((symbol, timeframe))
 

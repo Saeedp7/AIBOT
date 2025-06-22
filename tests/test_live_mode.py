@@ -18,6 +18,13 @@ def test_execute_trade_uses_mock(monkeypatch):
     order_calls = []
     monkeypatch.setattr(mt5, "order_send", lambda req: order_calls.append(req))
 
+    info = types.SimpleNamespace(
+        trade_mode=1,
+        stops_level=0,
+        point=0.01,
+    )
+    monkeypatch.setattr(mt5, "symbol_info", lambda symbol: info)
+    
     monkeypatch.setattr(scheduler_loop, "execute_fake_order", lambda *a, **k: calls.append((a, k)) or 123)
 
     ticket = scheduler_loop.execute_trade("buy", "XAUUSD.", 0.1, 1.0, 2.0)

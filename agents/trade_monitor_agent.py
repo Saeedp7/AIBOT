@@ -21,10 +21,12 @@ def analyze_trade_result(ticket: int) -> tuple[str, float]:
 class TradeMonitorAgent:
     """Poll MT5 until a trade closes then update score."""
 
-    def __init__(self, ticket: int, strategy: str, symbol: str) -> None:
+    def __init__(self, ticket: int, symbol: str, timeframe: str, strategy: str, regime: str) -> None:
         self.ticket = ticket
-        self.strategy = strategy
         self.symbol = symbol
+        self.timeframe = timeframe
+        self.strategy = strategy
+        self.regime = regime  # ✅ FIX: Added regime tracking
 
     def wait_and_score(self) -> None:
         """Block until the trade closes then log the result."""
