@@ -18,7 +18,7 @@ class DailyGuard:
         self,
         loss_limit_percent: float = 5.0,
         max_trades: int = 100,
-        profit_limit_percent: float = 10.0,
+        profit_limit_percent: float = 20.0,
         data_file: str = "logs/daily_guard.json",
         starting_balance: Optional[float] = None,
     ) -> None:

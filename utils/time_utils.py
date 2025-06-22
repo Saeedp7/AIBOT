@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, time, timezone
 from typing import List, Tuple
+import logging
 
 from config.manager import get_config
 
@@ -27,11 +28,17 @@ def _parse_ranges(ranges: str) -> List[Tuple[time, time]]:
 
 _SESSIONS = _parse_ranges(get_config("SESSION_TIMES", _DEFAULT_SESSIONS))
 _OFF_RISK = float(get_config("OFF_SESSION_RISK", 0.5))
+_TRADE_OUTSIDE_SESSIONS = get_config("TRADE_OUTSIDE_SESSIONS", "true").lower() == "true"
+_REDUCED_RISK_OUTSIDE_SESSION = float(
+    get_config("REDUCED_RISK_OUTSIDE_SESSION", _OFF_RISK)
+)
 
+logger = logging.getLogger(__name__)
 
-def in_active_session(now: datetime | None = None) -> bool:
-    """Return ``True`` if ``now`` (UTC) falls within any configured session."""
-    now_t = (datetime.now(timezone.utc)).time()
+def is_in_high_session(now: datetime | None = None) -> bool:
+    """Return ``True`` if ``now`` falls inside a high-volume session."""
+    now_dt = datetime.now(timezone.utc)
+    now_t = now_dt.time()
     for start, end in _SESSIONS:
         if start <= now_t <= end:
             return True
@@ -39,5 +46,15 @@ def in_active_session(now: datetime | None = None) -> bool:
 
 
 def session_risk_multiplier(now: datetime | None = None) -> float:
-    """Return risk multiplier based on whether we are in an active session."""
-    return 1.0 if in_active_session(datetime.now(timezone.utc)) else _OFF_RISK
+    """Return risk multiplier depending on high/low session settings."""
+    now_dt = datetime.now(timezone.utc)
+    if is_in_high_session(now_dt):
+        logger.debug(f"Current UTC time: {now_dt}. Session: HIGH.")
+        return 1.0
+    if _TRADE_OUTSIDE_SESSIONS:
+        logger.debug(
+            f"Current UTC time: {now_dt}. Session: LOW. Applying {_REDUCED_RISK_OUTSIDE_SESSION * 100:.0f}% risk."
+        )
+        return _REDUCED_RISK_OUTSIDE_SESSION
+    logger.debug(f"Current UTC time: {now_dt}. Session: LOW. Trading disabled.")
+    return 0.0

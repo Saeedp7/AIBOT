@@ -568,7 +568,7 @@
     "timeframe": "H1",
     "strategy": "DeltaDivergenceScalpingStrategy",
     "entry": 2163.46,
-    "sl": 2125.21,
+    "sl": 2163.46,
     "tp": [
       2201.71,
       2239.96,
@@ -584,18 +584,19 @@
     "commission_usd": 0.0,
     "swap_usd": 0.0,
     "exit_reason": "loss",
-    "hit": null,
-    "sl_moved": false,
+    "hit": "TP1",
+    "sl_moved": true,
     "closed_early": false,
     "ticket": 27414729,
-    "timestamp": "2025-06-22T20:39:32.773017Z"
+    "timestamp": "2025-06-22T20:39:32.773017Z",
+    "tp1_hit": true
   },
   {
     "symbol": "BTCUSD.",
     "timeframe": "H1",
     "strategy": "MeanReversionStrategy",
     "entry": 99430.12,
-    "sl": 98532.73,
+    "sl": 99430.12,
     "tp": [
       100327.51,
       101224.89,
@@ -612,10 +613,11 @@
     "commission_usd": 0.0,
     "swap_usd": 0.0,
     "exit_reason": "loss",
-    "hit": null,
-    "sl_moved": false,
+    "hit": "TP1",
+    "sl_moved": true,
     "closed_early": false,
     "ticket": 27414756,
-    "timestamp": "2025-06-22T20:53:17.376168Z"
+    "timestamp": "2025-06-22T20:53:17.376168Z",
+    "tp1_hit": true
   }
 ]
