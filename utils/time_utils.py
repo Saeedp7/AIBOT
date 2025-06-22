@@ -31,7 +31,7 @@ _OFF_RISK = float(get_config("OFF_SESSION_RISK", 0.5))
 
 def in_active_session(now: datetime | None = None) -> bool:
     """Return ``True`` if ``now`` (UTC) falls within any configured session."""
-    now_t = (now or datetime.now(timezone.utc)).time()
+    now_t = (datetime.now(timezone.utc)).time()
     for start, end in _SESSIONS:
         if start <= now_t <= end:
             return True
@@ -40,4 +40,4 @@ def in_active_session(now: datetime | None = None) -> bool:
 
 def session_risk_multiplier(now: datetime | None = None) -> float:
     """Return risk multiplier based on whether we are in an active session."""
-    return 1.0 if in_active_session(now) else _OFF_RISK
+    return 1.0 if in_active_session(datetime.now(timezone.utc)) else _OFF_RISK
