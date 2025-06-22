@@ -50,7 +50,7 @@ def session_allowed(symbol: str, now: datetime | None = None) -> bool:
     now_t = (now or datetime.now(timezone.utc)).time()
     for start, end in _BLOCKED:
         if start <= now_t <= end:
-            return True    
+            return False    
     status = market_is_open(symbol)
     if status is False:
         return False

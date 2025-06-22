@@ -1,6 +1,8 @@
 import pandas as pd
 import pandas_ta as ta
 from .base import BaseStrategy
+from utils.indicators import calculate_rsi
+from core.ict_utils import detect_liquidity_grab
 
 class VWAPReversionStrategy(BaseStrategy):
     def __init__(self):
@@ -22,10 +24,11 @@ class VWAPReversionStrategy(BaseStrategy):
 
         last_price = data['close'].iloc[-1]
         vwap_val = data['vwap'].iloc[-1]
+        rsi = calculate_rsi(data['close']).iloc[-1]
 
-        if last_price < vwap_val * 0.995:
+        if detect_liquidity_grab(data) and last_price < vwap_val and rsi < 45:
             self.signal = 'buy'
-        elif last_price > vwap_val * 1.005:
+        elif detect_liquidity_grab(data) and last_price > vwap_val and rsi > 55:
             self.signal = 'sell'
 
     def should_buy(self):

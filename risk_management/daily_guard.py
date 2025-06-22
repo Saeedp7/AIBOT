@@ -17,12 +17,14 @@ class DailyGuard:
     def __init__(
         self,
         loss_limit_percent: float = 5.0,
-        max_trades: int = 20,
+        max_trades: int = 100,
+        profit_limit_percent: float = 10.0,
         data_file: str = "logs/daily_guard.json",
         starting_balance: Optional[float] = None,
     ) -> None:
         self.loss_limit_percent = loss_limit_percent
         self.max_trades = max_trades
+        self.profit_limit_percent = profit_limit_percent
         self.data_file = data_file
         self.starting_balance = starting_balance
         self.state: dict[str, float | int | str] = {}
@@ -66,13 +68,26 @@ class DailyGuard:
     def hit_limits(self) -> bool:
         self.reset_if_new_day()
         balance = float(self.state.get("start_balance", 0.0))
-        pnl = float(self.state.get("pnl", 0.0))
-        pnl_percent = (pnl / balance * 100) if balance > 0 else 0.0
-        if pnl_percent <= -self.loss_limit_percent:
+        current = None
+        if get_account_info:
+            try:
+                current = get_account_info().balance
+            except Exception:
+                current = None
+        if current is None:
+            current = balance + float(self.state.get("pnl", 0.0))
+        growth_percent = ((current - balance) / balance * 100) if balance > 0 else 0.0
+        if growth_percent <= -self.loss_limit_percent:
             log_risk_guard(
                 f"Loss limit hit: {pnl_percent:.2f}% <= -{self.loss_limit_percent}%"
             )
             alert_daily_guard("loss_limit")
+            return True
+        if growth_percent >= self.profit_limit_percent:
+            log_risk_guard(
+                f"Profit target hit: {growth_percent:.2f}% >= {self.profit_limit_percent}%"
+            )
+            alert_daily_guard("profit_limit")
             return True
         if int(self.state.get("trades", 0)) >= self.max_trades:
             log_risk_guard(

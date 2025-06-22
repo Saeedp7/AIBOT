@@ -1,5 +1,7 @@
 import pandas as pd
 from .base import BaseStrategy
+from utils.indicators import calculate_ema
+from core.price_action import is_bullish_engulfing, is_bearish_engulfing
 
 class OrderBlockScalpingStrategy(BaseStrategy):
     def __init__(self):
@@ -11,11 +13,13 @@ class OrderBlockScalpingStrategy(BaseStrategy):
             return
 
         # Simulate basic OB logic: buy if strong bullish engulfing after support
-        recent = data.iloc[-3:]
-        if recent['close'].iloc[-1] > recent['open'].iloc[-1] and recent['close'].iloc[-1] > recent['high'].iloc[-2]:
-            self.signal = 'buy'
-        elif recent['close'].iloc[-1] < recent['open'].iloc[-1] and recent['close'].iloc[-1] < recent['low'].iloc[-2]:
-            self.signal = 'sell'
+        ema20 = calculate_ema(data["close"], 20).iloc[-1]
+        last_close = data["close"].iloc[-1]
+
+        if is_bullish_engulfing(data.tail(2)) and last_close > ema20:
+            self.signal = "buy"
+        elif is_bearish_engulfing(data.tail(2)) and last_close < ema20:
+            self.signal = "sell"
 
     def should_buy(self):
         return self.signal == 'buy'

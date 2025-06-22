@@ -7,7 +7,7 @@ from risk_management.stop_loss_manager import determine_sl_tp
 from risk_management.lot_sizing_module import calculate_lot_size
 from risk_management.breakeven_manager import BreakEvenManager
 from risk_management.daily_guard import DailyGuard
-
+from utils.time_utils import session_risk_multiplier
 
 def prepare_trade_parameters(
     *,
@@ -33,7 +33,7 @@ def prepare_trade_parameters(
     lot = calculate_lot_size(
         balance=account_balance,
         sl_distance=abs(entry_price - sl),
-        risk_percent=risk_percent,
+        risk_percent=risk_percent * session_risk_multiplier(),
         symbol=symbol,
         market_data=market_data,
     )
