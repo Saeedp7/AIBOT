@@ -12,7 +12,7 @@ pytest_cache/
 config/config.json
 
 # Log and data files
-logs/
+logs/*
 !logs/trade_history.json
 backtesting/logs/
 *.csv

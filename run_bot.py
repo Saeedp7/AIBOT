@@ -6,6 +6,7 @@ from config.manager import get_config
 from connectors.mt5_connector import initialize_mt5, shutdown_mt5
 from live.scheduler_loop import scheduler_loop
 import MetaTrader5 as mt5
+import sys
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run AutoTrade AI Bot")
