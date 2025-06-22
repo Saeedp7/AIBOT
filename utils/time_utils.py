@@ -28,8 +28,8 @@ def _parse_ranges(ranges: str) -> List[Tuple[time, time]]:
 
 _SESSIONS = _parse_ranges(get_config("SESSION_TIMES", _DEFAULT_SESSIONS))
 _OFF_RISK = float(get_config("OFF_SESSION_RISK", 0.5))
-_TRADE_OUTSIDE_SESSIONS = get_config("TRADE_OUTSIDE_SESSIONS", "true").lower() == "true"
-_REDUCED_RISK_OUTSIDE_SESSION = float(
+TRADE_OUTSIDE_SESSIONS = get_config("TRADE_OUTSIDE_SESSIONS", "true").lower() == "true"
+REDUCED_RISK_OUTSIDE_SESSION = float(
     get_config("REDUCED_RISK_OUTSIDE_SESSION", _OFF_RISK)
 )
 
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 def is_in_high_session(now: datetime | None = None) -> bool:
     """Return ``True`` if ``now`` falls inside a high-volume session."""
-    now_dt = datetime.now(timezone.utc)
+    now_dt = now if now is not None else datetime.now(timezone.utc)
     now_t = now_dt.time()
     for start, end in _SESSIONS:
         if start <= now_t <= end:
@@ -47,14 +47,14 @@ def is_in_high_session(now: datetime | None = None) -> bool:
 
 def session_risk_multiplier(now: datetime | None = None) -> float:
     """Return risk multiplier depending on high/low session settings."""
-    now_dt = datetime.now(timezone.utc)
+    now_dt = now if now is not None else datetime.now(timezone.utc)
     if is_in_high_session(now_dt):
         logger.debug(f"Current UTC time: {now_dt}. Session: HIGH.")
         return 1.0
-    if _TRADE_OUTSIDE_SESSIONS:
+    if TRADE_OUTSIDE_SESSIONS:
         logger.debug(
-            f"Current UTC time: {now_dt}. Session: LOW. Applying {_REDUCED_RISK_OUTSIDE_SESSION * 100:.0f}% risk."
+            f"Current UTC time: {now_dt}. Session: LOW. Applying {REDUCED_RISK_OUTSIDE_SESSION * 100:.0f}% risk."
         )
-        return _REDUCED_RISK_OUTSIDE_SESSION
+        return REDUCED_RISK_OUTSIDE_SESSION
     logger.debug(f"Current UTC time: {now_dt}. Session: LOW. Trading disabled.")
     return 0.0
