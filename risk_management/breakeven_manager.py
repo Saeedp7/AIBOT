@@ -2,7 +2,8 @@
 """Utility to adjust stop loss as take profit targets are hit."""
 
 from typing import List
-
+from risk_management.commission_calculator import estimate_commission
+from connectors.symbol_info import get_symbol_specs
 
 class BreakEvenManager:
     """Manage stop loss adjustments after partial take profits."""
@@ -14,11 +15,20 @@ class BreakEvenManager:
         stop_loss: float,
         tp_levels: List[float],
         reached: set[int] | None = None,
+        *,
+        symbol: str | None = None,
+        lot: float = 0.0,
+        precision: int = 2,
     ):
         self.entry_price = entry_price
+        self.entry = entry_price
         self.direction = direction.lower()
         self.stop_loss = stop_loss
+        self.sl = stop_loss
         self.tp_levels = tp_levels
+        self.symbol = symbol or ""
+        self.lot = lot
+        self.precision = precision
         # Persist TP levels that were already hit
         self._reached = set(reached) if reached else set()
 
@@ -27,15 +37,30 @@ class BreakEvenManager:
         if self.direction not in {"buy", "sell"}:
             raise ValueError("direction must be 'buy' or 'sell'")
 
-        for i, tp in enumerate(self.tp_levels):
-            if i in self._reached:
-                continue
+        if not self.tp_levels or self.entry is None or self.sl is None:
+            return self.sl
 
-            hit_tp = current_price >= tp if self.direction == "buy" else current_price <= tp
-            if hit_tp:
-                self._reached.add(i)
-                if i == 0:
-                    self.stop_loss = self.entry_price
-                else:
-                    self.stop_loss = self.tp_levels[i - 1]
-        return self.stop_loss
+        hit_tp1 = (
+            current_price >= self.tp_levels[0]
+            if self.direction == "buy"
+            else current_price <= self.tp_levels[0]
+        )
+        if not hit_tp1:
+            return self.sl
+
+        commission = estimate_commission(self.symbol, self.lot)
+        specs = get_symbol_specs(self.symbol)
+        tick_value = getattr(specs, "tick_value", 0)
+        tick_size = getattr(specs, "tick_size", 0)
+
+        pip_value = tick_value / tick_size if tick_size > 0 else 1.0
+        buffer_pips = commission / pip_value if pip_value > 0 else 0.0
+
+        if self.direction == "buy":
+            new_sl = self.entry + buffer_pips
+        else:
+            new_sl = self.entry - buffer_pips
+
+        self.sl = round(new_sl, self.precision)
+        self.stop_loss = self.sl
+        return self.sl

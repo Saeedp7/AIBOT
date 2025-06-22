@@ -1867,7 +1867,7 @@
     "timeframe": "M5",
     "strategy": "VWAPReversionStrategy",
     "entry": 102637.8,
-    "sl": 102939.71,
+    "sl": 102637.8,
     "tp": [
       102335.89,
       102033.98,
@@ -1883,11 +1883,12 @@
     "net_profit_pct": null,
     "commission_usd": null,
     "swap_usd": null,
-    "hit": null,
-    "sl_moved": false,
+    "hit": "TP1",
+    "sl_moved": true,
     "closed_early": false,
     "ticket": 27412366,
-    "timestamp": "2025-06-22T01:17:43.418455Z"
+    "timestamp": "2025-06-22T01:17:43.418455Z",
+    "tp1_hit": true
   },
   {
     "symbol": "ETHUSD.",
@@ -1916,5 +1917,59 @@
     "closed_early": false,
     "ticket": 27412369,
     "timestamp": "2025-06-22T01:22:05.570595Z"
+  },
+  {
+    "symbol": "BTCUSD.",
+    "timeframe": "M15",
+    "strategy": "OrderBlockScalpingStrategy",
+    "entry": 102257.5,
+    "sl": 102778.84,
+    "tp": [
+      101736.16,
+      101214.83,
+      100693.5
+    ],
+    "result": "loss",
+    "regime": "ranging",
+    "exit": null,
+    "close_time": "2025-06-22T01:35:44.099787Z",
+    "duration": null,
+    "profit_pct": 0.0,
+    "net_profit_pct": null,
+    "commission_usd": null,
+    "swap_usd": null,
+    "hit": null,
+    "sl_moved": false,
+    "closed_early": false,
+    "ticket": 27412377,
+    "timestamp": "2025-06-22T01:35:29.091073Z"
+  },
+  {
+    "symbol": "ETHUSD.",
+    "timeframe": "M5",
+    "strategy": "SupplyDemandSwingStrategy",
+    "entry": 2275.56,
+    "sl": 2263.08,
+    "tp": [
+      2288.04,
+      2300.52,
+      2313.0,
+      2325.47,
+      2337.95
+    ],
+    "result": "loss",
+    "regime": "ranging",
+    "exit": null,
+    "close_time": "2025-06-22T01:35:44.624775Z",
+    "duration": null,
+    "profit_pct": 0.0,
+    "net_profit_pct": null,
+    "commission_usd": null,
+    "swap_usd": null,
+    "hit": null,
+    "sl_moved": false,
+    "closed_early": false,
+    "ticket": 27412378,
+    "timestamp": "2025-06-22T01:35:39.610470Z"
   }
 ]
