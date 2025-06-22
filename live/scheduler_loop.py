@@ -228,9 +228,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         )
         return
 
-    if not session_allowed(symbol):
-        logger.info("Session guard blocked trading for %s %s", symbol, timeframe)
-        return
+
 
     if not spread_within_limit(symbol):
         logger.info("Spread guard blocked trade for %s", symbol)
@@ -258,7 +256,10 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
             f"🚫 Exposure guard blocked trade: {symbol} {timeframe} {decision}"
         )
         return
-
+    if not session_allowed(symbol):
+        logger.info("Session guard blocked trading for %s %s", symbol, timeframe)
+        return
+    
     acct = mt5.account_info()
     prep = prepare_trade_parameters(
         symbol=symbol,
