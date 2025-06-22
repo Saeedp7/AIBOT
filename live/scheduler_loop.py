@@ -128,15 +128,21 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
         "type": deal_type,
         "price": entry_price,
         "sl": sl,
-        "tp": tp,
         "deviation": 20,
         "magic": MAGIC_NUMBER,
         "comment": "AI Trade",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": type_filling,
     }
+    if tp and tp > 0:
+        request["tp"] = tp
+    info = mt5.symbol_info(symbol)
+    if not info or info.trade_mode != mt5.SYMBOL_TRADE_MODE_FULL:
+        logger.warning(f"{symbol} is not tradeable now (market closed or disabled)")
+        return None
     result = mt5.order_send(request)
-
+    print("⛔ Order Send Failed")
+    print("⛔ Last Error:", mt5.last_error())
     if result and result.retcode == mt5.TRADE_RETCODE_DONE:
         logger.info("Trade executed: ticket %s", result.order)
         alert_trade_opened(symbol, "live", direction, entry_price, sl, tp)

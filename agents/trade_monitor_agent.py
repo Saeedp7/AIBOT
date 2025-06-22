@@ -31,5 +31,5 @@ class TradeMonitorAgent:
         while mt5.positions_get(ticket=self.ticket):
             time.sleep(5)
         outcome, profit = analyze_trade_result(self.ticket)
-        update_strategy_score(self.strategy, outcome)
+        update_strategy_score(self.strategy, outcome, self.regime)
         update_trade(self.ticket, close_time=datetime.utcnow().isoformat() + "Z", result=outcome, profit_pct=profit)
