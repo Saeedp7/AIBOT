@@ -22,6 +22,8 @@ _OUTCOME_WEIGHTS = {
     "tp1": 1.0,
     "tp2": 1.5,
     "tp3": 2.0,
+    "partial": 0.5,
+    "breakeven": 0.2,
     "sl": -2.0,
     "closedearly": -1.0,
 }
@@ -62,6 +64,10 @@ def _score_from_result(result: str, closed_early: bool = False) -> float:
     result = str(result).lower()
     if closed_early or "closed" in result:
         return _OUTCOME_WEIGHTS["closedearly"]
+    if "breakeven" in result:
+        return _OUTCOME_WEIGHTS["breakeven"]
+    if "partial" in result:
+        return _OUTCOME_WEIGHTS["partial"]
     if "tp3" in result:
         return _OUTCOME_WEIGHTS["tp3"]
     if "tp2" in result:

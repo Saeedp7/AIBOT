@@ -216,6 +216,17 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
     if decision not in ("buy", "sell") or not best_strat:
         logger.info("No action for %s %s", symbol, timeframe)
         return
+    # Regime enforcement: block trades if strategy not allowed in detected regime
+    strat_obj = next(
+        (s for s in strategy_selector_agent.strategies if s.__class__.__name__ == best_strat),
+        None,
+    )
+    allowed = getattr(strat_obj, "ALLOWED_REGIMES", {"trending"}) if strat_obj else {"trending"}
+    if market_regime not in allowed:
+        logger.info(
+            "Regime %s not allowed for %s, skipping trade", market_regime, best_strat
+        )
+        return
 
     if not session_allowed(symbol):
         logger.info("Session guard blocked trading for %s %s", symbol, timeframe)
@@ -424,7 +435,7 @@ def run_live_trade_manager() -> None:
                 )
                 close_ts = datetime.utcnow().isoformat() + "Z"
                 open_ts = datetime.fromisoformat(rec["timestamp"].replace("Z", "+00:00"))
-                dur = (datetime.utcnow() - open_ts).total_seconds()
+                dur = (datetime.utcnow() - open_ts).total_seconds() / 60
                 gross_pct = (
                     (price - rec["entry"]) / rec["entry"] * 100
                     if direction == "buy"
@@ -447,6 +458,7 @@ def run_live_trade_manager() -> None:
                     commission_usd=commission,
                     swap_usd=swap,
                     hit="closed_early",
+                    exit_reason="early_exit",
                 )
                 win_condition = net_pct > 0
                 outcome = "win" if win_condition else "loss"

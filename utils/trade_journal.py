@@ -45,6 +45,7 @@ def record_trade(
     net_profit_pct: float | None = None,
     commission_usd: float | None = None,
     swap_usd: float | None = None,
+    exit_reason: str | None = None,
     hit: str | None = None,
     sl_moved: bool = False,
     closed_early: bool = False,
@@ -69,6 +70,7 @@ def record_trade(
         "net_profit_pct": net_profit_pct,
         "commission_usd": commission_usd,
         "swap_usd": swap_usd,
+        "exit_reason": exit_reason,
         "hit": hit,
         "sl_moved": sl_moved,
         "closed_early": closed_early,
@@ -91,6 +93,7 @@ def update_trade(
     net_profit_pct: float | None = None,
     commission_usd: float | None = None,
     swap_usd: float | None = None,
+    exit_reason: str | None = None,
     **updates: Any,
 ) -> None:
     """Update an existing trade entry by ticket."""
@@ -131,6 +134,24 @@ def update_trade(
                 trade["commission_usd"] = commission_usd
             if swap_usd is not None:
                 trade["swap_usd"] = swap_usd
+            if exit_reason is not None:
+                trade["exit_reason"] = exit_reason
+
+            if close_time and not trade.get("duration") and trade.get("timestamp"):
+                try:
+                    open_ts = datetime.fromisoformat(trade["timestamp"].replace("Z", "+00:00"))
+                    close_ts = datetime.fromisoformat(close_time.replace("Z", "+00:00"))
+                    trade["duration"] = (close_ts - open_ts).total_seconds() / 60
+                except Exception:
+                    pass
+
+            if commission_usd is None and trade.get("commission_usd") is None and trade.get("symbol"):
+                from risk_management.commission_calculator import estimate_commission
+                lot = updates.get("volume", 0.0)
+                try:
+                    trade["commission_usd"] = estimate_commission(trade["symbol"], lot)
+                except Exception:
+                    trade["commission_usd"] = 0.0
             trade.update(updates)
             break
     _save_history(history)

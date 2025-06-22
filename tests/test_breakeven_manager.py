@@ -1,5 +1,6 @@
 from risk_management.breakeven_manager import BreakEvenManager
-
+import risk_management.breakeven_manager as bem
+from types import SimpleNamespace
 
 def test_buy_side_buffer(monkeypatch):
     monkeypatch.setattr(bem, "estimate_commission", lambda s, l: 2.0)

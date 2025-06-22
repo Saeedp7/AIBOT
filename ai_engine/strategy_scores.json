@@ -11,6 +11,11 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "trending": {
+      "win_rate": 0.0,
+      "recent_score": 0.8199999999999998,
+      "regime_fit": 0.8199999999999998
     }
   },
   "EMACrossoverScalpingStrategy": {
@@ -28,8 +33,8 @@
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.8199999999999998,
-      "regime_fit": 0.8199999999999998
+      "recent_score": 0.6507999999999997,
+      "regime_fit": 0.6507999999999997
     }
   },
   "IchimokuDayStrategy": {
@@ -72,6 +77,11 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "trending": {
+      "win_rate": 0.0,
+      "recent_score": 0.8199999999999998,
+      "regime_fit": 0.8199999999999998
     }
   },
   "OrderBlockScalpingStrategy": {
@@ -82,8 +92,8 @@
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.8199999999999998,
-      "regime_fit": 0.8199999999999998
+      "recent_score": 0.6507999999999997,
+      "regime_fit": 0.6507999999999997
     }
   },
   "SupertrendADXRSIStrategy": {
@@ -101,8 +111,8 @@
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.8199999999999998,
-      "regime_fit": 0.8199999999999998
+      "recent_score": 0.6507999999999997,
+      "regime_fit": 0.6507999999999997
     }
   },
   "TrendFollowingStrategy": {
@@ -117,6 +127,11 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "ranging": {
+      "win_rate": 0.0,
+      "recent_score": 0.6507999999999997,
+      "regime_fit": 0.6507999999999997
     }
   },
   "VolumeBreakoutStrategy": {
@@ -124,6 +139,11 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "ranging": {
+      "win_rate": 0.0,
+      "recent_score": 0.0,
+      "regime_fit": 0.8200000000000001
     }
   },
   "VWAPReversionStrategy": {
@@ -134,8 +154,8 @@
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.8199999999999998,
-      "regime_fit": 0.8199999999999998
+      "recent_score": 0.6507999999999997,
+      "regime_fit": 0.6507999999999997
     }
   },
   "Sample": {

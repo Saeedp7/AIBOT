@@ -8,7 +8,9 @@ class BaseStrategy:
     strategy_group: str = "day"
     preferred_tf: str = "M15"
     regimes: list[str] | None = None
-
+    # Allowed market regimes for this strategy. Scheduler will block trades if
+    # the detected regime is not listed here.  Defaults to trending only.
+    ALLOWED_REGIMES: set[str] = {"trending"}
     def generate_signal(self, df: pd.DataFrame) -> str | None:
         """Return 'buy', 'sell', or None based on DataFrame."""
         raise NotImplementedError
