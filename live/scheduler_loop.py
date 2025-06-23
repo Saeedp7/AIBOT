@@ -412,6 +412,7 @@ def run_live_trade_manager() -> None:
             close_type = (
                 mt5.ORDER_TYPE_SELL if direction == "buy" else mt5.ORDER_TYPE_BUY
             )
+            print(f"[TP] Price crossed TP{i + 1}. Closing {close_vol} manually.")
             close_req = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": pos.symbol,
@@ -425,6 +426,10 @@ def run_live_trade_manager() -> None:
             }
             res = mt5.order_send(close_req)
             if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                time.sleep(1)
+                confirm = mt5.positions_get(ticket=ticket)
+                if confirm and confirm[0].volume >= pos.volume - 0.0001:
+                    logger.warn
                 log_trade_action(
                    f"\u2705 TP{i + 1} hit \u2192 partial close executed for {pos.symbol} {rec['timeframe']}"
                 )
@@ -459,6 +464,11 @@ def run_live_trade_manager() -> None:
             }
             res = mt5.order_send(close_req)
             if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                time.sleep(1)
+                confirm = mt5.positions_get(ticket=ticket)
+                if confirm:
+                    logger.warning("Close order sent but position still open %s", ticket)
+                    continue
                 log_trade_action(
                     f"Trade closed early on trend reversal: {pos.symbol} {rec['timeframe']}"
                 )

@@ -23,15 +23,9 @@ def determine_sl_tp(strategy_name, entry_price, direction, market_data):
     if market_data is None or market_data.empty:
         raise ValueError("Market data is empty or None.")
 
-    volatility = np.std(market_data['close'].pct_change().dropna()) * 100
-    trend_strength = abs(market_data['close'].iloc[-1] - market_data['close'].iloc[-20]) / market_data['close'].iloc[-20]
+    from ai_engine.regime_classifier import detect_market_regime
 
-    if trend_strength > 0.015:
-        regime = 'trending'
-    elif volatility > 1.5:
-        regime = 'volatile'
-    else:
-        regime = 'ranging'
+    regime = detect_market_regime(market_data)
     atr_series = calculate_atr(market_data, period=14).dropna()
     atr = float(atr_series.iloc[-1]) if not atr_series.empty else None
 

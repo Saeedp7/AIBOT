@@ -32,14 +32,9 @@ class StrategySelector:
         return tf_data
 
     def get_market_regime(self, df):
-        volatility = np.std(df['close'].pct_change().dropna()) * 100
-        trend_strength = abs(df['close'].iloc[-1] - df['close'].iloc[-20]) / df['close'].iloc[-20]
-        if trend_strength > 0.015:
-            return 'trending'
-        elif volatility > 1.5:
-            return 'volatile'
-        else:
-            return 'ranging'
+        from ai_engine.regime_classifier import detect_market_regime
+
+        return detect_market_regime(df)
 
     def select_strategy(self, multi_tf_data):
         best_score = -1

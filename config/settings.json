@@ -18,6 +18,8 @@
     "XAUUSD": { "type": "tier", "tiers": [ [0, 6, 0], [6, 10000, 5] ] },
     "DJIUSD": { "type": "tier", "tiers": [ [0, 2, 0], [2, 10000, 6] ] },
     "NDXUSD": { "type": "tier", "tiers": [ [0, 2, 0], [2, 10000, 6] ] }
-  }
+  },
+  "REGIME_ATR_SLOPE_THRESHOLD": "0.7",
+  "REGIME_EMA_DISTANCE_THRESHOLD": "0.5"
 }
 
