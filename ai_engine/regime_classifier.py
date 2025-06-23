@@ -1,7 +1,11 @@
 import pandas as pd
 
-from config.manager import get_config
+from config.settings import EMA_SLOPE_THRESHOLD, ATR_VOLATILITY_THRESHOLD
 from utils.indicators import calculate_ema, calculate_atr
+from utils.structure_detection import (
+    is_higher_highs_last_n,
+    is_lower_lows_last_n,
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,50 +21,38 @@ def detect_market_regime(
     if len(df) < window + 50:
         return "unknown"
     if atr_slope_threshold is None:
-        atr_slope_threshold = float(get_config("REGIME_ATR_SLOPE_THRESHOLD", 0.7))
+        atr_slope_threshold = ATR_VOLATILITY_THRESHOLD
     if ema_slope_threshold is None:
-        ema_slope_threshold = float(
-            get_config("REGIME_EMA_DISTANCE_THRESHOLD", 0.5)
-        )
+        ema_slope_threshold = EMA_SLOPE_THRESHOLD
 
     ema = df["ema_50"] if "ema_50" in df.columns else calculate_ema(df["close"], 50)
     atr = calculate_atr(df, period=14)
 
-    ema_slope = (ema.iloc[-1] - ema.iloc[-window]) / max(ema.iloc[-window], 1e-8) * 100
-    atr_slope = (atr.iloc[-1] - atr.iloc[-window]) / max(atr.iloc[-window], 1e-8) * 100
+    ema_start = ema.iloc[-window]
+    ema_end = ema.iloc[-1]
+    ema_slope = (ema_end - ema_start) / max(ema_start, 1e-8) * 100
 
-    highs = df["high"].iloc[-window:]
-    lows = df["low"].iloc[-window:]
+    atr_start = atr.iloc[-window]
+    atr_end = atr.iloc[-1]
+    atr_change = (atr_end - atr_start) / max(atr_start, 1e-8) * 100
 
-    high_trend = (highs.diff() > 0).mean()
-    low_trend = (lows.diff() > 0).mean()
-
-    if high_trend > 0.6 and low_trend > 0.6:
-        structure = "HH/HL"
-    elif high_trend < 0.4 and low_trend < 0.4:
-        structure = "LL/LH"
+    if ema_slope > ema_slope_threshold and is_higher_highs_last_n(df):
+        structure = "uptrend"
+    elif ema_slope < -ema_slope_threshold and is_lower_lows_last_n(df):
+        structure = "downtrend"
     else:
         structure = "range"
 
-    if abs(ema_slope) > ema_slope_threshold and structure != "range":
+    if abs(ema_slope) > ema_slope_threshold and structure in {"uptrend", "downtrend"}:
         regime = "trending"
-    elif atr_slope > atr_slope_threshold:
+    elif abs(atr_change) > atr_slope_threshold:
         regime = "volatile"
     else:
        regime = "ranging"
 
-    print(
-        f"[REGIME] EMA Slope: {ema_slope:.2f} | ATR Change: {atr_slope:.2f} | Structure: {structure} → Regime: {regime}"
-    )
     logger.info(
-        "[REGIME] EMA %.2f→%.2f (%.2f%%) | ATR %.5f→%.5f (%.2f%%) | %s → %s",
-        ema.iloc[-window],
-        ema.iloc[-1],
-        ema_slope,
-        atr.iloc[-window],
-        atr.iloc[-1],
-        atr_slope,
-        structure,
-        regime,
+        f"[REGIME] EMA {ema_start:.2f}→{ema_end:.2f} ({ema_slope:+.2f}%) | "
+        f"ATR {atr_start:.5f}→{atr_end:.5f} ({atr_change:+.2f}%) | "
+        f"Structure: {structure} → Regime: {regime}"
     )
     return regime
