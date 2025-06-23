@@ -1,10 +1,16 @@
 import pandas as pd
 
-from config.settings import EMA_SLOPE_THRESHOLD, ATR_VOLATILITY_THRESHOLD
+from config.settings import (
+    EMA_SLOPE_THRESHOLD,
+    ATR_VOLATILITY_THRESHOLD,
+    STRUCTURE_LOOKBACK,
+)
 from utils.indicators import calculate_ema, calculate_atr
 from utils.structure_detection import (
     is_higher_highs_last_n,
     is_lower_lows_last_n,
+    is_higher_lows_last_n,
+    is_lower_highs_last_n,
 )
 import logging
 
@@ -15,6 +21,7 @@ def detect_market_regime(
     window: int = 20,
     atr_slope_threshold: float | None = None,
     ema_slope_threshold: float | None = None,
+    structure_lookback: int | None = None,
 ) -> str:
     """Return market regime based on EMA and ATR slope analysis."""
 
@@ -24,6 +31,8 @@ def detect_market_regime(
         atr_slope_threshold = ATR_VOLATILITY_THRESHOLD
     if ema_slope_threshold is None:
         ema_slope_threshold = EMA_SLOPE_THRESHOLD
+    if structure_lookback is None:
+        structure_lookback = STRUCTURE_LOOKBACK
 
     ema = df["ema_50"] if "ema_50" in df.columns else calculate_ema(df["close"], 50)
     atr = calculate_atr(df, period=14)
@@ -36,15 +45,23 @@ def detect_market_regime(
     atr_end = atr.iloc[-1]
     atr_change = (atr_end - atr_start) / max(atr_start, 1e-8) * 100
 
-    if ema_slope > ema_slope_threshold and is_higher_highs_last_n(df):
+    if (
+            ema_slope > ema_slope_threshold
+            and is_higher_highs_last_n(df, structure_lookback)
+            and is_higher_lows_last_n(df, structure_lookback)
+        ):
         structure = "uptrend"
-    elif ema_slope < -ema_slope_threshold and is_lower_lows_last_n(df):
+    elif (
+            ema_slope < -ema_slope_threshold
+            and is_lower_lows_last_n(df, structure_lookback)
+            and is_lower_highs_last_n(df, structure_lookback)
+        ):
         structure = "downtrend"
     else:
         structure = "range"
 
     if abs(ema_slope) > ema_slope_threshold and structure in {"uptrend", "downtrend"}:
-        regime = "trending"
+        regime = structure
     elif abs(atr_change) > atr_slope_threshold:
         regime = "volatile"
     else:

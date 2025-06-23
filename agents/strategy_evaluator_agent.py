@@ -6,7 +6,9 @@ import pandas as pd
 
 from strategies.base import BaseStrategy
 from ai_engine.strategy_selector import load_scores
+import logging
 
+logger = logging.getLogger(__name__)
 
 class StrategyEvaluatorAgent:
     """Score strategies using stored metrics."""
@@ -23,6 +25,12 @@ class StrategyEvaluatorAgent:
         for strat in strategies:
             name = strat.__class__.__name__
             signal = strat.check_signal(df)
+            if signal == "buy" and regime in {"downtrend"}:
+                logger.info(f"Skipping {name}: buy signal blocked in {regime} regime.")
+                continue
+            if signal == "sell" and regime in {"uptrend"}:
+                logger.info(f"Skipping {name}: sell signal blocked in {regime} regime.")
+                continue
             metrics = scores.get(name, {})
             fit = float(metrics.get("regime_fit", 1.0))
             win = float(metrics.get("win_rate", 0.0))
