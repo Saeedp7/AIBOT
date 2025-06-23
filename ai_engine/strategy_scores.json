@@ -4,6 +4,11 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "trending": {
+      "win_rate": 0.0,
+      "recent_score": 0.6507999999999997,
+      "regime_fit": 0.6507999999999997
     }
   },
   "DeltaDivergenceScalpingStrategy": {
@@ -25,6 +30,11 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "ranging": {
+      "win_rate": 100.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
     }
   },
   "IchimokuDayStrategy": {

@@ -29,15 +29,23 @@ class BreakEvenManager:
         self.symbol = symbol or ""
         self.lot = lot
         self.precision = precision
-        # Persist TP levels that were already hit
+        # Track which TP levels have been reached already
         self._reached = set(reached) if reached else set()
-
+    @property
+    def reached_tps(self) -> set[int]:
+        """Return a copy of reached TP level indexes."""
+        return set(self._reached)
+    
     def update_stop_loss(self, current_price: float) -> float:
         """Update stop loss if a new TP level has been reached."""
         if self.direction not in {"buy", "sell"}:
             raise ValueError("direction must be 'buy' or 'sell'")
 
         if not self.tp_levels or self.entry is None or self.sl is None:
+            return self.sl
+
+        # Only move the stop once per TP level
+        if 0 in self._reached:
             return self.sl
 
         hit_tp1 = (
@@ -63,4 +71,6 @@ class BreakEvenManager:
 
         self.sl = round(new_sl, self.precision)
         self.stop_loss = self.sl
+        # mark TP1 reached so we don't move it again
+        self._reached.add(0)
         return self.sl
