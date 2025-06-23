@@ -359,6 +359,48 @@ def run_live_trade_manager() -> None:
             for idx in range(len(rec.get("tp", [])))
             if rec.get(f"tp{idx + 1}_hit")
         }
+         # Check TP hits first so SL can be moved after
+        tps = rec.get("tp", [])
+        for i, tp in enumerate(tps):
+            flag = f"tp{i + 1}_hit"
+            if rec.get(flag):
+                continue
+            hit_tp = price >= tp if direction == "buy" else price <= tp
+            if not hit_tp:
+                continue
+            close_vol = round(pos.volume * 0.33, 2)
+            if i == len(tps) - 1 or close_vol <= 0:
+                close_vol = pos.volume
+            close_type = mt5.ORDER_TYPE_SELL if direction == "buy" else mt5.ORDER_TYPE_BUY
+            print(f"[TP] Price crossed TP{i + 1}. Closing {close_vol} manually.")
+            close_req = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": pos.symbol,
+                "volume": close_vol,
+                "type": close_type,
+                "position": ticket,
+                "price": price,
+                "deviation": 20,
+                "magic": MAGIC_NUMBER,
+                "comment": f"TP{i + 1} partial",
+            }
+            res = mt5.order_send(close_req)
+            if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                time.sleep(1)
+                log_trade_action(
+                    f"\u2705 TP{i + 1} hit \u2192 partial close executed for {pos.symbol} {rec['timeframe']}"
+                )
+                update_trade(
+                    ticket,
+                    **{flag: True},
+                    hit=f"TP{i + 1}",
+                    reached_tps=list(reached | {i}),
+                )
+                rec[flag] = True
+                reached.add(i)
+                rec["reached_tps"] = list(reached)
+            break
+
         bem = BreakEvenManager(
             rec["entry"],
             direction,
@@ -397,52 +439,6 @@ def run_live_trade_manager() -> None:
                     update_strategy_score(
                         rec["strategy"], "win", regime=rec.get("regime", "")
                     )
-        # Handle partial take profits dynamically
-        tps = rec.get("tp", [])
-        for i, tp in enumerate(tps):
-            flag = f"tp{i + 1}_hit"
-            if rec.get(flag):
-                continue
-            hit_tp = price >= tp if direction == "buy" else price <= tp
-            if not hit_tp:
-                break
-            close_vol = round(pos.volume * 0.33, 2)
-            if i == len(tps) - 1 or close_vol <= 0:
-                close_vol = pos.volume
-            close_type = (
-                mt5.ORDER_TYPE_SELL if direction == "buy" else mt5.ORDER_TYPE_BUY
-            )
-            print(f"[TP] Price crossed TP{i + 1}. Closing {close_vol} manually.")
-            close_req = {
-                "action": mt5.TRADE_ACTION_DEAL,
-                "symbol": pos.symbol,
-                "volume": close_vol,
-                "type": close_type,
-                "position": ticket,
-                "price": price,
-                "deviation": 20,
-                "magic": MAGIC_NUMBER,
-                "comment": f"TP{i + 1} partial",
-            }
-            res = mt5.order_send(close_req)
-            if res and res.retcode == mt5.TRADE_RETCODE_DONE:
-                time.sleep(1)
-                confirm = mt5.positions_get(ticket=ticket)
-                if confirm and confirm[0].volume >= pos.volume - 0.0001:
-                    logger.warn
-                log_trade_action(
-                   f"\u2705 TP{i + 1} hit \u2192 partial close executed for {pos.symbol} {rec['timeframe']}"
-                )
-                update_trade(
-                    ticket,
-                    **{flag: True},
-                    hit=f"TP{i + 1}",
-                    reached_tps=list(bem.reached_tps | {i}),
-                )
-                rec[flag] = True
-                reached.add(i)
-                rec["reached_tps"] = list(reached)
-            break
         # simple reversal check
         if direction == "buy" and price < rec["entry"] - (rec["entry"] - rec["sl"]):
             close_type = mt5.ORDER_TYPE_SELL
