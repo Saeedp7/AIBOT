@@ -51,8 +51,10 @@ class StrategyChooser:
         best_strategy = max(ranked, key=lambda x: x[1])[0]
         return best_strategy
 
-    def determine_sl_tp(self, strategy_name, entry_price, direction, market_data):
-        return determine_sl_tp(strategy_name, entry_price, direction, market_data)
+    def determine_sl_tp(self, strategy_name, entry_price, direction, market_data, symbol=""):
+        return determine_sl_tp(
+            strategy_name, entry_price, direction, market_data, symbol=symbol
+        )
 
     def _score_strategy_fit(self, strat, regime, group):
         weights = {

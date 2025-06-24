@@ -15,7 +15,14 @@ def calculate_sl_tp(entry_price, direction, sl_percent=1.5, tp_percent=2.0):
         raise ValueError("Invalid trade direction. Must be 'buy' or 'sell'.")
     return round(stop_loss, 2), round(take_profit, 2)
 
-def determine_sl_tp(strategy_name, entry_price, direction, market_data):
+def determine_sl_tp(
+    strategy_name,
+    entry_price,
+    direction,
+    market_data,
+    *,
+    symbol: str | None = None,
+):
     """
     Use AI and regime intelligence to set SL and multi-TPs based on strategy and market context.
     Also returns the regime ('trending', 'volatile', 'ranging').
@@ -25,7 +32,7 @@ def determine_sl_tp(strategy_name, entry_price, direction, market_data):
 
     from ai_engine.regime_classifier import detect_market_regime
 
-    regime = detect_market_regime(market_data)
+    regime = detect_market_regime(market_data, symbol=symbol or strategy_name)
     atr_series = calculate_atr(market_data, period=14).dropna()
     atr = float(atr_series.iloc[-1]) if not atr_series.empty else None
 

@@ -24,5 +24,5 @@ class MarketScannerAgent:
         df = data[symbol][timeframe]
         enriched = add_indicators(data)
         df = enriched[symbol][timeframe]
-        regime = detect_market_regime(df)
+        regime = detect_market_regime(df, symbol=symbol)
         return df, regime

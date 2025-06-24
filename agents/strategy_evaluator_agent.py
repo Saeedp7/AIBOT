@@ -16,7 +16,15 @@ class StrategyEvaluatorAgent:
     def __init__(self, score_path: str = "ai_engine/strategy_scores.json") -> None:
         self.score_path = score_path
 
-    def evaluate(self, strategies: Iterable[BaseStrategy], df: pd.DataFrame, regime: str) -> List[Dict]:
+    def evaluate(
+        self,
+        strategies: Iterable[BaseStrategy],
+        df: pd.DataFrame,
+        regime: str,
+        *,
+        symbol: str | None = None,
+        timeframe: str | None = None,
+    ) -> List[Dict]:
         try:
             scores = load_scores(self.score_path)
         except TypeError:
@@ -24,7 +32,9 @@ class StrategyEvaluatorAgent:
         results: List[Dict] = []
         for strat in strategies:
             name = strat.__class__.__name__
-            signal = strat.check_signal(df)
+            signal = strat.check_signal(
+                df, symbol=symbol, timeframe=timeframe, regime=regime
+            )
             if signal == "buy" and regime in {"downtrend"}:
                 logger.info(f"Skipping {name}: buy signal blocked in {regime} regime.")
                 continue

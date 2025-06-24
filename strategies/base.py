@@ -15,6 +15,30 @@ class BaseStrategy:
         """Return 'buy', 'sell', or None based on DataFrame."""
         raise NotImplementedError
 
-    def check_signal(self, df: pd.DataFrame) -> str | None:
-        """Wrapper used by external modules."""
-        return self.generate_signal(df.copy(deep=True))
+    def check_signal(
+            self,
+            df: pd.DataFrame,
+            *,
+            symbol: str | None = None,
+            timeframe: str | None = None,
+            regime: str | None = None,
+        ) -> str | None:
+            """Wrapper used by external modules.
+
+            Adds debug logging so we can confirm strategy evaluation is occurring for
+            each symbol/timeframe.
+            """
+            import logging
+
+            logger = logging.getLogger(__name__)
+            if isinstance(df, pd.DataFrame):
+                price = df["close"].iloc[-1] if "close" in df.columns else float("nan")
+                data = df.copy(deep=True)
+            else:
+                price = float("nan")
+                data = df
+            logger.debug(
+                f"[{self.__class__.__name__}] Called on {symbol or ''} {timeframe or ''}"
+                f" Regime: {regime or 'unknown'}, Price: {price}"
+            )
+            return self.generate_signal(data)

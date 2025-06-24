@@ -28,7 +28,7 @@ def prepare_trade_parameters(
         return None
 
     sl, tp_levels, regime = determine_sl_tp(
-        strategy_name, entry_price, direction, market_data
+        strategy_name, entry_price, direction, market_data, symbol=symbol
     )
     lot = calculate_lot_size(
         balance=account_balance,

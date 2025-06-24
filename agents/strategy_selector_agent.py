@@ -30,7 +30,9 @@ class StrategySelectorAgent:
         self.memory.run()
         allowed = filter_strategies(self.strategies, regime)
         allowed = [s for s in allowed if not self.guard.is_blocked(s.__class__.__name__)]
-        evaluations = self.evaluator.evaluate(allowed, df, regime)
+        evaluations = self.evaluator.evaluate(
+            allowed, df, regime, symbol=symbol, timeframe=timeframe
+        )
         best = None
         best_score = -1.0
         decision = None

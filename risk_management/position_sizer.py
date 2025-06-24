@@ -21,7 +21,9 @@ def calculate_position_size_and_targets(entry_price, balance, strategy_name, dir
     contract_size = getattr(info, "trade_contract_size", 0) or fallback.get("contract_size", 100)
 
     # Calculate SL and TP levels dynamically using AI/strategy-aware method
-    stop_loss, tp_levels, regime = determine_sl_tp(strategy_name, entry_price, direction, market_data)
+    stop_loss, tp_levels, regime = determine_sl_tp(
+        strategy_name, entry_price, direction, market_data, symbol=symbol
+    )
    # Optionally override stop_loss using ATR-based distance
     if USE_ATR_SL and isinstance(market_data, pd.DataFrame):
         if all(col in market_data.columns for col in ["high", "low", "close"]):

@@ -31,10 +31,10 @@ class StrategySelector:
                 print(f"❌ Error fetching data for timeframe {tf}: {e}")
         return tf_data
 
-    def get_market_regime(self, df):
+    def get_market_regime(self, df, *, symbol: str | None = None):
         from ai_engine.regime_classifier import detect_market_regime
 
-        return detect_market_regime(df)
+        return detect_market_regime(df, symbol=symbol)
 
     def select_strategy(self, multi_tf_data):
         best_score = -1

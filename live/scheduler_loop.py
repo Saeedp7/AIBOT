@@ -217,7 +217,10 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
     decision, best_strat, market_regime = strategy_selector_agent.select(symbol, timeframe)
     if decision not in ("buy", "sell") or not best_strat:
         logger.info("No action for %s %s", symbol, timeframe)
-        return
+        
+    logger.info(
+        f"[SIGNAL GENERATED] {best_strat} | {symbol} {timeframe} → {decision.upper()}"
+    )
     # Regime enforcement: block trades if strategy not allowed in detected regime
     strat_obj = next(
         (s for s in strategy_selector_agent.strategies if s.__class__.__name__ == best_strat),

@@ -61,3 +61,8 @@ REGIME_EMA_DISTANCE_THRESHOLD = float(os.getenv("REGIME_EMA_DISTANCE_THRESHOLD",
 EMA_SLOPE_THRESHOLD = float(os.getenv("EMA_SLOPE_THRESHOLD", 0.1))
 ATR_VOLATILITY_THRESHOLD = float(os.getenv("ATR_VOLATILITY_THRESHOLD", 20.0))
 STRUCTURE_LOOKBACK = int(os.getenv("STRUCTURE_LOOKBACK", 3))
+
+# --- Debug / Filter Tweaks ---
+MIN_REWARD_TO_RISK = float(os.getenv("MIN_REWARD_TO_RISK", 1.2))
+ALLOW_RANGING_ENTRIES = os.getenv("ALLOW_RANGING_ENTRIES", "true").lower() == "true"
+BOLLINGER_FILTER_ENABLED = os.getenv("BOLLINGER_FILTER_ENABLED", "false").lower() == "true"

@@ -22,6 +22,8 @@ def detect_market_regime(
     atr_slope_threshold: float | None = None,
     ema_slope_threshold: float | None = None,
     structure_lookback: int | None = None,
+    *,
+    symbol: str | None = None,
 ) -> str:
     """Return market regime based on EMA and ATR slope analysis."""
 
@@ -71,5 +73,9 @@ def detect_market_regime(
         f"[REGIME] EMA {ema_start:.2f}→{ema_end:.2f} ({ema_slope:+.2f}%) | "
         f"ATR {atr_start:.5f}→{atr_end:.5f} ({atr_change:+.2f}%) | "
         f"Structure: {structure} → Regime: {regime}"
+    )
+    logger.debug(
+        f"[REGIME STRUCTURE] {symbol or ''} → {structure} | EMA Δ: {ema_slope:+.2f}%" 
+        f" ATR Δ: {atr_change:+.2f}%"
     )
     return regime
