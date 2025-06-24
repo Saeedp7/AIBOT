@@ -59,33 +59,9 @@ from risk_management.session_guard import session_allowed
 from utils.time_utils import session_risk_multiplier
 from recovery.restart_manager import recover_state
 import MetaTrader5 as mt5
+from utils.market_status import is_market_open
 
 
-
-def is_market_open(symbol: str) -> bool:
-    info = mt5.symbol_info(symbol)
-    tick = mt5.symbol_info_tick(symbol)
-
-    if not info or not info.visible:
-        return False
-
-    if info.trade_mode != mt5.SYMBOL_TRADE_MODE_FULL:
-        return False
-
-    # 💡 Allow crypto pairs (BTC, ETH) to bypass bid/ask check
-    if symbol.startswith(("BTC", "ETH")):
-        return True
-
-    # For non-crypto symbols, check valid prices
-    if not tick or tick.bid == 0.0 or tick.ask == 0.0:
-        return False
-
-    # Optional: block trades on Saturday/Sunday for forex/indices
-    from datetime import datetime
-    if not symbol.startswith(("BTC", "ETH")) and datetime.now().weekday() >= 5:
-        return False
-
-    return True
 logger = logging.getLogger("scheduler")
 
 
@@ -136,6 +112,9 @@ def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:
     indicator_cache[(symbol, timeframe)] = enriched[symbol][timeframe]
 
 def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> int | None:
+    if not is_market_open(symbol):
+        logger.warning(f"[SKIP] Market is closed for {symbol}, skipping trade.")
+        return None
     info = mt5.symbol_info(symbol)
     if not info:
         logger.error(f"\u26a0\ufe0f Failed to fetch SymbolInfo for {symbol}")

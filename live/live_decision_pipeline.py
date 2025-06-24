@@ -12,6 +12,7 @@ from strategies.strategy_selector import StrategySelector
 from ai_engine.strategy_selector import load_scores, get_best_signal
 from risk_management.stop_loss_manager import calculate_sl_tp
 from config.manager import get_config
+from utils.market_status import is_market_open
 
 SYMBOL = get_config("TRADE_SYMBOL", "BTCUSD.")
 TIMEFRAME = get_config("TRADE_TIMEFRAME", "M5")
@@ -22,6 +23,9 @@ MAGIC_NUMBER = int(get_config("MAGIC_NUMBER", 123456))
 
 def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> bool:
     """Send a trade order via MT5."""
+    if not is_market_open(symbol):
+        print(f"[SKIP] Market is closed for {symbol}, skipping trade.")
+        return False
     if not mt5.initialize():
         print("❌ Failed to initialize MT5")
         return False
