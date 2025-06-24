@@ -37,5 +37,15 @@ def prepare_trade_parameters(
         symbol=symbol,
         market_data=market_data,
     )
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.debug(
+        "Risk params for %s %s: lot=%s sl=%s tp1=%s",
+        symbol,
+        strategy_name,
+        lot,
+        sl,
+        tp_levels[0] if tp_levels else None,
+    )
     bem = BreakEvenManager(entry_price, direction, sl, tp_levels)
     return lot, sl, tp_levels, bem, regime

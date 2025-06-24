@@ -52,8 +52,10 @@ def market_is_open(symbol: str) -> Optional[bool]:
 def session_allowed(symbol: str, now: datetime | None = None) -> bool:
     """Return ``True`` if trading is allowed for ``symbol`` at ``now`` (UTC)."""
     now_dt = now if now is not None else datetime.now(timezone.utc)
+    logger.debug("Session check for %s at %s", symbol, now_dt.isoformat())
     status = market_is_open(symbol)
     if status is False:
+        logger.debug("Market closed for %s", symbol)
         return False
     multiplier = session_risk_multiplier(now_dt)
     if multiplier == 0.0:
@@ -64,4 +66,5 @@ def session_allowed(symbol: str, now: datetime | None = None) -> bool:
             "Low session active — applying reduced risk multiplier: %s",
             multiplier,
         )
+    logger.debug("Session allowed for %s with multiplier %s", symbol, multiplier)
     return True

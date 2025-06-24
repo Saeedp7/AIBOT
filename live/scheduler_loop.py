@@ -8,6 +8,7 @@ import threading
 from datetime import datetime
 import argparse
 import logging
+import os
 from typing import Dict, Tuple
 import pandas as pd
 import MetaTrader5 as mt5
@@ -92,7 +93,15 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Live trading scheduler loop")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--silent", action="store_true", help="Suppress info logging")
-    return parser.parse_args()
+    parser.add_argument(
+        "--force-trade",
+        action="store_true",
+        help="Override risk/session guards",
+    )
+    args = parser.parse_args()
+    if os.getenv("FORCE_TRADE", "false").lower() == "true":
+        args.force_trade = True
+    return args
 
 daily_guard = DailyGuard(
     loss_limit_percent=DAILY_LOSS_LIMIT_PERCENT,
@@ -149,6 +158,15 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
         logger.warning(f"Invalid stop levels for {symbol}. SL/TP too close to price.")
         return None
     if get_config("LIVE_MODE", "false").lower() != "true":
+        logger.debug(
+            "[SIM MODE] %s %s lot=%.2f price=%.5f sl=%s tp=%s",
+            direction,
+            symbol,
+            lot,
+            entry_price,
+            sl,
+            tp,
+        )
         execute_fake_order(direction, symbol, lot, entry_price, sl=sl, tp=tp)
         alert_trade_opened(symbol, "sim", direction, entry_price, sl, tp)
         return int(time.time())
@@ -187,31 +205,31 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
     if not info or info.trade_mode != mt5.SYMBOL_TRADE_MODE_FULL:
         logger.warning(f"{symbol} is not tradeable now (market closed or disabled)")
         return None
+    logger.debug("Sending order: %s", request)
     result = mt5.order_send(request)
-    print("⛔ Order Send Failed")
-    print("⛔ Last Error:", mt5.last_error())
+    logger.debug("MT5 retcode=%s comment=%s", getattr(result, "retcode", None), getattr(result, "comment", ""))
     if result and result.retcode == mt5.TRADE_RETCODE_DONE:
         logger.info("Trade executed: ticket %s", result.order)
         alert_trade_opened(symbol, "live", direction, entry_price, sl, tp)
         return result.order
-    logger.error("Trade failed: %s", result)
+    logger.error("Trade failed: %s | request=%s", result, request)
     return None
 
 
-def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
+def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool = False) -> None:
     logger.info(f"Checking symbol: {symbol}")
-    if not is_market_open(symbol):
+    if not is_market_open(symbol) and not force_trade:
         logger.info(f"Market closed for {symbol}, skipping...")
         return
-    if daily_guard.hit_limits():
+    if not force_trade and daily_guard.hit_limits():
         logger.warning("Daily risk guard triggered.")
         alert_daily_guard("limits hit")
         return
 
-    if (symbol, timeframe) in trade_cache:
+    if (symbol, timeframe) in trade_cache and not force_trade:
         logger.debug("Trade already open for %s %s", symbol, timeframe)
         return
-    if executed_trades.get(symbol, {}).get(timeframe):
+    if executed_trades.get(symbol, {}).get(timeframe) and not force_trade:
         logger.debug("Existing trade for %s %s, skipping execution", symbol, timeframe)
         return
     df = indicator_cache.get((symbol, timeframe))
@@ -257,26 +275,28 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
     log_trade_action(
         f"Confidence {confidence:.4f} for {symbol} {timeframe} using {best_strat}"
     )
-    if confidence < CONFIDENCE_THRESHOLD:
+    if confidence < CONFIDENCE_THRESHOLD and not force_trade:
         log_trade_action(
             f"Skipping trade for {symbol} {timeframe}: confidence {confidence:.4f} < {CONFIDENCE_THRESHOLD}"
         )
         return
-    if not exposure_guard.allow(symbol, timeframe, decision, confidence):
+    if not force_trade and not exposure_guard.allow(symbol, timeframe, decision, confidence):
         log_trade_action(
             f"🚫 Exposure guard blocked trade: {symbol} {timeframe} {decision}"
         )
         return
-    if not session_allowed(symbol):
+    if not session_allowed(symbol) and not force_trade:
         logger.info("Session guard blocked trading for %s %s", symbol, timeframe)
         return
     
     risk_multiplier = session_risk_multiplier(datetime.utcnow())
-    if risk_multiplier < 1.0:
+    if risk_multiplier < 1.0 and not force_trade:
         logger.info(
             "Low session active — applying reduced lot size multiplier: %s",
             risk_multiplier,
         )
+    if force_trade:
+        risk_multiplier = 1.0
     acct = mt5.account_info()
     prep = prepare_trade_parameters(
         symbol=symbol,
@@ -288,6 +308,17 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         risk_percent=MAX_RISK_PER_TRADE * 100 * risk_multiplier,
         guard=daily_guard,
     )
+    if not prep and force_trade:
+        prep = prepare_trade_parameters(
+            symbol=symbol,
+            strategy_name=best_strat,
+            direction=decision,
+            entry_price=entry,
+            market_data=df,
+            account_balance=acct.balance,
+            risk_percent=MAX_RISK_PER_TRADE * 100 * risk_multiplier,
+            guard=DailyGuard(loss_limit_percent=10000.0, max_trades=1000000),
+        )
     if not prep:
         logger.info("Risk guard prevented trade for %s %s", symbol, timeframe)
         return
@@ -315,6 +346,15 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
         sl,
         tp_levels[0],
         lot,
+    )
+    logger.debug(
+        "Order params: symbol=%s tf=%s direction=%s lot=%.2f sl=%.5f tp1=%.5f",
+        symbol,
+        timeframe,
+        decision,
+        lot,
+        sl,
+        tp_levels[0],
     )
     # Execute without TP so trade manager can handle multi-TP logic
     ticket = execute_trade(decision, symbol, lot, sl, tp=0)
@@ -396,7 +436,13 @@ def run_live_trade_manager() -> None:
                 "magic": MAGIC_NUMBER,
                 "comment": f"TP{i + 1} partial",
             }
+            logger.debug("Sending close order: %s", close_req)
             res = mt5.order_send(close_req)
+            logger.debug(
+                "Close retcode=%s comment=%s",
+                getattr(res, "retcode", None),
+                getattr(res, "comment", ""),
+            )
             if res and res.retcode == mt5.TRADE_RETCODE_DONE:
                 time.sleep(1)
                 log_trade_action(
@@ -431,7 +477,13 @@ def run_live_trade_manager() -> None:
                 "sl": new_sl,
                 "tp": pos.tp,
             }
+            logger.debug("Adjusting SL/TP: %s", req)
             res = mt5.order_send(req)
+            logger.debug(
+                "Modify retcode=%s comment=%s",
+                getattr(res, "retcode", None),
+                getattr(res, "comment", ""),
+            )
             if res and res.retcode == mt5.TRADE_RETCODE_DONE:
                 log_trade_action(
                     f"\uD83D\uDD01 SL moved to breakeven for {pos.symbol} on {rec['timeframe']}"
@@ -533,7 +585,7 @@ def scheduler_loop(args: argparse.Namespace) -> None:
             for symbol, tfs in ACTIVE_SYMBOLS_TIMEFRAMES.items():
                 for tf in tfs:
                     refresh_data(symbol, tf)
-                    process_symbol_timeframe(symbol, tf)
+                    process_symbol_timeframe(symbol, tf, force_trade=args.force_trade)
         finally:
             mt5.shutdown()
         time.sleep(CHECK_INTERVAL_SECONDS)

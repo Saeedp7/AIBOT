@@ -14,11 +14,18 @@ def parse_args() -> argparse.Namespace:
     mode.add_argument("--live", action="store_true", help="Run with real order execution")
     mode.add_argument("--test", action="store_true", help="Dry-run without sending orders")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--force-trade",
+        action="store_true",
+        help="Override guards and force trade execution",
+    )
     return parser.parse_args()
 
 def main() -> None:
     args = parse_args()
     os.environ["LIVE_MODE"] = "true" if args.live else "false"
+    if args.force_trade:
+        os.environ["FORCE_TRADE"] = "true"
 
     logging.basicConfig(
         level=logging.DEBUG if args.debug else logging.INFO,
@@ -31,7 +38,11 @@ def main() -> None:
         return
 
     try:
-        scheduler_loop(argparse.Namespace(debug=args.debug, silent=False))
+        scheduler_loop(
+            argparse.Namespace(
+                debug=args.debug, silent=False, force_trade=args.force_trade
+            )
+        )
     finally:
         shutdown_mt5()
         print("🛑 Bot stopped.")
