@@ -66,3 +66,23 @@ STRUCTURE_LOOKBACK = int(os.getenv("STRUCTURE_LOOKBACK", 3))
 MIN_REWARD_TO_RISK = float(os.getenv("MIN_REWARD_TO_RISK", 1.2))
 ALLOW_RANGING_ENTRIES = os.getenv("ALLOW_RANGING_ENTRIES", "true").lower() == "true"
 BOLLINGER_FILTER_ENABLED = os.getenv("BOLLINGER_FILTER_ENABLED", "false").lower() == "true"
+
+# --- Regime-based SL/TP multipliers ---
+REGIME_SL_MULTIPLIERS = {
+    "volatile": float(os.getenv("VOLATILE_SL_MULTIPLIER", 1.5)),
+    "trending": float(os.getenv("TRENDING_SL_MULTIPLIER", 0.8)),
+    "ranging": float(os.getenv("RANGING_SL_MULTIPLIER", 1.0)),
+}
+
+REGIME_TP_MULTIPLIERS = {
+    "volatile": float(os.getenv("VOLATILE_TP_MULTIPLIER", 0.8)),
+    "trending": float(os.getenv("TRENDING_TP_MULTIPLIER", 1.5)),
+    "ranging": float(os.getenv("RANGING_TP_MULTIPLIER", 1.0)),
+}
+
+# Partial position close ratios (e.g. "0.33,0.33,0.34")
+PARTIAL_CLOSE_RATIOS = [
+    float(x)
+    for x in os.getenv("PARTIAL_CLOSE_RATIOS", "0.33,0.33,0.34").split(",")
+    if x
+]

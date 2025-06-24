@@ -31,6 +31,8 @@ class BreakEvenManager:
         self.precision = precision
         # Track which TP levels have been reached already
         self._reached = set(reached) if reached else set()
+        self.trailing_active = 0 in self._reached
+        self.trail_distance = abs(self.entry - self.sl)
     @property
     def reached_tps(self) -> set[int]:
         """Return a copy of reached TP level indexes."""
@@ -44,8 +46,20 @@ class BreakEvenManager:
         if not self.tp_levels or self.entry is None or self.sl is None:
             return self.sl
 
-        # Only move the stop once per TP level
+        # If TP1 already hit, trail the stop
         if 0 in self._reached:
+            if not self.trailing_active:
+                self.trailing_active = True
+            if self.trailing_active:
+                if self.direction == "buy":
+                    candidate = current_price - self.trail_distance
+                    if candidate > self.sl:
+                        self.sl = round(candidate, self.precision)
+                else:
+                    candidate = current_price + self.trail_distance
+                    if candidate < self.sl:
+                        self.sl = round(candidate, self.precision)
+                self.stop_loss = self.sl
             return self.sl
 
         hit_tp1 = (
@@ -71,6 +85,8 @@ class BreakEvenManager:
 
         self.sl = round(new_sl, self.precision)
         self.stop_loss = self.sl
-        # mark TP1 reached so we don't move it again
+        # mark TP1 reached and enable trailing
         self._reached.add(0)
+        self.trailing_active = True
+        self.stop_loss = self.sl
         return self.sl

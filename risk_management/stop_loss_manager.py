@@ -2,6 +2,8 @@
 
 import numpy as np
 from utils.indicators import calculate_atr
+from config.manager import get_config
+from config.settings import REGIME_SL_MULTIPLIERS, REGIME_TP_MULTIPLIERS
 
 def calculate_sl_tp(entry_price, direction, sl_percent=1.5, tp_percent=2.0):
     """Basic SL/TP calculator for fixed %."""
@@ -43,6 +45,11 @@ def determine_sl_tp(
         base_tp = entry_price * 0.01
         base_sl = entry_price * 0.015
 
+    sl_mult = REGIME_SL_MULTIPLIERS.get(regime, REGIME_SL_MULTIPLIERS.get("ranging", 1.0))
+    tp_mult = REGIME_TP_MULTIPLIERS.get(regime, REGIME_TP_MULTIPLIERS.get("ranging", 1.0))
+    base_sl *= sl_mult
+    base_tp *= tp_mult
+
     if 'scalping' in strategy_name.lower():
         num_tps = 3
     elif 'swing' in strategy_name.lower():
@@ -56,7 +63,9 @@ def determine_sl_tp(
 
     multiplier = 1 if direction == 'buy' else -1
     stop_loss = round(entry_price - multiplier * base_sl, 2)
-    take_profits = [round(entry_price + multiplier * base_tp * (i + 1), 2) for i in range(num_tps)]
+    take_profits = [
+        round(entry_price + multiplier * base_tp * (i + 1), 2) for i in range(num_tps)
+    ]
 
     # Ensure it's a list
     if not isinstance(take_profits, list):

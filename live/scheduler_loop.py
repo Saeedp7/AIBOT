@@ -23,6 +23,11 @@ MAGIC_NUMBER = int(get_config("MAGIC_NUMBER", 123456))
 DAILY_LOSS_LIMIT_PERCENT = float(get_config("DAILY_LOSS_LIMIT_PERCENT", 5.0))
 MAX_TRADES_PER_DAY = int(get_config("MAX_TRADES_PER_DAY", 20))
 CONFIDENCE_THRESHOLD = float(get_config("CONFIDENCE_THRESHOLD", 0.5))
+PARTIAL_CLOSE_RATIOS = [
+    float(x)
+    for x in get_config("PARTIAL_CLOSE_RATIOS", "0.33,0.33,0.34").split(",")
+    if x
+]
 from data.chart_data_handler import load_multi_ohlcv
 from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators
@@ -217,7 +222,8 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
     decision, best_strat, market_regime = strategy_selector_agent.select(symbol, timeframe)
     if decision not in ("buy", "sell") or not best_strat:
         logger.info("No action for %s %s", symbol, timeframe)
-        
+        return
+    
     logger.info(
         f"[SIGNAL GENERATED] {best_strat} | {symbol} {timeframe} → {decision.upper()}"
     )
@@ -325,6 +331,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str) -> None:
             strategy=best_strat,
             result="open",
             ticket=ticket,
+            volume=lot,
             timestamp=datetime.utcnow().isoformat() + "Z",
             regime=regime,
         )
@@ -364,6 +371,7 @@ def run_live_trade_manager() -> None:
         }
          # Check TP hits first so SL can be moved after
         tps = rec.get("tp", [])
+        initial_vol = rec.get("volume", pos.volume)
         for i, tp in enumerate(tps):
             flag = f"tp{i + 1}_hit"
             if rec.get(flag):
@@ -371,8 +379,9 @@ def run_live_trade_manager() -> None:
             hit_tp = price >= tp if direction == "buy" else price <= tp
             if not hit_tp:
                 continue
-            close_vol = round(pos.volume * 0.33, 2)
-            if i == len(tps) - 1 or close_vol <= 0:
+            ratio = PARTIAL_CLOSE_RATIOS[i] if i < len(PARTIAL_CLOSE_RATIOS) else 1.0
+            close_vol = round(initial_vol * ratio, 2)
+            if i == len(tps) - 1 or close_vol > pos.volume:
                 close_vol = pos.volume
             close_type = mt5.ORDER_TYPE_SELL if direction == "buy" else mt5.ORDER_TYPE_BUY
             print(f"[TP] Price crossed TP{i + 1}. Closing {close_vol} manually.")

@@ -49,6 +49,7 @@ def record_trade(
     hit: str | None = None,
     sl_moved: bool = False,
     closed_early: bool = False,
+    volume: float | None = None,
     timestamp: str | None = None,
 ) -> None:
     """Append a trade entry to the history log."""
@@ -74,6 +75,7 @@ def record_trade(
         "hit": hit,
         "sl_moved": sl_moved,
         "closed_early": closed_early,
+        "volume": volume,
         "ticket": ticket,
         "timestamp": timestamp,
     }
