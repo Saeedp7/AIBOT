@@ -184,41 +184,61 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
     if not info or info.trade_mode != mt5.SYMBOL_TRADE_MODE_FULL:
         logger.warning(f"{symbol} is not tradeable now (market closed or disabled)")
         return None
-    logger.debug("Sending order: %s", request)
+    logger.info(f"Sending order for {symbol}...")
+    logger.debug("Order details: %s", request)
     result = mt5.order_send(request)
-    logger.debug("MT5 retcode=%s comment=%s", getattr(result, "retcode", None), getattr(result, "comment", ""))
+    logger.debug(
+        "MT5 retcode=%s comment=%s", getattr(result, "retcode", None), getattr(result, "comment", "")
+    )
     if result and result.retcode == mt5.TRADE_RETCODE_DONE:
         logger.info("Trade executed: ticket %s", result.order)
         alert_trade_opened(symbol, "live", direction, entry_price, sl, tp)
         return result.order
-    logger.error("Trade failed: %s | request=%s", result, request)
+    logger.error(
+        "Trade failed: retcode=%s reason=%s response=%s",
+        getattr(result, "retcode", None),
+        getattr(result, "comment", ""),
+        result,
+    )
     return None
 
 
 def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool = False) -> None:
     logger.info(f"Checking symbol: {symbol}")
     if not is_market_open(symbol) and not force_trade:
-        logger.info(f"Market closed for {symbol}, skipping...")
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Market is Closed"
+        )
         return
     if not force_trade and daily_guard.hit_limits():
-        logger.warning("Daily risk guard triggered.")
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Max drawdown reached"
+        )
         alert_daily_guard("limits hit")
         return
 
     if (symbol, timeframe) in trade_cache and not force_trade:
-        logger.debug("Trade already open for %s %s", symbol, timeframe)
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Max open trades"
+        )
         return
     if executed_trades.get(symbol, {}).get(timeframe) and not force_trade:
-        logger.debug("Existing trade for %s %s, skipping execution", symbol, timeframe)
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Max open trades"
+        )
         return
     df = indicator_cache.get((symbol, timeframe))
     if df is None or df.empty:
-        logger.warning("No cached data for %s %s", symbol, timeframe)
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Missing market data"
+        )
         return
 
     decision, best_strat, market_regime = strategy_selector_agent.select(symbol, timeframe)
     if decision not in ("buy", "sell") or not best_strat:
-        logger.info("No action for %s %s", symbol, timeframe)
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: No valid signal"
+        )
         return
     
     logger.info(
@@ -231,15 +251,17 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
     )
     allowed = getattr(strat_obj, "ALLOWED_REGIMES", {"trending"}) if strat_obj else {"trending"}
     if market_regime not in allowed:
-        logger.info(
-            "Regime %s not allowed for %s, skipping trade", market_regime, best_strat
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Regime {market_regime} not allowed"
         )
         return
 
 
 
     if not spread_within_limit(symbol):
-        logger.info("Spread guard blocked trade for %s", symbol)
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Spread too high"
+        )
         return
 
 
@@ -255,17 +277,28 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         f"Confidence {confidence:.4f} for {symbol} {timeframe} using {best_strat}"
     )
     if confidence < CONFIDENCE_THRESHOLD and not force_trade:
+        message = (
+            f"Confidence {confidence:.4f} < {CONFIDENCE_THRESHOLD}"
+        )
         log_trade_action(
-            f"Skipping trade for {symbol} {timeframe}: confidence {confidence:.4f} < {CONFIDENCE_THRESHOLD}"
+            f"Skipping trade for {symbol} {timeframe}: {message}"
+        )
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: {message}"
         )
         return
     if not force_trade and not exposure_guard.allow(symbol, timeframe, decision, confidence):
         log_trade_action(
             f"🚫 Exposure guard blocked trade: {symbol} {timeframe} {decision}"
         )
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Exposure guard"
+        )
         return
     if not session_allowed(symbol) and not force_trade:
-        logger.info("Session guard blocked trading for %s %s", symbol, timeframe)
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Session guard"
+        )
         return
     
     risk_multiplier = session_risk_multiplier(datetime.utcnow())
@@ -304,7 +337,9 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
     lot, sl, tp_levels, _bem, regime = prep
     ok, reason = risk_manager_agent.validate_trade(symbol, lot)
     if not ok:
-        logger.info("Trade blocked: %s", reason)
+        logger.warning(
+            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: {reason}"
+        )
         return
     commission = estimate_commission(symbol, lot)
     tp_usd = abs(tp_levels[0] - entry) * lot * 100000.0
@@ -338,6 +373,9 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
     # Execute without TP so trade manager can handle multi-TP logic
     ticket = execute_trade(decision, symbol, lot, sl, tp=0)
     if ticket:
+        logger.info(
+            f"[EXECUTED] Trade opened: {symbol} {timeframe} ticket={ticket}"
+        )
         daily_guard.record_trade(0)
         exposure_guard.record(symbol, timeframe, decision, confidence)
         executed_trades.setdefault(symbol, {})[timeframe] = ticket
@@ -357,6 +395,10 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         monitor = TradeMonitorAgent(ticket, symbol, timeframe, best_strat, regime)
         threading.Thread(target=monitor.wait_and_score, daemon=True).start()
         trade_cache.add((symbol, timeframe))
+    else:
+        logger.error(
+            f"[FAIL] Trade failed for {symbol} {timeframe}" 
+        )
 
 
 
