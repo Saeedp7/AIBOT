@@ -10,14 +10,19 @@ def is_market_open(symbol: str) -> bool:
     if not info or not getattr(info, "visible", True):
         return False
 
-    if info.trade_mode not in (mt5.SYMBOL_TRADE_MODE_FULL,):
+    full_mode = getattr(mt5, "SYMBOL_TRADE_MODE_FULL", None)
+    if full_mode is not None and info.trade_mode not in (full_mode,):
         return False
 
-    if not tick or tick.bid <= 0 or tick.ask <= 0 or not tick.time:
+    if not tick or tick.bid <= 0 or tick.ask <= 0:
         return False
+    
+    tick_time = getattr(tick, "time", None)
+    if tick_time is None:
+        return True
 
     # Convert broker time (UTC) to Tehran time (UTC+3:30)
-    utc_time = datetime.utcfromtimestamp(tick.time)
+    utc_time = datetime.utcfromtimestamp(tick_time)
     tehran_offset = timedelta(minutes=30)
     tehran_time = utc_time + tehran_offset
 

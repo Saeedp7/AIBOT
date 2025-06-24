@@ -9,6 +9,7 @@ from datetime import datetime
 import argparse
 import logging
 import os
+import json
 from typing import Dict, Tuple
 import pandas as pd
 import MetaTrader5 as mt5
@@ -23,12 +24,17 @@ MAX_RISK_PER_TRADE = float(get_config("MAX_RISK", 0.01))
 MAGIC_NUMBER = int(get_config("MAGIC_NUMBER", 123456))
 DAILY_LOSS_LIMIT_PERCENT = float(get_config("DAILY_LOSS_LIMIT_PERCENT", 5.0))
 MAX_TRADES_PER_DAY = int(get_config("MAX_TRADES_PER_DAY", 20))
-CONFIDENCE_THRESHOLD = float(get_config("CONFIDENCE_THRESHOLD", 0.5))
 PARTIAL_CLOSE_RATIOS = [
     float(x)
     for x in get_config("PARTIAL_CLOSE_RATIOS", "0.33,0.33,0.34").split(",")
     if x
 ]
+from ai_engine.parameter_optimizer import load_strategy_thresholds
+from config.settings import (
+    DEFAULT_CONFIDENCE_THRESHOLDS,
+    MIN_RISK_SCALE,
+    DEFAULT_ALLOWED_REGIMES,
+)
 from data.chart_data_handler import load_multi_ohlcv
 from data.preprocessing import preprocess_ohlcv_data
 from indicators.indicator_engine import add_indicators
@@ -63,6 +69,26 @@ from utils.market_status import is_market_open
 
 
 logger = logging.getLogger("scheduler")
+
+def get_confidence_threshold(symbol: str, timeframe: str, regime: str, strategy_name: str) -> float:
+    """Return confidence threshold for a trade context."""
+    overrides = load_strategy_thresholds()
+    if strategy_name in overrides:
+        try:
+            return float(overrides[strategy_name])
+        except (TypeError, ValueError):
+            pass
+    return float(DEFAULT_CONFIDENCE_THRESHOLDS.get(regime, 0.3))
+
+
+def scale_risk_by_confidence(confidence: float, threshold: float) -> float:
+    """Return position size multiplier based on confidence level."""
+    if threshold <= 0:
+        return 1.0
+    if confidence >= threshold:
+        return 1.0
+    scale = confidence / threshold
+    return max(MIN_RISK_SCALE, round(scale, 2))
 
 
 def _parse_args() -> argparse.Namespace:
@@ -249,8 +275,16 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         (s for s in strategy_selector_agent.strategies if s.__class__.__name__ == best_strat),
         None,
     )
-    allowed = getattr(strat_obj, "ALLOWED_REGIMES", {"trending"}) if strat_obj else {"trending"}
+    if strat_obj is not None and hasattr(strat_obj, "allowed_regimes"):
+        allowed = strat_obj.allowed_regimes()
+    elif strat_obj is not None:
+        allowed = list(getattr(strat_obj, "ALLOWED_REGIMES", DEFAULT_ALLOWED_REGIMES))
+    else:
+        allowed = list(DEFAULT_ALLOWED_REGIMES)
     if market_regime not in allowed:
+        log_trade_action(
+            f"Skipping trade for {symbol} {timeframe}: regime {market_regime} not allowed for {best_strat}"
+        )
         logger.warning(
             f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Regime {market_regime} not allowed"
         )
@@ -273,20 +307,20 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         * float(metrics.get("regime_fit", 0.0))
         * float(metrics.get("win_rate", 0.0))
     )
+    threshold = get_confidence_threshold(symbol, timeframe, market_regime, best_strat)
+    scale = scale_risk_by_confidence(confidence, threshold)
     log_trade_action(
-        f"Confidence {confidence:.4f} for {symbol} {timeframe} using {best_strat}"
+        f"Confidence {confidence:.4f} th={threshold:.2f} scale={scale:.2f} for {symbol} {timeframe} using {best_strat}"
     )
-    if confidence < CONFIDENCE_THRESHOLD and not force_trade:
-        message = (
-            f"Confidence {confidence:.4f} < {CONFIDENCE_THRESHOLD}"
+    if scale < 1.0:
+        logger.info(
+            "Scaling trade risk for %s %s to %.2f due to confidence %.4f",
+            symbol,
+            timeframe,
+            scale,
+            confidence,
         )
-        log_trade_action(
-            f"Skipping trade for {symbol} {timeframe}: {message}"
-        )
-        logger.warning(
-            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: {message}"
-        )
-        return
+
     if not force_trade and not exposure_guard.allow(symbol, timeframe, decision, confidence):
         log_trade_action(
             f"🚫 Exposure guard blocked trade: {symbol} {timeframe} {decision}"
@@ -302,13 +336,15 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         return
     
     risk_multiplier = session_risk_multiplier(datetime.utcnow())
-    if risk_multiplier < 1.0 and not force_trade:
-        logger.info(
-            "Low session active — applying reduced lot size multiplier: %s",
-            risk_multiplier,
-        )
     if force_trade:
         risk_multiplier = 1.0
+    else:
+        risk_multiplier *= scale
+        if risk_multiplier < 1.0:
+            logger.info(
+                "Low session active — applying reduced lot size multiplier: %s",
+                risk_multiplier,
+            )
     acct = mt5.account_info()
     prep = prepare_trade_parameters(
         symbol=symbol,

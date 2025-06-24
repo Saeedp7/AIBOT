@@ -13,7 +13,10 @@ def filter_strategies(strategies: Iterable[BaseStrategy], regime: str) -> List[B
     """
     result: List[BaseStrategy] = []
     for strat in strategies:
-        allowed = getattr(strat, "regimes", None)
+        if hasattr(strat, "allowed_regimes"):
+            allowed = strat.allowed_regimes()
+        else:
+            allowed = getattr(strat, "regimes", None)
         if allowed and regime not in allowed:
             continue
         result.append(strat)

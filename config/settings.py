@@ -2,6 +2,7 @@
 
 import os
 from itertools import product
+from config.manager import get_config
 
 # --- Broker API Credentials ---
 API_LOGIN = int(os.getenv('MT5_LOGIN', 245905))
@@ -86,3 +87,24 @@ PARTIAL_CLOSE_RATIOS = [
     for x in os.getenv("PARTIAL_CLOSE_RATIOS", "0.33,0.33,0.34").split(",")
     if x
 ]
+
+# --- Confidence thresholds and risk scaling ---
+import json
+
+_raw_thresh = os.getenv("DEFAULT_CONFIDENCE_THRESHOLDS", None)
+if _raw_thresh is None:
+    _raw_thresh = get_config(
+        "default_confidence_thresholds",
+        '{"trending": 0.3, "ranging": 0.15, "volatile": 0.25}',
+    )
+if isinstance(_raw_thresh, str):
+    DEFAULT_CONFIDENCE_THRESHOLDS = json.loads(_raw_thresh)
+else:
+    DEFAULT_CONFIDENCE_THRESHOLDS = _raw_thresh
+MIN_RISK_SCALE = float(
+    os.getenv("MIN_RISK_SCALE", get_config("min_risk_scale", 0.3))
+)
+
+DEFAULT_ALLOWED_REGIMES = ["trending", "volatile"]
+if ALLOW_RANGING_ENTRIES:
+    DEFAULT_ALLOWED_REGIMES.append("ranging")

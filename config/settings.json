@@ -27,6 +27,12 @@
   "TRENDING_TP_MULTIPLIER": "1.5",
   "RANGING_SL_MULTIPLIER": "1.0",
   "RANGING_TP_MULTIPLIER": "1.0",
-  "PARTIAL_CLOSE_RATIOS": "0.33,0.33,0.34"
+  "PARTIAL_CLOSE_RATIOS": "0.33,0.33,0.34",
+  "default_confidence_thresholds": {
+    "trending": 0.3,
+    "ranging": 0.15,
+    "volatile": 0.25
+  },
+  "min_risk_scale": 0.3
 }
 
