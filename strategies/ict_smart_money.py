@@ -18,3 +18,17 @@ class ICTSmartMoneyStrategy(BaseStrategy):
         if detect_fvg(df):
             return "buy" if df["close"].iloc[-1] > df["open"].iloc[-1] else "sell"
         return None
+    def check_signal(
+        self,
+        symbol: str,
+        timeframe: str,
+        df: pd.DataFrame,
+        regime: str,
+    ) -> str | None:
+        import logging
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug(
+            f"[{self.__class__.__name__}] Checking {symbol} {timeframe} in {regime} regime"
+        )
+        return self.generate_signal(df)

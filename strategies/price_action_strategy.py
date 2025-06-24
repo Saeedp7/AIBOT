@@ -25,3 +25,17 @@ class PriceActionStrategy(BaseStrategy):
         if is_inside_bar(recent):
             return None
         return None
+    def check_signal(
+        self,
+        symbol: str,
+        timeframe: str,
+        df: pd.DataFrame,
+        regime: str,
+    ) -> str | None:
+        import logging
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug(
+            f"[{self.__class__.__name__}] Checking {symbol} {timeframe} in {regime} regime"
+        )
+        return self.generate_signal(df)

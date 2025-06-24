@@ -97,14 +97,20 @@ class StrategySelector:
     def set_strategy_cooldown(self, strategy_name, bars=10):
         self.cooldowns[strategy_name] = bars
 
-    def check_all(self, df) -> dict[str, str | None]:
-     """Run check_signal for each strategy and return signal results."""
-     results = {}
-     for strat in self.strategies:
-        name = strat.__class__.__name__
-        try:
-            results[name] = strat.check_signal(df)
-        except Exception as e:
-            print(f"⚠️ {name} failed: {e}")
-            results[name] = None
-     return results
+    def check_all(
+        self,
+        symbol: str,
+        timeframe: str,
+        df,
+        regime: str,
+    ) -> dict[str, str | None]:
+        """Run check_signal for each strategy and return signal results."""
+        results = {}
+        for strat in self.strategies:
+            name = strat.__class__.__name__
+            try:
+                results[name] = strat.check_signal(symbol, timeframe, df, regime)
+            except Exception as e:
+                print(f"⚠️ {name} failed: {e}")
+                results[name] = None
+        return results

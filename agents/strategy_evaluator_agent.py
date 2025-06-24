@@ -32,9 +32,7 @@ class StrategyEvaluatorAgent:
         results: List[Dict] = []
         for strat in strategies:
             name = strat.__class__.__name__
-            signal = strat.check_signal(
-                df, symbol=symbol, timeframe=timeframe, regime=regime
-            )
+            signal = strat.check_signal(symbol, timeframe, df, regime)
             if signal == "buy" and regime in {"downtrend"}:
                 logger.info(f"Skipping {name}: buy signal blocked in {regime} regime.")
                 continue

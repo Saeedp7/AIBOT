@@ -84,13 +84,16 @@ def make_decision_and_trade(
         print("❌ No enriched data found after indicators.")
         return
 
+    from ai_engine.regime_classifier import detect_market_regime
+
+    regime = detect_market_regime(df, symbol=symbol)
     print("🔍 Evaluating strategies...")
     selector = StrategySelector()
     signals: dict[str, str | None] = {}
     for strat in selector.strategies:
         name = strat.__class__.__name__
         try:
-            signals[name] = strat.check_signal(df)
+            signals[name] = strat.check_signal(symbol, timeframe, df, regime)
         except Exception as exc:
             print(f"⚠️ {name} failed: {exc}")
             signals[name] = None

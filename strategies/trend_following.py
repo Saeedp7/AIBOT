@@ -34,7 +34,19 @@ class TrendFollowingStrategy(BaseStrategy):
     def should_sell(self):
         return self.last_signal == "sell"
 
-    def check_signal(self, df: pd.DataFrame) -> str | None:
+    def check_signal(
+        self,
+        symbol: str,
+        timeframe: str,
+        df: pd.DataFrame,
+        regime: str,
+    ) -> str | None:
+        import logging
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug(
+            f"[{self.__class__.__name__}] Checking {symbol} {timeframe} in {regime} regime"
+        )
         self.analyze(df)
         return self.last_signal
 
