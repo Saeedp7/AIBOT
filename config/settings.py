@@ -108,6 +108,10 @@ else:
 MIN_RISK_SCALE = float(
     os.getenv("MIN_RISK_SCALE", get_config("min_risk_scale", 0.3))
 )
+# Optional safety buffer percentage for broker stop levels
+STOP_LEVEL_BUFFER_PCT = float(
+    os.getenv("STOP_LEVEL_BUFFER_PCT", get_config("STOP_LEVEL_BUFFER_PCT", 0))
+)
 
 DEFAULT_ALLOWED_REGIMES = ["trending", "volatile"]
 if ALLOW_RANGING_ENTRIES:

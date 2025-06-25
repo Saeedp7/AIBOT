@@ -34,6 +34,7 @@
     "ranging": 0.15,
     "volatile": 0.25
   },
-  "min_risk_scale": 0.3
+  "min_risk_scale": 0.3,
+  "STOP_LEVEL_BUFFER_PCT": 5
 }
 

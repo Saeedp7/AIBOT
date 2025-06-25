@@ -29,6 +29,7 @@ PARTIAL_CLOSE_RATIOS = [
     for x in get_config("PARTIAL_CLOSE_RATIOS", "0.33,0.33,0.34").split(",")
     if x
 ]
+STOP_LEVEL_BUFFER_PCT = float(get_config("STOP_LEVEL_BUFFER_PCT", 0))
 from ai_engine.parameter_optimizer import load_strategy_thresholds
 from config.settings import (
     DEFAULT_CONFIDENCE_THRESHOLDS,
@@ -157,10 +158,35 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
 
     entry_price = price.ask if direction == "buy" else price.bid
 
-        # Check SL/TP against minimum stop level
-    min_stop = getattr(info, 'stops_level', 100) * info.point  # fallback = 100 points
-    if abs(entry_price - sl) < min_stop or abs(entry_price - tp) < min_stop:
-        logger.warning(f"Invalid stop levels for {symbol}. SL/TP too close to price.")
+    # Determine broker required stop level distance
+    trade_stop_points = getattr(info, "trade_stops_level", getattr(info, "stops_level", 0))
+    required_min_distance = trade_stop_points * info.point
+    required_min_distance *= 1 + (STOP_LEVEL_BUFFER_PCT / 100)
+    digits = getattr(info, "digits", 2)
+
+    # Adjust SL/TP outward if too close
+    if abs(entry_price - sl) < required_min_distance:
+        orig_sl = sl
+        sl = entry_price - required_min_distance if direction == "buy" else entry_price + required_min_distance
+        sl = round(sl, digits)
+        logger.info(
+            f"Adjusted SL for {symbol}: {orig_sl} -> {sl} to satisfy minimum stop level"
+        )
+
+    if tp and abs(tp - entry_price) < required_min_distance:
+        orig_tp = tp
+        tp = entry_price + required_min_distance if direction == "buy" else entry_price - required_min_distance
+        tp = round(tp, digits)
+        logger.info(
+            f"Adjusted TP for {symbol}: {orig_tp} -> {tp} to satisfy minimum stop level"
+        )
+
+    if abs(entry_price - sl) < required_min_distance or (
+        tp and abs(entry_price - tp) < required_min_distance
+    ):
+        logger.warning(
+            f"Invalid stop levels for {symbol}. SL/TP too close to price even after adjustment."
+        )
         return None
     if get_config("LIVE_MODE", "false").lower() != "true":
         logger.debug(

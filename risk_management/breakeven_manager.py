@@ -2,7 +2,8 @@
 """Utility to adjust stop loss as take profit targets are hit."""
 
 from typing import List
-from config.settings import SL_BUFFER_AFTER_TP1
+from risk_management.commission_calculator import estimate_commission
+from connectors.symbol_info import get_symbol_specs
 
 class BreakEvenManager:
     """Manage stop loss adjustments after partial take profits."""
@@ -18,7 +19,7 @@ class BreakEvenManager:
         symbol: str | None = None,
         lot: float = 0.0,
         precision: int = 2,
-        sl_buffer: float = SL_BUFFER_AFTER_TP1,
+        sl_buffer: float = 0.0,
     ) -> None:
         self.entry_price = entry_price
         self.entry = entry_price
@@ -53,10 +54,17 @@ class BreakEvenManager:
                 else current_price <= self.tp_levels[0]
             )
             if hit_tp1:
+                commission = estimate_commission(self.symbol, self.lot)
+                specs = get_symbol_specs(self.symbol)
+                tick_value = getattr(specs, "tick_value", 0)
+                tick_size = getattr(specs, "tick_size", 0)
+                pip_value = tick_value / tick_size if tick_size > 0 else 1.0
+                buffer_pips = commission / pip_value if pip_value > 0 else 0.0
+                buffer_pips += self.sl_buffer
                 if self.direction == "buy":
-                    new_sl = self.entry + self.sl_buffer
+                    new_sl = self.entry + buffer_pips
                 else:
-                    new_sl = self.entry - self.sl_buffer
+                    new_sl = self.entry - buffer_pips
                 self.sl = round(new_sl, self.precision)
                 self.stop_loss = self.sl
                 self._reached.add(0)
