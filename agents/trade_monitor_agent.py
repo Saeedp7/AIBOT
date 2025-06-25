@@ -78,8 +78,6 @@ class TradeMonitorAgent:
                 duration = (datetime.utcnow() - start).total_seconds() / 60
             except Exception:
                 duration = None
-
-        update_strategy_score(self.strategy, outcome, getattr(self, "regime", "unknown"))
         update_trade(
             self.ticket,
             exit=exit_price,

@@ -113,8 +113,19 @@ def run_simulation():
 
             if result:
                 balance += pnl
-                log_trade(SYMBOL, direction, entry, price_now, volume, strategy_name, result, pnl, regime)
-                update_strategy_score(strategy_name, result)
+                log_trade(
+                    SYMBOL,
+                    direction,
+                    entry,
+                    price_now,
+                    volume,
+                    strategy_name,
+                    result,
+                    pnl,
+                    regime,
+                )
+                pct = (pnl / (entry * volume * 100000.0) * 100) if entry and volume else 0.0
+                update_strategy_score(strategy_name, result, pct, regime)
                 print(f"📊 {strategy_name} → {result.upper()} | PnL: ${round(pnl, 2)} | New Balance: ${round(balance, 2)}")
 
         time.sleep(CHECK_INTERVAL_SECONDS)

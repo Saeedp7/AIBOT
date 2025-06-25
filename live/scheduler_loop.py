@@ -488,9 +488,6 @@ def run_live_trade_manager() -> None:
                 update_trade(ticket, result="TP1 hit", hit="TP1")
                 rec["result"] = "TP1 hit"
                 rec["tp1_hit"] = True
-                update_strategy_score(
-                    rec["strategy"], "win", regime=rec.get("regime", "")
-                )
             break
 
         bem = BreakEvenManager(
@@ -587,11 +584,6 @@ def run_live_trade_manager() -> None:
                     swap_usd=swap,
                     hit="closed_early",
                     exit_reason="early_exit",
-                )
-                win_condition = net_pct > 0
-                outcome = "win" if win_condition else "loss"
-                update_strategy_score(
-                    rec["strategy"], outcome, regime=rec.get("regime", "")
                 )
                 executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
                 trade_cache.discard((pos.symbol, rec["timeframe"]))

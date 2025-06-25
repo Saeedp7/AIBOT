@@ -69,49 +69,50 @@ def update_scores(results: Dict[str, dict], score_path: str = DEFAULT_SCORE_PATH
 def update_strategy_score(
     strategy_name: str,
     result: str,
+    net_profit_pct: float,
     regime: str,
     score_path: str = DEFAULT_SCORE_PATH,
-    decay: float = 0.8,
+    alpha: float = 0.1,
 ) -> None:
-    """Update nested regime metrics for ``strategy_name``.
+    """Update metrics for ``strategy_name`` after a closed trade.
 
     Parameters
     ----------
     strategy_name : str
         Name of the strategy being evaluated.
     result : str
-        Outcome string such as ``"TP1 hit"`` or ``"SL hit"``.
+        Final outcome label (``"win"`` or ``"loss"``).
+    net_profit_pct : float
+        Net profit or loss percentage of the trade.
     regime : str
-        Market regime label used during the trade (``"trending"``, ``"ranging"``,
-        etc.).
+        Market regime label used during the trade.
     score_path : str, optional
         Path to the JSON score file.
-        decay : float, optional
-        Exponential smoothing decay factor. ``0.8`` keeps 80% of the previous
-        value.
-    """   
+    alpha : float, optional
+        Exponential smoothing factor for ``win_rate``.
+    """
+    if net_profit_pct is None:
+        return
     scores = _load_json(score_path)
     regime = regime or "unknown"
-    strat_data = scores.get(strategy_name, {})
-    metrics = strat_data.get(
+    metrics = scores.get(strategy_name, {}).get(
         regime,
-        {"win_rate": 0.0, "recent_score": 0.0, "regime_fit": 1.0},
+        {"recent_score": 1.0, "win_rate": 50.0, "regime_fit": 1.0, "decay": 0.99},
     )
 
-    outcome_win = str(result).lower().startswith("tp") or result.lower() == "win"
-    new_values  = {
-        "win_rate": 100.0 if outcome_win else 0.0,
-        "recent_score": 1.0 if outcome_win else 0.0,
-        "regime_fit": 1.0 if outcome_win else 0.5,
-    }
+    win = str(result).lower() == "win"
+    prev_recent = float(metrics.get("recent_score", 1.0))
+    prev_wr = float(metrics.get("win_rate", 50.0))
 
-    for key, val in new_values.items():
-        base = 1.0 if key == "regime_fit" else 0.0
-        prev = float(metrics.get(key, base))
-        metrics[key] = decay * prev + (1 - decay) * val
+    delta = (abs(net_profit_pct) / 100.0) * (1 if win else -1)
+    recent_score = min(2.0, max(0.1, prev_recent + delta))
+    win_rate = (1 - alpha) * prev_wr + alpha * (100.0 if win else 0.0)
 
-    strat_data[regime] = metrics
-    scores[strategy_name] = strat_data
+    metrics["recent_score"] = recent_score
+    metrics["win_rate"] = win_rate
+    metrics.setdefault("regime_fit", 1.0)
+    metrics.setdefault("decay", 0.99)
+    scores.setdefault(strategy_name, {})[regime] = metrics
     _save_json(scores, score_path)
 
 def load_scores(path: str = DEFAULT_SCORE_PATH) -> Dict[str, dict]:

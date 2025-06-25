@@ -110,24 +110,20 @@ def update_trade(
                 trade["close_time"] = close_time
             if result is not None:
                 trade["result"] = result
-                if result.lower() != "open":
-                    hit = str(result).lower()
+                if result.lower() != "open" and (
+                    net_profit_pct is not None or trade.get("net_profit_pct") is not None
+                ):
                     net_val = (
-                        net_profit_pct
+                        float(net_profit_pct)
                         if net_profit_pct is not None
-                        else trade.get("net_profit_pct")
+                            else float(trade.get("net_profit_pct", 0.0))
                     )
-                    if net_val is not None:
-                        try:
-                            win_condition = (float(net_val) > 0) or hit.startswith("tp")
-                        except Exception:
-                            win_condition = hit.startswith("tp")
-                    else:
-                        win_condition = hit.startswith("tp")
+                    win_condition = net_val > 0
                     outcome = "win" if win_condition else "loss"
                     update_strategy_score(
                         trade.get("strategy", ""),
                         outcome,
+                        net_val,
                         regime=trade.get("regime", ""),
                     )
             if profit_pct is not None:
