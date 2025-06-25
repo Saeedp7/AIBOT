@@ -67,7 +67,7 @@ from utils.time_utils import session_risk_multiplier
 from recovery.restart_manager import recover_state
 import MetaTrader5 as mt5
 from utils.market_status import is_market_open
-
+from utils.stop_level import enforce_min_stop_distance
 
 logger = logging.getLogger("scheduler")
 
@@ -158,35 +158,8 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
 
     entry_price = price.ask if direction == "buy" else price.bid
 
-    # Determine broker required stop level distance
-    trade_stop_points = getattr(info, "trade_stops_level", getattr(info, "stops_level", 0))
-    required_min_distance = trade_stop_points * info.point
-    required_min_distance *= 1 + (STOP_LEVEL_BUFFER_PCT / 100)
-    digits = getattr(info, "digits", 2)
-
-    # Adjust SL/TP outward if too close
-    if abs(entry_price - sl) < required_min_distance:
-        orig_sl = sl
-        sl = entry_price - required_min_distance if direction == "buy" else entry_price + required_min_distance
-        sl = round(sl, digits)
-        logger.info(
-            f"Adjusted SL for {symbol}: {orig_sl} -> {sl} to satisfy minimum stop level"
-        )
-
-    if tp and abs(tp - entry_price) < required_min_distance:
-        orig_tp = tp
-        tp = entry_price + required_min_distance if direction == "buy" else entry_price - required_min_distance
-        tp = round(tp, digits)
-        logger.info(
-            f"Adjusted TP for {symbol}: {orig_tp} -> {tp} to satisfy minimum stop level"
-        )
-
-    if abs(entry_price - sl) < required_min_distance or (
-        tp and abs(entry_price - tp) < required_min_distance
-    ):
-        logger.warning(
-            f"Invalid stop levels for {symbol}. SL/TP too close to price even after adjustment."
-        )
+    sl, tp, valid = enforce_min_stop_distance(symbol, entry_price, sl, tp, direction)
+    if not valid:
         return None
     if get_config("LIVE_MODE", "false").lower() != "true":
         logger.debug(
