@@ -28,6 +28,7 @@
   "RANGING_SL_MULTIPLIER": "1.0",
   "RANGING_TP_MULTIPLIER": "1.0",
   "PARTIAL_CLOSE_RATIOS": "0.33,0.33,0.34",
+  "sl_buffer_after_tp1": 0.5,
   "default_confidence_thresholds": {
     "trending": 0.3,
     "ranging": 0.15,

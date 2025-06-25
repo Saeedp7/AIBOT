@@ -2,15 +2,15 @@
   "BreakoutStrategy": {
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.6507999999999997,
-      "regime_fit": 0.6507999999999997
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "FibonacciSwingStrategy": {
     "ranging": {
       "win_rate": 100.0,
-      "recent_score": 1.0,
-      "regime_fit": 1.0
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
@@ -23,6 +23,11 @@
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "volatile": {
+      "win_rate": 100.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
     }
   },
   "EMACrossoverScalpingStrategy": {
@@ -48,6 +53,11 @@
   },
   "LondonBreakoutStrategy": {
     "unknown": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "volatile": {
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
@@ -86,6 +96,11 @@
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.8199999999999998,
+      "regime_fit": 0.8199999999999998
     }
   },
   "PriceActionStrategy": {
@@ -93,6 +108,11 @@
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.8199999999999998,
+      "regime_fit": 0.8199999999999998
     }
   },
   "SupertrendADXRSIStrategy": {
@@ -104,6 +124,11 @@
   },
   "SupplyDemandSwingStrategy": {
     "unknown": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "volatile": {
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
@@ -121,6 +146,11 @@
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.8199999999999998,
+      "regime_fit": 0.8199999999999998
     }
   },
   "TrendPullbackStrategy": {

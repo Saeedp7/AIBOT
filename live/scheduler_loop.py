@@ -462,7 +462,8 @@ def run_live_trade_manager() -> None:
             continue
         price = tick.bid if direction == "sell" else tick.ask
         reached = set(rec.get("reached_tps", []))
-         # Check TP hits first so SL can be moved after
+        prev_reached = set(reached)
+        # Check TP hits first so SL can be moved after
         tps = rec.get("tp", [])
         initial_vol = rec.get("volume", pos.volume)
         for i, tp in enumerate(tps):
@@ -472,50 +473,24 @@ def run_live_trade_manager() -> None:
             hit_tp = price >= tp if direction == "buy" else price <= tp
             if not hit_tp:
                 continue
-            ratio = PARTIAL_CLOSE_RATIOS[i] if i < len(PARTIAL_CLOSE_RATIOS) else 1.0
-            close_vol = round(initial_vol * ratio, 2)
-            if i == len(tps) - 1 or close_vol > pos.volume:
-                close_vol = pos.volume
-            close_type = mt5.ORDER_TYPE_SELL if direction == "buy" else mt5.ORDER_TYPE_BUY
-            print(f"[TP] Price crossed TP{i + 1}. Closing {close_vol} manually.")
-            close_req = {
-                "action": mt5.TRADE_ACTION_DEAL,
-                "symbol": pos.symbol,
-                "volume": close_vol,
-                "type": close_type,
-                "position": ticket,
-                "price": price,
-                "deviation": 20,
-                "magic": MAGIC_NUMBER,
-                "comment": f"TP{i + 1} partial",
-            }
-            logger.debug("Sending close order: %s", close_req)
-            res = mt5.order_send(close_req)
-            if not res or res.retcode != mt5.TRADE_RETCODE_DONE:
-                time.sleep(1)
-                res = mt5.order_send(close_req)
-            logger.debug(
-                "Close retcode=%s comment=%s",
-                getattr(res, "retcode", None),
-                getattr(res, "comment", ""),
+            log_trade_action(
+                f"\u2705 TP{i + 1} hit for {pos.symbol} {rec['timeframe']} @ {price}"
             )
-            if res and res.retcode == mt5.TRADE_RETCODE_DONE:
-                time.sleep(1)
-                log_trade_action(
-                    f"\u2705 TP{i + 1} hit \u2192 partial close executed for {pos.symbol} {rec['timeframe']}"
-                )
-                update_trade(
-                    ticket,
-                    **{flag: True},
-                    hit=f"TP{i + 1}",
-                    reached_tps=list(reached | {i}),
-                )
-                rec[flag] = True
-                reached.add(i)
-                rec["reached_tps"] = list(reached)
-            else:
-                logger.error(
-                    "Partial close failed for ticket %s TP%s", ticket, i + 1
+            update_trade(
+                ticket,
+                **{flag: True},
+                hit=f"TP{i + 1}",
+                reached_tps=list(reached | {i}),
+            )
+            rec[flag] = True
+            reached.add(i)
+            rec["reached_tps"] = list(reached)
+            if i == 0 and rec.get("result") == "open":
+                update_trade(ticket, result="TP1 hit", hit="TP1")
+                rec["result"] = "TP1 hit"
+                rec["tp1_hit"] = True
+                update_strategy_score(
+                    rec["strategy"], "win", regime=rec.get("regime", "")
                 )
             break
 
@@ -524,13 +499,14 @@ def run_live_trade_manager() -> None:
             direction,
             pos.sl,
             rec.get("tp", []),
-            reached,
+            prev_reached,
             symbol=pos.symbol,
             lot=pos.volume,
             precision=getattr(mt5.symbol_info(pos.symbol), "digits", 2),
-            trail_distance=rec.get("trail_distance"),
         )
         new_sl = bem.update_stop_loss(price)
+        reached.update(bem.reached_tps)
+        rec["reached_tps"] = list(reached)
         if new_sl != pos.sl:
             req = {
                 "action": mt5.TRADE_ACTION_SLTP,
@@ -546,8 +522,9 @@ def run_live_trade_manager() -> None:
                 getattr(res, "comment", ""),
             )
             if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                reason = "TP1" if 0 in bem.reached_tps and 0 not in prev_reached else "TP2" if 1 in bem.reached_tps and 1 not in prev_reached else "manual"
                 log_trade_action(
-                    f"\uD83D\uDD01 SL moved to breakeven for {pos.symbol} on {rec['timeframe']}"
+                    f"[INFO] SL moved after {reason}: {pos.symbol} @ {price:.2f} → New SL: {new_sl:.2f} (Entry: {rec['entry']})"
                 )
                 update_trade(
                     ticket,
@@ -555,15 +532,7 @@ def run_live_trade_manager() -> None:
                     sl_moved=True,
                     reached_tps=list(bem.reached_tps),
                 )
-                rec["reached_tps"] = list(bem.reached_tps)
                 alert_sl_moved(pos.symbol, rec["timeframe"], new_sl)
-                if new_sl == rec["entry"] and rec.get("result") == "open":
-                    update_trade(ticket, result="TP1 hit", hit="TP1")
-                    rec["result"] = "TP1 hit"
-                    rec["tp1_hit"] = True
-                    update_strategy_score(
-                        rec["strategy"], "win", regime=rec.get("regime", "")
-                    )
         # simple reversal check
         if direction == "buy" and price < rec["entry"] - (rec["entry"] - rec["sl"]):
             close_type = mt5.ORDER_TYPE_SELL
