@@ -50,6 +50,7 @@ def record_trade(
     sl_moved: bool = False,
     closed_early: bool = False,
     volume: float | None = None,
+    trail_distance: float | None = None,
     timestamp: str | None = None,
 ) -> None:
     """Append a trade entry to the history log."""
@@ -78,6 +79,7 @@ def record_trade(
         "volume": volume,
         "ticket": ticket,
         "timestamp": timestamp,
+        "trail_distance": trail_distance,
     }
     if regime is not None:
         trade["regime"] = regime

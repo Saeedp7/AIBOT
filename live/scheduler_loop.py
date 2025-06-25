@@ -461,11 +461,7 @@ def run_live_trade_manager() -> None:
         if not tick:
             continue
         price = tick.bid if direction == "sell" else tick.ask
-        reached = set(rec.get("reached_tps", [])) or {
-            idx
-            for idx in range(len(rec.get("tp", [])))
-            if rec.get(f"tp{idx + 1}_hit")
-        }
+        reached = set(rec.get("reached_tps", []))
          # Check TP hits first so SL can be moved after
         tps = rec.get("tp", [])
         initial_vol = rec.get("volume", pos.volume)
@@ -495,6 +491,9 @@ def run_live_trade_manager() -> None:
             }
             logger.debug("Sending close order: %s", close_req)
             res = mt5.order_send(close_req)
+            if not res or res.retcode != mt5.TRADE_RETCODE_DONE:
+                time.sleep(1)
+                res = mt5.order_send(close_req)
             logger.debug(
                 "Close retcode=%s comment=%s",
                 getattr(res, "retcode", None),
@@ -514,6 +513,10 @@ def run_live_trade_manager() -> None:
                 rec[flag] = True
                 reached.add(i)
                 rec["reached_tps"] = list(reached)
+            else:
+                logger.error(
+                    "Partial close failed for ticket %s TP%s", ticket, i + 1
+                )
             break
 
         bem = BreakEvenManager(
@@ -525,6 +528,7 @@ def run_live_trade_manager() -> None:
             symbol=pos.symbol,
             lot=pos.volume,
             precision=getattr(mt5.symbol_info(pos.symbol), "digits", 2),
+            trail_distance=rec.get("trail_distance"),
         )
         new_sl = bem.update_stop_loss(price)
         if new_sl != pos.sl:

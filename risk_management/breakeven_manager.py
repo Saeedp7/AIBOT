@@ -19,7 +19,8 @@ class BreakEvenManager:
         symbol: str | None = None,
         lot: float = 0.0,
         precision: int = 2,
-    ):
+        trail_distance: float | None = None,
+    ) -> None:
         self.entry_price = entry_price
         self.entry = entry_price
         self.direction = direction.lower()
@@ -32,7 +33,9 @@ class BreakEvenManager:
         # Track which TP levels have been reached already
         self._reached = set(reached) if reached else set()
         self.trailing_active = 0 in self._reached
-        self.trail_distance = abs(self.entry - self.sl)
+        self.trail_distance = (
+            abs(self.entry - self.sl) if trail_distance is None else trail_distance
+        )
     @property
     def reached_tps(self) -> set[int]:
         """Return a copy of reached TP level indexes."""
