@@ -5,6 +5,18 @@ from utils.indicators import calculate_atr
 from config.manager import get_config
 from config.settings import REGIME_SL_MULTIPLIERS, REGIME_TP_MULTIPLIERS
 
+# Define pip sizes per symbol
+PIP_SIZES = {
+    "XAUUSD": 0.1,
+    "NDXUSD": 1.0,
+    "DJIUSD": 1.0,
+    "BTCUSD": 1.0,
+    "ETHUSD": 1.0,
+}
+
+# Default pip distances per TP
+TP_PIP_DISTANCES = [40, 80, 120, 160, 200]
+
 def calculate_sl_tp(entry_price, direction, sl_percent=1.5, tp_percent=2.0):
     """Basic SL/TP calculator for fixed %."""
     if direction == 'buy':
@@ -27,52 +39,41 @@ def determine_sl_tp(
 ):
     """
     Use AI and regime intelligence to set SL and multi-TPs based on strategy and market context.
-    Also returns the regime ('trending', 'volatile', 'ranging').
+    Returns: stop_loss, take_profits (list), regime
     """
     if market_data is None or market_data.empty:
         raise ValueError("Market data is empty or None.")
 
     from ai_engine.regime_classifier import detect_market_regime
 
-    regime = detect_market_regime(market_data, symbol=symbol or strategy_name)
+    base_symbol = symbol.replace(".", "") if symbol else "XAUUSD"
+    pip_size = PIP_SIZES.get(base_symbol.upper(), 1.0)
+
+    regime = detect_market_regime(market_data, symbol=base_symbol or strategy_name)
     atr_series = calculate_atr(market_data, period=14).dropna()
     atr = float(atr_series.iloc[-1]) if not atr_series.empty else None
 
-    if atr and atr > 0:
-        base_tp = atr
-        base_sl = atr
-    else:
-        base_tp = entry_price * 0.01
-        base_sl = entry_price * 0.015
-
-    sl_mult = REGIME_SL_MULTIPLIERS.get(regime, REGIME_SL_MULTIPLIERS.get("ranging", 1.0))
-    tp_mult = REGIME_TP_MULTIPLIERS.get(regime, REGIME_TP_MULTIPLIERS.get("ranging", 1.0))
-    base_sl *= sl_mult
-    base_tp *= tp_mult
-
+    # Determine number of TPs
     if 'scalping' in strategy_name.lower():
         num_tps = 3
     elif 'swing' in strategy_name.lower():
         num_tps = 5
-    else:  # day trading
+    else:
         num_tps = 4
-
     if regime == 'volatile':
         num_tps = min(5, num_tps + 1)
     num_tps = max(3, min(num_tps, 5))
 
-    multiplier = 1 if direction == 'buy' else -1
-    stop_loss = round(entry_price - multiplier * base_sl, 2)
-    take_profits = [
-        round(entry_price + multiplier * base_tp * (i + 1), 2) for i in range(num_tps)
-    ]
+    pip_distances = TP_PIP_DISTANCES[:num_tps]
 
-    # Ensure it's a list
-    if not isinstance(take_profits, list):
-        take_profits = [take_profits]
+    # Build TP and SL based on fixed pip logic
+    multiplier = 1 if direction == "buy" else -1
+    take_profits = [
+        round(entry_price + multiplier * pip_size * pip, 2) for pip in pip_distances
+    ]
+    stop_loss = round(entry_price - multiplier * pip_size * pip_distances[0], 2)
 
     return stop_loss, take_profits, regime
-
 
 def get_required_timeframes(strategy):
     """Auto-select timeframes based on strategy group"""
