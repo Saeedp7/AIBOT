@@ -383,7 +383,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
     commission = estimate_commission(symbol, lot)
     direction_mult = 1 if decision == "buy" else -1
     print(tp_levels)
-    tp_levels = tp_levels[:3]
+    tp_slice = tp_levels[:3]
     # Keep original sl/tp from strategy logic
 
     # Slightly widen SL to absorb commission only
@@ -419,6 +419,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         if sub_lot <= 0:
             continue
         tp_val = tp_levels[idx] if idx < len(tp_levels) else tp_levels[-1]
+        assert tp_val in tp_levels, f"Mismatch in TP levels: {tp_val} not in {tp_levels}"
         print(tp_val)
         tkt = execute_trade(
             decision,
@@ -457,7 +458,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
             decision,
             entry,
             sl,
-            tp_levels[:3],
+            tp_slice,
             SL_BUFFER_AFTER_TP1,
         )
         daily_guard.record_trade(0)
