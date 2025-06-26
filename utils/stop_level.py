@@ -7,6 +7,23 @@ from config.manager import get_config
 
 STOP_LEVEL_BUFFER_PCT = float(get_config("STOP_LEVEL_BUFFER_PCT", 0))
 
+def enforce_min_sl_tp(
+    entry: float,
+    sl: float,
+    tp: Optional[float],
+    min_dist: float,
+    direction: str,
+    buffer_ratio: float = 1.2,
+) -> Tuple[float, Optional[float]]:
+    """Adjust SL/TP to satisfy minimum distance requirements."""
+    buffer = min_dist * buffer_ratio
+    if abs(entry - sl) < buffer:
+        sl = entry - buffer if direction == "buy" else entry + buffer
+    if tp is not None and abs(entry - tp) < buffer:
+        tp = entry + buffer if direction == "buy" else entry - buffer
+    return sl, tp
+
+
 def enforce_min_stop_distance(
     symbol: str,
     entry_price: float,
@@ -25,23 +42,15 @@ def enforce_min_stop_distance(
 
     trade_stop_points = getattr(info, "trade_stops_level", getattr(info, "stops_level", 0))
     min_distance = trade_stop_points * info.point
-    min_distance *= 1 + (STOP_LEVEL_BUFFER_PCT / 100)
+    buffer_ratio = 1 + (STOP_LEVEL_BUFFER_PCT / 100)
+    tp = entry_price + min_distance if direction == "buy" else entry_price - min_distance
+    sl, tp = enforce_min_sl_tp(entry_price, sl, tp, min_distance, direction, buffer_ratio)
+
     digits = getattr(info, "digits", 2)
-
-    adjusted = False
-    if abs(entry_price - sl) < min_distance:
-        orig = sl
-        sl = entry_price - min_distance if direction == "buy" else entry_price + min_distance
-        sl = round(sl, digits)
-        logging.info(f"Adjusted SL for {symbol}: {orig} -> {sl} to satisfy minimum stop level")
-        adjusted = True
-
-    if tp is not None and abs(entry_price - tp) < min_distance:
-        orig = tp
+    sl = round(sl, digits)
+    if tp is not None:
         tp = entry_price + min_distance if direction == "buy" else entry_price - min_distance
         tp = round(tp, digits)
-        logging.info(f"Adjusted TP for {symbol}: {orig} -> {tp} to satisfy minimum stop level")
-        adjusted = True
 
     if abs(entry_price - sl) < min_distance or (
         tp is not None and abs(entry_price - tp) < min_distance

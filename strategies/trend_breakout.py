@@ -1,6 +1,8 @@
 import pandas as pd
-from utils.indicators import calculate_atr
+from utils.stop_level import enforce_min_sl_tp
+import MetaTrader5 as mt5
 from ai_engine.regime_classifier import detect_market_regime
+from utils.indicators import calculate_atr
 from .base import BaseStrategy
 
 
@@ -103,6 +105,20 @@ class TrendBreakoutStrategy(BaseStrategy):
             f"[{self.__class__.__name__}] Checking {symbol} {timeframe} in {regime} regime"
         )
         self.analyze(df.copy(deep=True))
+        if self.signal and self.stop_loss and self.take_profit:
+            info = mt5.symbol_info(symbol)
+            if info:
+                min_dist = getattr(info, "trade_stops_level", getattr(info, "stops_level", 0)) * info.point
+                self.stop_loss, self.take_profit = enforce_min_sl_tp(
+                    df["close"].iloc[-1],
+                    self.stop_loss,
+                    self.take_profit,
+                    min_dist,
+                    self.signal,
+                )
+                digits = getattr(info, "digits", 2)
+                self.stop_loss = round(self.stop_loss, digits)
+                self.take_profit = round(self.take_profit, digits)
         return self.signal
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
