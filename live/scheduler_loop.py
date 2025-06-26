@@ -382,7 +382,8 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         return
     commission = estimate_commission(symbol, lot)
     direction_mult = 1 if decision == "buy" else -1
-    tp_levels = [round(tp, 2) for tp in tp_levels]
+    print(tp_levels)
+    tp_levels = tp_levels[:3]
     # Keep original sl/tp from strategy logic
 
     # Slightly widen SL to absorb commission only

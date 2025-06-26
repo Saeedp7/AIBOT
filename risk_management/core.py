@@ -10,8 +10,6 @@ from connectors.symbol_info import get_symbol_specs
 from utils.indicators import calculate_atr
 from config.settings import (
     SL_BUFFER_AFTER_TP1,
-    MULTI_TP_DISTANCES,
-    MIN_TP_DISTANCE_PIPS,
     USE_ATR_TRAILING,
     ATR_PERIOD,
     TRAIL_ATR_MULTIPLIER,
@@ -39,17 +37,12 @@ def prepare_trade_parameters(
     if not guard.can_trade():
         return None
 
-    sl, _unused, regime = determine_sl_tp(
+    sl, tp_levels, regime = determine_sl_tp(
         strategy_name, entry_price, direction, market_data, symbol=symbol
     )
 
     specs = get_symbol_specs(symbol)
-    pip_size = getattr(specs, "tick_size", 0.01)
     digits = getattr(specs, "digits", 2)
-    direction_mult = 1 if direction.lower() == "buy" else -1
-    sl, tp_levels, regime = determine_sl_tp(
-    strategy_name, entry_price, direction, market_data, symbol=symbol
-)
     info = mt5.symbol_info(symbol)
     if info:
         min_dist = getattr(info, "trade_stops_level", getattr(info, "stops_level", 0)) * info.point
