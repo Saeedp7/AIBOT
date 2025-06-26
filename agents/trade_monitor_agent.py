@@ -8,6 +8,7 @@ import MetaTrader5 as mt5
 
 from ai_engine.score_updater import update_strategy_score
 from utils.trade_journal import update_trade, load_history
+from execution.multi_tp_manager import handle_order_close
 from risk_management.commission_calculator import estimate_commission, estimate_swap
 
 logger = logging.getLogger(__name__)
@@ -90,6 +91,8 @@ class TradeMonitorAgent:
             duration=duration,
             exit_reason=outcome,
         )
+        handle_order_close(self.ticket, exit_price)
+        update_strategy_score(self.strategy, outcome, self.regime)
         logger.debug(
             "Trade closed: %s %s result=%s net_pct=%.2f", self.symbol, self.timeframe, outcome, net_pct
         )

@@ -52,6 +52,7 @@ def record_trade(
     volume: float | None = None,
     trail_distance: float | None = None,
     timestamp: str | None = None,
+    tp_index: int | None = None,
 ) -> None:
     """Append a trade entry to the history log."""
     history = _load_history()
@@ -83,6 +84,8 @@ def record_trade(
     }
     if regime is not None:
         trade["regime"] = regime
+    if tp_index is not None:
+        trade["tp_index"] = tp_index
     history.append(trade)
     _save_history(history)
 

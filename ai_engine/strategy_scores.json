@@ -75,7 +75,12 @@
     "recent_score": 1.0,
     "win_rate": 0.5,
     "regime_fit": 1.0,
-    "decay": 0.99
+    "decay": 0.99,
+    "volatile": {
+      "win_rate": 35.99999999999999,
+      "recent_score": 0.35999999999999993,
+      "regime_fit": 1.0
+    }
   },
   "SupertrendADXRSIStrategy": {
     "recent_score": 1.0,

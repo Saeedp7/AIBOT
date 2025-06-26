@@ -696,7 +696,7 @@
     "timeframe": "M5",
     "strategy": "PriceActionStrategy",
     "entry": 3332.92,
-    "sl": 3330.51,
+    "sl": 3333.42,
     "tp": [
       3334.21,
       3335.49,
@@ -704,22 +704,26 @@
       3338.07,
       3339.35
     ],
-    "result": "open",
+    "result": "TP1 hit",
     "regime": "volatile",
     "exit": null,
     "close_time": null,
     "duration": null,
     "profit_pct": null,
     "net_profit_pct": null,
-    "commission_usd": null,
+    "commission_usd": 0.0,
     "swap_usd": null,
     "exit_reason": null,
-    "hit": null,
-    "sl_moved": false,
+    "hit": "TP1",
+    "sl_moved": true,
     "closed_early": false,
     "volume": 0.01,
     "ticket": 27479216,
     "timestamp": "2025-06-25T20:34:54.257982Z",
-    "trail_distance": null
+    "trail_distance": null,
+    "tp1_hit": true,
+    "reached_tps": [
+      0
+    ]
   }
 ]

@@ -138,7 +138,9 @@ def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:
     enriched = add_indicators(clean)
     indicator_cache[(symbol, timeframe)] = enriched[symbol][timeframe]
 
-def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float) -> int | None:
+def execute_trade(
+    direction: str, symbol: str, lot: float, sl: float, tp: float, magic_offset: int = 0
+) -> int | None:
     if not is_market_open(symbol):
         logger.warning(f"[SKIP] Market is closed for {symbol}, skipping trade.")
         return None
@@ -198,7 +200,7 @@ def execute_trade(direction: str, symbol: str, lot: float, sl: float, tp: float)
         "price": entry_price,
         "sl": sl,
         "deviation": 20,
-        "magic": MAGIC_NUMBER,
+        "magic": MAGIC_NUMBER + magic_offset,
         "comment": "AI Trade",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": type_filling,
@@ -405,34 +407,54 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         sl,
         tp_levels[0],
     )
-    # Execute without TP so trade manager can handle multi-TP logic
-    ticket = execute_trade(decision, symbol, lot, sl, tp=0)
-    if ticket:
-        logger.info(
-            f"[EXECUTED] Trade opened: {symbol} {timeframe} ticket={ticket}"
+    
+    tickets: list[int] = []
+    for idx, ratio in enumerate(PARTIAL_CLOSE_RATIOS[:3]):
+        sub_lot = round(lot * ratio, 2)
+        if sub_lot <= 0:
+            continue
+        tp_val = tp_levels[idx] if idx < len(tp_levels) else tp_levels[-1]
+        tkt = execute_trade(
+            decision,
+            symbol,
+            sub_lot,
+            sl,
+            tp_val,
+            magic_offset=idx,
         )
+        if tkt:
+            tickets.append(tkt)
+            record_trade(
+                symbol=symbol,
+                timeframe=timeframe,
+                entry=entry,
+                sl=sl,
+                tps=tp_levels,
+                strategy=best_strat,
+                result="open",
+                ticket=tkt,
+                volume=sub_lot,
+                timestamp=datetime.utcnow().isoformat() + "Z",
+                regime=regime,
+                tp_index=idx,
+            )
+            monitor = TradeMonitorAgent(tkt, symbol, timeframe, best_strat, regime)
+            threading.Thread(target=monitor.wait_and_score, daemon=True).start()
+
+    if tickets:
+        from execution.multi_tp_manager import register_group
+
+        register_group(tickets, symbol, decision, entry, sl, tp_levels[:3])
         daily_guard.record_trade(0)
         exposure_guard.record(symbol, timeframe, decision, confidence)
-        executed_trades.setdefault(symbol, {})[timeframe] = ticket
-        record_trade(
-            symbol=symbol,
-            timeframe=timeframe,
-            entry=entry,
-            sl=sl,
-            tps=tp_levels,
-            strategy=best_strat,
-            result="open",
-            ticket=ticket,
-            volume=lot,
-            timestamp=datetime.utcnow().isoformat() + "Z",
-            regime=regime,
-        )
-        monitor = TradeMonitorAgent(ticket, symbol, timeframe, best_strat, regime)
-        threading.Thread(target=monitor.wait_and_score, daemon=True).start()
+        executed_trades.setdefault(symbol, {}).setdefault(timeframe, []).extend(tickets)
         trade_cache.add((symbol, timeframe))
+        logger.info(
+            f"[EXECUTED] Opened multi-TP orders: {symbol} {timeframe} tickets={tickets}"
+        )
     else:
         logger.error(
-            f"[FAIL] Trade failed for {symbol} {timeframe}" 
+            f"[FAIL] Trade failed for {symbol} {timeframe}"
         )
 
 
@@ -445,8 +467,11 @@ def run_live_trade_manager() -> None:
         return
     open_tickets = {p.ticket for p in positions}
     for sym, tf_map in list(executed_trades.items()):
-        for tf, tkt in list(tf_map.items()):
-            if tkt not in open_tickets:
+        for tf, tickets in list(tf_map.items()):
+            remaining = [t for t in tickets if t in open_tickets]
+            if remaining:
+                tf_map[tf] = remaining
+            else:
                 tf_map.pop(tf, None)
                 trade_cache.discard((sym, tf))
                 exposure_guard.remove(sym, tf)
@@ -585,7 +610,11 @@ def run_live_trade_manager() -> None:
                     hit="closed_early",
                     exit_reason="early_exit",
                 )
-                executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
+                lst = executed_trades.get(pos.symbol, {}).get(rec["timeframe"], [])
+                if ticket in lst:
+                    lst.remove(ticket)
+                if not lst:
+                    executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
                 trade_cache.discard((pos.symbol, rec["timeframe"]))
                 exposure_guard.remove(pos.symbol, rec["timeframe"])
                 alert_trade_closed(pos.symbol, rec["timeframe"], "closed_early")
