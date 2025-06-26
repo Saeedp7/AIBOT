@@ -6,6 +6,7 @@ from typing import Tuple
 from risk_management.stop_loss_manager import determine_sl_tp
 from risk_management.lot_sizing_module import calculate_lot_size
 from risk_management.breakeven_manager import BreakEvenManager
+from config.settings import SL_BUFFER_AFTER_TP1
 from risk_management.daily_guard import DailyGuard
 
 
@@ -47,5 +48,13 @@ def prepare_trade_parameters(
         sl,
         tp_levels[0] if tp_levels else None,
     )
-    bem = BreakEvenManager(entry_price, direction, sl, tp_levels)
+    trail_dist = abs(tp_levels[0] - entry_price) if tp_levels else 0.0
+    bem = BreakEvenManager(
+        entry_price,
+        direction,
+        sl,
+        tp_levels,
+        sl_buffer=SL_BUFFER_AFTER_TP1,
+        trail_distance=trail_dist,
+    )
     return lot, sl, tp_levels, bem, regime

@@ -407,7 +407,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         sl,
         tp_levels[0],
     )
-    
+    trail_dist = abs(tp_levels[0] - entry)
     tickets: list[int] = []
     for idx, ratio in enumerate(PARTIAL_CLOSE_RATIOS[:3]):
         sub_lot = round(lot * ratio, 2)
@@ -437,6 +437,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
                 timestamp=datetime.utcnow().isoformat() + "Z",
                 regime=regime,
                 tp_index=idx,
+                trail_distance=trail_dist,
             )
             monitor = TradeMonitorAgent(tkt, symbol, timeframe, best_strat, regime)
             threading.Thread(target=monitor.wait_and_score, daemon=True).start()
@@ -524,6 +525,7 @@ def run_live_trade_manager() -> None:
             symbol=pos.symbol,
             lot=pos.volume,
             precision=getattr(mt5.symbol_info(pos.symbol), "digits", 2),
+            trail_distance=rec.get("trail_distance", 0.0),
         )
         new_sl = bem.update_stop_loss(price)
         reached.update(bem.reached_tps)

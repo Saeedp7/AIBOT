@@ -7,6 +7,7 @@ import argparse
 import ast
 import json
 import os
+from copy import deepcopy
 from pathlib import Path
 
 DEFAULT_OUTPUT = "ai_engine/strategy_scores.json"
@@ -19,7 +20,7 @@ DEFAULT_METRICS = {
 
 
 def find_strategy_classes() -> list[str]:
-    """Parse ``strategies`` package and return subclass names of ``BaseStrategy``."""
+    """Parse `strategies` package and return subclass names of `BaseStrategy`."""
     root = Path(__file__).resolve().parent.parent
     strategies_dir = root / "strategies"
     classes: list[str] = []
@@ -32,18 +33,16 @@ def find_strategy_classes() -> list[str]:
         for node in tree.body:
             if isinstance(node, ast.ClassDef):
                 for base in node.bases:
-                    if isinstance(base, ast.Name) and base.id == "BaseStrategy":
-                        classes.append(node.name)
-                        break
-                    if isinstance(base, ast.Attribute) and base.attr == "BaseStrategy":
+                    if (isinstance(base, ast.Name) and base.id == "BaseStrategy") or \
+                       (isinstance(base, ast.Attribute) and base.attr == "BaseStrategy"):
                         classes.append(node.name)
                         break
     return classes
 
 
 def build_scores() -> dict:
-    """Return mapping of strategy names to default metrics."""
-    return {name: DEFAULT_METRICS.copy() for name in find_strategy_classes()}
+    """Return mapping of strategy names to default metrics (deep copied)."""
+    return {name: deepcopy(DEFAULT_METRICS) for name in find_strategy_classes()}
 
 
 def main() -> None:
