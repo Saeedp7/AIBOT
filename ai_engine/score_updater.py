@@ -124,6 +124,42 @@ def get_strategy_win_rate(strategy_name: str, path: str = DEFAULT_SCORE_PATH) ->
     """Return win rate percentage for ``strategy_name`` from the score file."""
     return float(load_scores(path).get(strategy_name, {}).get("win_rate", 0.0))
 
+def update_ai_from_trade(
+    *,
+    ticket: int,
+    result: str,
+    strategy: str,
+    regime: str,
+    symbol: str,
+    timeframe: str,
+    net_profit_pct: float,
+    tp_hits: list,
+) -> None:
+    """Analyze trade outcome and update AI memory."""
+    from ai_engine.memory import strategy_memory
+
+    outcome = str(result or "").lower()
+    if outcome.startswith("tp"):
+        feedback_score = 1.0
+    elif outcome == "closed_early":
+        feedback_score = 0.5
+    elif outcome == "stopped_out":
+        feedback_score = -1.0
+    else:
+        feedback_score = 0.0
+
+    bonus = len(tp_hits) * 0.2
+    adjusted = feedback_score + bonus
+
+    strategy_memory.update_score(
+        symbol=symbol,
+        timeframe=timeframe,
+        strategy=strategy,
+        regime=regime,
+        score_delta=adjusted,
+    )
+
+
 
 if __name__ == "__main__":
     example = {

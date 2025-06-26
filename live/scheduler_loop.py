@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import time
 import threading
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import argparse
 import logging
 import os
@@ -45,7 +45,7 @@ from agents.strategy_selector_agent import StrategySelectorAgent
 from agents.risk_manager_agent import RiskManagerAgent
 from agents.trade_monitor_agent import TradeMonitorAgent
 from ai_engine.strategy_selector import load_scores
-from ai_engine.score_updater import update_strategy_score
+from ai_engine.score_updater import update_strategy_score, update_ai_from_trade
 from risk_management.core import prepare_trade_parameters
 from risk_management.commission_calculator import estimate_commission, estimate_swap
 from risk_management.daily_guard import DailyGuard
@@ -60,6 +60,7 @@ from monitoring.alert_manager import (
     alert_sl_moved,
     alert_trade_closed,
     alert_daily_guard,
+    send_telegram_alert,
     retry_failed_alerts,
 )
 from execution.spread_guard import spread_within_limit
@@ -112,6 +113,8 @@ daily_guard = DailyGuard(
     max_trades=MAX_TRADES_PER_DAY,
 )
 
+daily_guard_alert_sent = False
+daily_guard_trigger_date: date | None = None
 
 trade_cache: set[tuple[str, str]] = set()
 strategy_selector_agent = StrategySelectorAgent(StrategySelector().strategies)
@@ -239,11 +242,18 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
             f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Market is Closed"
         )
         return
+    today = date.today()
+    global daily_guard_alert_sent, daily_guard_trigger_date
+    if daily_guard_alert_sent and daily_guard_trigger_date == today:
+        logger.info(f"[SKIP] Bot paused due to Daily Guard for {today}")
+        return
     if not force_trade and daily_guard.hit_limits():
-        logger.warning(
-            f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Max drawdown reached"
-        )
-        alert_daily_guard("limits hit")
+        if not daily_guard_alert_sent or daily_guard_trigger_date != today:
+            alert_daily_guard(
+                f"\u274c Daily limit hit. Bot halted until {today + timedelta(days=1)}"
+            )
+            daily_guard_alert_sent = True
+            daily_guard_trigger_date = today
         return
 
     if (symbol, timeframe) in trade_cache and not force_trade:
@@ -448,6 +458,21 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
             )
             monitor = TradeMonitorAgent(tkt, symbol, timeframe, best_strat, regime)
             threading.Thread(target=monitor.wait_and_score, daemon=True).start()
+            tp_info = ", ".join([f"TP{i+1}: {tp}" for i, tp in enumerate(tp_levels[:3])])
+            alert_msg = (
+                f"\u2705 Trade Executed\n"
+                f"Symbol: {symbol}\n"
+                f"Timeframe: {timeframe}\n"
+                f"Strategy: {best_strat}\n"
+                f"Regime: {regime}\n"
+                f"Direction: {decision.upper()}\n"
+                f"Entry: {entry}\n"
+                f"SL: {sl}\n"
+                f"{tp_info}\n"
+                f"Lot: {sub_lot}\n"
+                f"Ticket: {tkt}"
+            )
+            send_telegram_alert(alert_msg)
 
     if tickets:
         from execution.multi_tp_manager import register_group
@@ -635,6 +660,16 @@ def run_live_trade_manager() -> None:
                 trade_cache.discard((pos.symbol, rec["timeframe"]))
                 exposure_guard.remove(pos.symbol, rec["timeframe"])
                 alert_trade_closed(pos.symbol, rec["timeframe"], "closed_early")
+                update_ai_from_trade(
+                    ticket=ticket,
+                    result="closed_early",
+                    strategy=rec.get("strategy", ""),
+                    regime=rec.get("regime", ""),
+                    symbol=pos.symbol,
+                    timeframe=rec["timeframe"],
+                    net_profit_pct=net_pct,
+                    tp_hits=rec.get("reached_tps", []),
+                )
 
 
 def scheduler_loop(args: argparse.Namespace) -> None:
@@ -642,6 +677,11 @@ def scheduler_loop(args: argparse.Namespace) -> None:
     logging.basicConfig(level=level, format="%(asctime)s - %(levelname)s - %(message)s")
     while True:
         print("🔁 Loop is running...")
+        global daily_guard_alert_sent, daily_guard_trigger_date
+        if daily_guard_trigger_date and date.today() != daily_guard_trigger_date:
+            daily_guard_alert_sent = False
+            daily_guard_trigger_date = None
+            logger.info("[RESET] Daily Guard reset for new day")
         if not mt5.initialize():
             logger.error("Failed to initialize MT5")
             time.sleep(CHECK_INTERVAL_SECONDS)
