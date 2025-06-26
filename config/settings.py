@@ -45,6 +45,14 @@ SYMBOL_OVERRIDES = {
     }
 }
 
+PIP_SIZES = {
+    "XAUUSD": 0.1,
+    "NDXUSD": 1.0,
+    "DJIUSD": 1.0,
+    "BTCUSD": 1.0,
+    "ETHUSD": 1.0,
+
+}
 ACTIVE_SYMBOLS_TIMEFRAMES = {symbol: TIMEFRAMES for symbol in SYMBOLS}
 
 # Backtest date range
@@ -92,7 +100,7 @@ REGIME_TP_MULTIPLIERS = {
 # Partial position close ratios (e.g. "0.33,0.33,0.34")
 PARTIAL_CLOSE_RATIOS = [
     float(x)
-    for x in os.getenv("PARTIAL_CLOSE_RATIOS", "0.33,0.33,0.34").split(",")
+    for x in os.getenv("PARTIAL_CLOSE_RATIOS", "3.3,3.33,3.34").split(",")
     if x
 ]
 # Multi-TP distances in pips for legs 1-3

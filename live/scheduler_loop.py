@@ -161,7 +161,7 @@ def execute_trade(
 
     entry_price = price.ask if direction == "buy" else price.bid
 
-    sl, tp, valid = enforce_min_stop_distance(symbol, entry_price, sl, tp, direction)
+    sl, _, valid = enforce_min_stop_distance(symbol, entry_price, sl, tp, direction)
     if not valid:
         return None
     if get_config("LIVE_MODE", "false").lower() != "true":
@@ -181,7 +181,6 @@ def execute_trade(
     deal_type = mt5.ORDER_TYPE_BUY if direction == "buy" else mt5.ORDER_TYPE_SELL
     symbol_info = mt5.symbol_info(symbol)
     type_filling = mt5.ORDER_FILLING_IOC  # default fallback
-
     # Optional: make it dynamic per-symbol from config
     override = get_config("FILLING_MODE_OVERRIDES", {})
     if symbol in override:
@@ -193,6 +192,7 @@ def execute_trade(
             mt5.ORDER_FILLING_RETURN,
         ):
             type_filling = symbol_info.filling_mode
+    print(tp)            
     request = {
         "action": mt5.TRADE_ACTION_DEAL,
         "symbol": symbol,
@@ -200,6 +200,7 @@ def execute_trade(
         "type": deal_type,
         "price": entry_price,
         "sl": sl,
+        "tp": tp,
         "deviation": 20,
         "magic": MAGIC_NUMBER + magic_offset,
         "comment": "AI Trade",
@@ -380,14 +381,15 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         )
         return
     commission = estimate_commission(symbol, lot)
-    tp_usd = abs(tp_levels[0] - entry) * lot * 100000.0
-    sl_usd = abs(entry - sl) * lot * 100000.0
-    adjusted_tp = (tp_usd + commission) / (lot * 100000.0)
-    adjusted_sl = (sl_usd + commission) / (lot * 100000.0)
     direction_mult = 1 if decision == "buy" else -1
-    tp_levels[0] = round(entry + direction_mult * adjusted_tp, 2)
-    sl = round(entry - direction_mult * adjusted_sl, 2)
+    tp_levels = [round(tp, 2) for tp in tp_levels]
+    # Keep original sl/tp from strategy logic
 
+    # Slightly widen SL to absorb commission only
+    sl_diff = abs(entry - sl)
+    sl_adjusted = sl_diff + (commission / (lot * 100000.0))
+    sl = round(entry - direction_mult * sl_adjusted, 2)
+    
     logger.info(f"Estimated commission for {symbol}: ${commission:.2f}")
     logger.info(
         "%s %s → %s @ %s | SL: %s TP1: %s Lot: %s",
@@ -416,12 +418,13 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         if sub_lot <= 0:
             continue
         tp_val = tp_levels[idx] if idx < len(tp_levels) else tp_levels[-1]
+        print(tp_val)
         tkt = execute_trade(
             decision,
             symbol,
             sub_lot,
             sl,
-            tp_val,
+            tp=tp_val,
             magic_offset=idx,
         )
         if tkt:
