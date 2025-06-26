@@ -35,6 +35,7 @@ from config.settings import (
     DEFAULT_CONFIDENCE_THRESHOLDS,
     MIN_RISK_SCALE,
     DEFAULT_ALLOWED_REGIMES,
+    SL_BUFFER_AFTER_TP1,
 )
 from data.chart_data_handler import load_multi_ohlcv
 from data.preprocessing import preprocess_ohlcv_data
@@ -407,7 +408,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         sl,
         tp_levels[0],
     )
-    trail_dist = abs(tp_levels[0] - entry)
+    trail_dist = _bem.trail_distance
     tickets: list[int] = []
     for idx, ratio in enumerate(PARTIAL_CLOSE_RATIOS[:3]):
         sub_lot_raw = lot * ratio
@@ -446,7 +447,15 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
     if tickets:
         from execution.multi_tp_manager import register_group
 
-        register_group(tickets, symbol, decision, entry, sl, tp_levels[:3])
+        register_group(
+            tickets,
+            symbol,
+            decision,
+            entry,
+            sl,
+            tp_levels[:3],
+            SL_BUFFER_AFTER_TP1,
+        )
         daily_guard.record_trade(0)
         exposure_guard.record(symbol, timeframe, decision, confidence)
         executed_trades.setdefault(symbol, {}).setdefault(timeframe, []).extend(tickets)

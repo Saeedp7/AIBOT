@@ -18,6 +18,7 @@ def register_group(
     entry: float,
     sl: float,
     tp_levels: List[float],
+    sl_buffer: float,
 ) -> int:
     """Register a new multi-TP order group."""
     if not tickets:
@@ -29,6 +30,7 @@ def register_group(
         "direction": direction,
         "entry": entry,
         "tp_levels": tp_levels,
+        "sl_buffer": sl_buffer,
     }
     for idx, t in enumerate(tickets):
         _ticket_map[t] = (group_id, idx)
@@ -69,13 +71,15 @@ def handle_order_close(ticket: int, price: float) -> None:
     remaining = [t for t in data["tickets"] if t != ticket and t in _ticket_map]
     entry = data["entry"]
     tp_levels = data["tp_levels"]
-
+    sl_buffer = data.get("sl_buffer", 0.0)
     if idx == 0 and remaining:
         for t in remaining:
             _modify_sl(t, entry, [0])
     elif idx == 1 and remaining:
         # Only one ticket should remain
-        _modify_sl(remaining[0], tp_levels[0], [0, 1])
+        buffer_adj = sl_buffer if data["direction"] == "buy" else -sl_buffer
+        new_sl = tp_levels[1] - buffer_adj
+        _modify_sl(remaining[0], new_sl, [0, 1])
 
     if not remaining:
         _groups.pop(group_id, None)

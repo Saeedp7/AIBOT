@@ -80,7 +80,11 @@ class BreakEvenManager:
                 else current_price <= self.tp_levels[1]
             )
             if hit_tp2:
-                self.sl = round(self.tp_levels[0], self.precision)
+                if self.direction == "buy":
+                    new_sl = self.tp_levels[1] - self.sl_buffer
+                else:
+                    new_sl = self.tp_levels[1] + self.sl_buffer
+                self.sl = round(new_sl, self.precision)
                 self.stop_loss = self.sl
                 self._reached.add(1)
                 return self.sl

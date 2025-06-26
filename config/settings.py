@@ -56,6 +56,14 @@ USE_ATR_SL = True
 ATR_PERIOD = 14
 ATR_MULTIPLIER = 1.5
 
+# --- Trailing stop settings ---
+USE_ATR_TRAILING = os.getenv(
+    "USE_ATR_TRAILING", get_config("USE_ATR_TRAILING", "true")
+).lower() == "true"
+TRAIL_ATR_MULTIPLIER = float(
+    os.getenv("TRAIL_ATR_MULTIPLIER", get_config("TRAIL_ATR_MULTIPLIER", 1.0))
+)
+
 # --- Regime detection thresholds ---
 REGIME_ATR_SLOPE_THRESHOLD = float(os.getenv("REGIME_ATR_SLOPE_THRESHOLD", 0.7))
 REGIME_EMA_DISTANCE_THRESHOLD = float(os.getenv("REGIME_EMA_DISTANCE_THRESHOLD", 0.5))
@@ -87,12 +95,18 @@ PARTIAL_CLOSE_RATIOS = [
     for x in os.getenv("PARTIAL_CLOSE_RATIOS", "0.33,0.33,0.34").split(",")
     if x
 ]
-# Default TP distances in pips (e.g. "40,80,120")
-TP_PIPS = [
+# Multi-TP distances in pips for legs 1-3
+MULTI_TP_DISTANCES = [
     float(x)
-    for x in os.getenv("TP_PIPS", get_config("TP_PIPS", "40,80,120")).split(",")
+    for x in os.getenv(
+        "MULTI_TP_DISTANCES", get_config("MULTI_TP_DISTANCES", "40,80,120")
+    ).split(",")
     if x
 ]
+# Fallback minimum TP distances if config is missing or invalid
+MIN_TP_DISTANCE_PIPS = [40, 80, 120]
+if len(MULTI_TP_DISTANCES) < 3:
+    MULTI_TP_DISTANCES = MIN_TP_DISTANCE_PIPS
 # Buffer (in price units) added when moving SL to breakeven after TP1
 SL_BUFFER_AFTER_TP1 = float(
     os.getenv("SL_BUFFER_AFTER_TP1", get_config("sl_buffer_after_tp1", 0.5))

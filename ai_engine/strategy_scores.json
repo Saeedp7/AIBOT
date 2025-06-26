@@ -11,11 +11,6 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
-    },
-    "volatile": {
-      "win_rate": 100.0,
-      "recent_score": 1.0882,
-      "regime_fit": 1.0882
     }
   },
   "EMACrossoverScalpingStrategy": {
@@ -28,11 +23,6 @@
   "FibonacciSwingStrategy": {
     "unknown": {
       "win_rate": 0.5,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
-    },
-    "volatile": {
-      "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
     }
@@ -54,11 +44,6 @@
   "LondonBreakoutStrategy": {
     "unknown": {
       "win_rate": 0.5,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
-    },
-    "volatile": {
-      "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
     }
@@ -89,11 +74,6 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
-    },
-    "volatile": {
-      "win_rate": 100.0,
-      "recent_score": 1.0882,
-      "regime_fit": 1.0882
     }
   },
   "OrderBlockScalpingStrategy": {
@@ -101,11 +81,6 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
-    },
-    "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.8199999999999998,
-      "regime_fit": 0.8199999999999998
     }
   },
   "PriceActionStrategy": {
@@ -113,11 +88,6 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
-    },
-    "volatile": {
-      "win_rate": 50.0,
-      "recent_score": 0.8307999999999999,
-      "regime_fit": 0.8307999999999999
     }
   },
   "SupertrendADXRSIStrategy": {
@@ -130,11 +100,6 @@
   "SupplyDemandSwingStrategy": {
     "unknown": {
       "win_rate": 0.5,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
-    },
-    "volatile": {
-      "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
     }
@@ -151,11 +116,6 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
-    },
-    "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.8199999999999998,
-      "regime_fit": 0.8199999999999998
     }
   },
   "TrendPullbackStrategy": {
@@ -163,11 +123,6 @@
       "win_rate": 0.5,
       "recent_score": 0.5,
       "regime_fit": 0.5
-    },
-    "volatile": {
-      "win_rate": 100.0,
-      "recent_score": 1.03,
-      "regime_fit": 1.03
     }
   },
   "VolumeBreakoutStrategy": {
