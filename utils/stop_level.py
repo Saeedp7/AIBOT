@@ -59,5 +59,5 @@ def enforce_min_stop_distance(
             f"Invalid stop levels for {symbol}. SL/TP too close to price even after adjustment."
         )
         return sl, tp, False
-
+    
     return sl, tp, True

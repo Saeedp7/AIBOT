@@ -410,7 +410,8 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
     trail_dist = abs(tp_levels[0] - entry)
     tickets: list[int] = []
     for idx, ratio in enumerate(PARTIAL_CLOSE_RATIOS[:3]):
-        sub_lot = round(lot * ratio, 2)
+        sub_lot_raw = lot * ratio
+        sub_lot = round(max(sub_lot_raw, 0.01), 2)
         if sub_lot <= 0:
             continue
         tp_val = tp_levels[idx] if idx < len(tp_levels) else tp_levels[-1]

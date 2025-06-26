@@ -87,6 +87,12 @@ PARTIAL_CLOSE_RATIOS = [
     for x in os.getenv("PARTIAL_CLOSE_RATIOS", "0.33,0.33,0.34").split(",")
     if x
 ]
+# Default TP distances in pips (e.g. "40,80,120")
+TP_PIPS = [
+    float(x)
+    for x in os.getenv("TP_PIPS", get_config("TP_PIPS", "40,80,120")).split(",")
+    if x
+]
 # Buffer (in price units) added when moving SL to breakeven after TP1
 SL_BUFFER_AFTER_TP1 = float(
     os.getenv("SL_BUFFER_AFTER_TP1", get_config("sl_buffer_after_tp1", 0.5))
