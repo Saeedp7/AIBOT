@@ -105,7 +105,7 @@ class BreakEvenManager:
                 self._reached.add(2)
                 return self.sl
 
-        if self.trail_distance > 0 and (1 in self._reached or 2 in self._reached):
+        if self.trail_distance is not None and self.trail_distance > 0 and (1 in self._reached or 2 in self._reached):
             if self.direction == "buy":
                 new_sl = round(current_price - self.trail_distance, self.precision)
                 if new_sl > self.sl:

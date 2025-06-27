@@ -12,7 +12,7 @@ API_PATH = os.getenv('MT5_PATH', r'C:\Program Files\MetaTrader 5\terminal64.exe'
 
 # --- Trading Settings ---
 # config/settings.py
-SYMBOLS = ["XAUUSD.", "NDXUSD.", "DJIUSD."]
+SYMBOLS = ["XAUUSD.", "NDXUSD.", "DJIUSD.", "BTCUSD.", "ETHUSD."]
 TIMEFRAMES = ["M1", "M5", "M15", "H1", "H4"]
 SYMBOL = os.getenv('TRADE_SYMBOL', 'BTCUSD.')
 CHECK_INTERVAL_SECONDS = 60

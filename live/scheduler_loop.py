@@ -149,6 +149,17 @@ for sym, tf_map in executed_trades.items():
 ohlcv_cache: Dict[Tuple[str, str], pd.DataFrame] = {}
 indicator_cache: Dict[Tuple[str, str], pd.DataFrame] = {}
 
+def refresh_active_symbols() -> None:
+    """Update ACTIVE_SYMBOLS_TIMEFRAMES based on market hours."""
+    global ACTIVE_SYMBOLS_TIMEFRAMES
+    core = ["XAUUSD.", "NDXUSD.", "DJIUSD."]
+    crypto = ["BTCUSD.", "ETHUSD."]
+    open_core = [s for s in core if is_market_open(s)]
+    if not open_core:
+        ACTIVE_SYMBOLS_TIMEFRAMES = {s: TIMEFRAMES for s in crypto}
+    else:
+        ACTIVE_SYMBOLS_TIMEFRAMES = {s: TIMEFRAMES for s in open_core}
+
 
 def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:
     """Fetch and cache OHLCV data with indicators for a symbol/timeframe."""
@@ -763,6 +774,7 @@ def scheduler_loop(args: argparse.Namespace) -> None:
             time.sleep(CHECK_INTERVAL_SECONDS)
             continue
         try:
+            refresh_active_symbols()
             run_live_trade_manager()
             retry_failed_alerts()
             for symbol, tfs in ACTIVE_SYMBOLS_TIMEFRAMES.items():

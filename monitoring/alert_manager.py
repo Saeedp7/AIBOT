@@ -23,14 +23,12 @@ def _send_telegram(message: str) -> bool:
 
 def send_telegram_alert(message: str) -> None:
     """Send ``message`` immediately via Telegram or queue for retry."""
-    print(message)
-    # if not _send_telegram(message):
-    #     telegram_queue.append({"msg": message, "retries": 0, "ts": datetime.utcnow()})
+    if not _send_telegram(message):
+        telegram_queue.append({"msg": message, "retries": 0, "ts": datetime.utcnow()})
 
 def _notify(message: str) -> None:
-    print(message)
-    #  if not _send_telegram(message):
-    #     telegram_queue.append({"msg": message, "retries": 0, "ts": datetime.utcnow()})
+     if not _send_telegram(message):
+        telegram_queue.append({"msg": message, "retries": 0, "ts": datetime.utcnow()})
 
 
 def retry_failed_alerts() -> None:

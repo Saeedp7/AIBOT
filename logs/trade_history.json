@@ -4683,7 +4683,7 @@
     "timeframe": "M1",
     "strategy": "SupplyDemandSwingStrategy",
     "entry": 3273.72,
-    "sl": 3269.72,
+    "sl": 3274.22,
     "tp": [
       3277.72,
       3281.72,
@@ -4691,18 +4691,18 @@
       3289.72,
       3293.72
     ],
-    "result": "open",
+    "result": "TP1 hit",
     "regime": "volatile",
     "exit": null,
     "close_time": null,
     "duration": null,
     "profit_pct": null,
     "net_profit_pct": null,
-    "commission_usd": null,
+    "commission_usd": 0.0,
     "swap_usd": null,
     "exit_reason": null,
-    "hit": null,
-    "sl_moved": false,
+    "hit": "TP1",
+    "sl_moved": true,
     "closed_early": false,
     "volume": 0.01,
     "ticket": 27541197,
@@ -4713,14 +4713,18 @@
     "bias": null,
     "session_tag": null,
     "rr_ratio": null,
-    "tp_index": 1
+    "tp_index": 1,
+    "tp1_hit": true,
+    "reached_tps": [
+      0
+    ]
   },
   {
     "symbol": "XAUUSD.",
     "timeframe": "M1",
     "strategy": "SupplyDemandSwingStrategy",
     "entry": 3273.72,
-    "sl": 3269.72,
+    "sl": 3277.72,
     "tp": [
       3277.72,
       3281.72,
@@ -4728,18 +4732,18 @@
       3289.72,
       3293.72
     ],
-    "result": "open",
+    "result": "TP1 hit",
     "regime": "volatile",
     "exit": null,
     "close_time": null,
     "duration": null,
     "profit_pct": null,
     "net_profit_pct": null,
-    "commission_usd": null,
+    "commission_usd": 0.0,
     "swap_usd": null,
     "exit_reason": null,
-    "hit": null,
-    "sl_moved": false,
+    "hit": "TP2",
+    "sl_moved": true,
     "closed_early": false,
     "volume": 0.01,
     "ticket": 27541198,
@@ -4750,7 +4754,13 @@
     "bias": null,
     "session_tag": null,
     "rr_ratio": null,
-    "tp_index": 2
+    "tp_index": 2,
+    "tp1_hit": true,
+    "reached_tps": [
+      0,
+      1
+    ],
+    "tp2_hit": true
   },
   {
     "symbol": "NDXUSD.",
@@ -4973,5 +4983,43 @@
     "session_tag": null,
     "rr_ratio": null,
     "tp_index": 2
+  },
+  {
+    "symbol": "NDXUSD.",
+    "timeframe": "M5",
+    "strategy": "SMCStrategy",
+    "entry": 22553.1,
+    "sl": 22552.6,
+    "tp": [
+      22542.1,
+      22375.4
+    ],
+    "result": "TP1 hit",
+    "regime": "bearish",
+    "exit": null,
+    "close_time": null,
+    "duration": null,
+    "profit_pct": null,
+    "net_profit_pct": null,
+    "commission_usd": 0.0,
+    "swap_usd": null,
+    "exit_reason": null,
+    "hit": "TP1",
+    "sl_moved": true,
+    "closed_early": false,
+    "volume": 0.01,
+    "ticket": 27541366,
+    "timestamp": "2025-06-27T17:44:28.725493Z",
+    "trail_distance": null,
+    "pattern_detected": "SMC",
+    "entry_zone": "OB",
+    "bias": "bearish",
+    "session_tag": "Off",
+    "rr_ratio": Infinity,
+    "tp_index": 1,
+    "tp1_hit": true,
+    "reached_tps": [
+      0
+    ]
   }
 ]
