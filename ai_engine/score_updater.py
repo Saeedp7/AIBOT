@@ -92,6 +92,14 @@ def update_strategy_score(
         Exponential smoothing factor for ``win_rate``.
     """
     if net_profit_pct is None:
+        # Ensure strategy entry exists even when no result yet
+        scores = _load_json(score_path)
+        regime = regime or "unknown"
+        scores.setdefault(strategy_name, {}).setdefault(
+            regime,
+            {"recent_score": 1.0, "win_rate": 50.0, "regime_fit": 1.0, "decay": 0.99},
+        )
+        _save_json(scores, score_path)
         return
     scores = _load_json(score_path)
     regime = regime or "unknown"

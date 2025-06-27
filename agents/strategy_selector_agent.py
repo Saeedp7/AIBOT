@@ -5,6 +5,9 @@ from typing import Iterable, Tuple
 import pandas as pd
 
 from strategies.base import BaseStrategy
+import logging
+
+logger = logging.getLogger(__name__)
 from .market_scanner_agent import MarketScannerAgent
 from .strategy_evaluator_agent import StrategyEvaluatorAgent
 from .memory_evaluator_agent import MemoryEvaluatorAgent
@@ -33,6 +36,8 @@ class StrategySelectorAgent:
         evaluations = self.evaluator.evaluate(
             allowed, df, regime, symbol=symbol, timeframe=timeframe
         )
+        score_map = {e["strategy"].__class__.__name__: e["score"] for e in evaluations}
+        logger.info("Evaluated strategies: %s", score_map)
         best = None
         best_score = -1.0
         decision = None

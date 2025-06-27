@@ -6,6 +6,7 @@ import pandas as pd
 
 from strategies.base import BaseStrategy
 from ai_engine.strategy_selector import load_scores
+from config.settings import DEFAULT_CONFIDENCE_THRESHOLDS
 import logging
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,7 @@ class StrategyEvaluatorAgent:
         except TypeError:
             scores = load_scores()
         results: List[Dict] = []
+        base_score = DEFAULT_CONFIDENCE_THRESHOLDS.get(regime, 0.3)
         for strat in strategies:
             name = strat.__class__.__name__
             signal = strat.check_signal(symbol, timeframe, df, regime)
@@ -39,10 +41,15 @@ class StrategyEvaluatorAgent:
             if signal == "sell" and regime in {"uptrend"}:
                 logger.info(f"Skipping {name}: sell signal blocked in {regime} regime.")
                 continue
-            metrics = scores.get(name, {})
-            fit = float(metrics.get("regime_fit", 1.0))
-            win = float(metrics.get("win_rate", 0.0))
-            recent = float(metrics.get("recent_score", 0.0))
-            confidence = (win / 100.0) * recent * fit
+            metrics = scores.get(name)
+            if not metrics:
+                confidence = base_score
+            else:
+                fit = float(metrics.get("regime_fit", 1.0))
+                win = float(metrics.get("win_rate", 0.0))
+                recent = float(metrics.get("recent_score", 0.0))
+                confidence = (win / 100.0) * recent * fit
+                if confidence == 0:
+                    confidence = base_score
             results.append({"strategy": strat, "signal": signal, "score": confidence})
         return results
