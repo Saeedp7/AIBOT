@@ -57,7 +57,10 @@ class SMCStrategy(BaseStrategy):
         if entry is None:
             entry = df["close"].iloc[-1]
         sl = ob.get("low") if direction == "bullish" else ob.get("high")
-        rr_ratio = abs((tp1 - entry) / (entry - sl)) if sl else 0.0
+        if sl and abs(entry - sl) > 1e-5:
+            rr_ratio = abs((tp1 - entry) / (entry - sl))
+        else:
+            rr_ratio = 0.0
         label = "SMC-PO3" if detect_po3(df) else "SMC"
         return {
             "entry": float(entry),
