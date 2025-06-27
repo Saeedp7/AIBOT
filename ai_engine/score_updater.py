@@ -9,10 +9,10 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Dict
+from typing import Dict, Iterable
 
 DEFAULT_SCORE_PATH = "ai_engine/strategy_scores.json"
-
+MIN_BASE_SCORE = 0.05
 
 def _load_json(path: str) -> Dict[str, dict]:
     """Return JSON data from ``path`` or an empty dict on failure."""
@@ -30,6 +30,27 @@ def _save_json(data: Dict[str, dict], path: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
+
+def initialize_scores(
+    strategy_names: Iterable[str],
+    regimes: Iterable[str],
+    path: str = DEFAULT_SCORE_PATH,
+) -> None:
+    """Ensure ``path`` has base entries for all strategy/regime combos."""
+    scores = _load_json(path)
+    changed = False
+    for name in strategy_names:
+        reg_map = scores.setdefault(name, {})
+        for regime in regimes:
+            if regime not in reg_map:
+                reg_map[regime] = {
+                    "win_rate": 0.0,
+                    "recent_score": MIN_BASE_SCORE,
+                    "regime_fit": MIN_BASE_SCORE,
+                }
+                changed = True
+    if changed:
+        _save_json(scores, path)
 
 
 def calculate_composite_score(metrics: dict) -> float:
@@ -55,13 +76,20 @@ def update_scores(results: Dict[str, dict], score_path: str = DEFAULT_SCORE_PATH
     scores = _load_json(score_path)
 
     for name, metrics in results.items():
-        existing = scores.get(name, {"win_rate": 0.0, "recent_score": 0.0, "regime_fit": 1.0})
+        existing = scores.get(
+            name,
+            {
+                "win_rate": 0.0,
+                "recent_score": MIN_BASE_SCORE,
+                "regime_fit": MIN_BASE_SCORE,
+            },
+        )
         existing["win_rate"] = 0.8 * float(existing.get("win_rate", 0.0)) + 0.2 * float(metrics.get("win_rate", 0.0))
-        existing["recent_score"] = 0.8 * float(existing.get("recent_score", 0.0)) + 0.2 * float(metrics.get("recent_score", 0.0))
+        existing["regime_fit"] = 0.8 * float(existing.get("regime_fit", MIN_BASE_SCORE)) + 0.2 * float(metrics.get("regime_fit", MIN_BASE_SCORE))
         if "regime_fit" in metrics:
             existing["regime_fit"] = 0.8 * float(existing.get("regime_fit", 1.0)) + 0.2 * float(metrics.get("regime_fit", 1.0))
         else:
-            existing.setdefault("regime_fit", 1.0)
+            existing.setdefault("regime_fit", MIN_BASE_SCORE)
         scores[name] = existing
 
     _save_json(scores, score_path)
@@ -97,7 +125,12 @@ def update_strategy_score(
         regime = regime or "unknown"
         scores.setdefault(strategy_name, {}).setdefault(
             regime,
-            {"recent_score": 1.0, "win_rate": 50.0, "regime_fit": 1.0, "decay": 0.99},
+                       {
+                "recent_score": MIN_BASE_SCORE,
+                "win_rate": 0.0,
+                "regime_fit": MIN_BASE_SCORE,
+                "decay": 0.99,
+            },
         )
         _save_json(scores, score_path)
         return
@@ -105,11 +138,16 @@ def update_strategy_score(
     regime = regime or "unknown"
     metrics = scores.get(strategy_name, {}).get(
         regime,
-        {"recent_score": 1.0, "win_rate": 50.0, "regime_fit": 1.0, "decay": 0.99},
+       {
+            "recent_score": MIN_BASE_SCORE,
+            "win_rate": 0.0,
+            "regime_fit": MIN_BASE_SCORE,
+            "decay": 0.99,
+        },
     )
 
     win = str(result).lower() == "win"
-    prev_recent = float(metrics.get("recent_score", 1.0))
+    prev_recent = float(metrics.get("recent_score", MIN_BASE_SCORE))
     prev_wr = float(metrics.get("win_rate", 50.0))
 
     delta = (abs(net_profit_pct) / 100.0) * (1 if win else -1)
@@ -118,7 +156,7 @@ def update_strategy_score(
 
     metrics["recent_score"] = recent_score
     metrics["win_rate"] = win_rate
-    metrics.setdefault("regime_fit", 1.0)
+    metrics.setdefault("regime_fit", MIN_BASE_SCORE)
     metrics.setdefault("decay", 0.99)
     scores.setdefault(strategy_name, {})[regime] = metrics
     _save_json(scores, score_path)

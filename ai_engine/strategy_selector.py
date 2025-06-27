@@ -7,12 +7,16 @@ historical score metrics to return a consolidated trading signal.
 from __future__ import annotations
 
 from typing import Dict, Optional
+import random
 
 # Default location for the strategy score memory
 DEFAULT_SCORE_PATH = "ai_engine/strategy_scores.json"
 # Minimum average composite score required to act on a direction
 DEFAULT_THRESHOLD = 0.9
-
+# Minimum confidence for any decision
+MIN_CONFIDENCE = 0.1
+# If scores differ by less than this, treat them as equal
+EPSILON = 0.05
 
 def load_scores(path: str = DEFAULT_SCORE_PATH) -> Dict[str, dict]:
     """Return mapping of strategy names to unified score metrics."""
@@ -90,6 +94,12 @@ def get_best_signal(
 
     avg_buy = sum(buy_scores) / len(buy_scores) if buy_scores else 0.0
     avg_sell = sum(sell_scores) / len(sell_scores) if sell_scores else 0.0
+
+    if avg_buy < MIN_CONFIDENCE and avg_sell < MIN_CONFIDENCE:
+        return None
+
+    if abs(avg_buy - avg_sell) < EPSILON and max(avg_buy, avg_sell) > MIN_CONFIDENCE:
+        return random.choice(["buy", "sell"])
 
     if avg_buy > avg_sell and avg_buy > threshold:
         return "buy"

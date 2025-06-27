@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Iterable, Tuple
+import random
 
 import pandas as pd
 
@@ -14,6 +15,10 @@ from .memory_evaluator_agent import MemoryEvaluatorAgent
 from .regime_filter import filter_strategies
 from .streak_guard import StreakGuard
 
+from config.settings import EXPLORATION_PROBABILITY
+
+MIN_CONFIDENCE = 0.1
+EPSILON = 0.05
 
 class StrategySelectorAgent:
     """High level decision maker for choosing a trading direction."""
@@ -38,14 +43,27 @@ class StrategySelectorAgent:
         )
         score_map = {e["strategy"].__class__.__name__: e["score"] for e in evaluations}
         logger.info("Evaluated strategies: %s", score_map)
-        best = None
-        best_score = -1.0
-        decision = None
-        for item in evaluations:
-            if item["signal"] not in ("buy", "sell"):
-                continue
-            if item["score"] > best_score:
-                best_score = item["score"]
-                best = item["strategy"]
-                decision = item["signal"]
-        return decision, best.__class__.__name__ if best else None, regime
+        scored = [
+            (e["strategy"], e["signal"], e["score"])
+            for e in evaluations
+            if e["signal"] in ("buy", "sell")
+        ]
+        if not scored:
+            return None, None, regime
+
+        scored.sort(key=lambda x: x[2], reverse=True)
+        top_score = scored[0][2]
+        if top_score < MIN_CONFIDENCE:
+            return None, None, regime
+
+        if len(scored) > 1 and top_score - scored[1][2] < EPSILON:
+            chosen = random.choice(scored[:2])
+        else:
+            chosen = scored[0]
+
+        # optional exploration across viable candidates
+        candidates = [s for s in scored if s[2] >= MIN_CONFIDENCE]
+        if candidates and random.random() < EXPLORATION_PROBABILITY:
+            chosen = random.choice(candidates)
+
+        return chosen[1], chosen[0].__class__.__name__, regime

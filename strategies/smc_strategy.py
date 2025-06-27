@@ -13,6 +13,7 @@ from strategy_components.liquidity_engine import (
     detect_stop_runs,
 )
 from strategy_components.smc_engine import detect_order_blocks
+from strategy_components.pattern_detector import detect_po3
 from strategy_components.bias_framework import (
     determine_daily_bias,
     align_with_institutional_flow,
@@ -43,12 +44,21 @@ class SMCStrategy(BaseStrategy):
             return None
         ob = ob_list[-1]
         liq = identify_liquidity_zones(df)
-        fvgs = detect_fvgs(df)
+        fvgs = [f for f in detect_fvgs(df) if f.get("type") == direction]
         tp1 = fvgs[-1]["high"] if fvgs else df["close"].iloc[-1] + 0.5
         tp2 = liq.get("eqh") if direction == "bullish" else liq.get("eql")
         tp3 = liq.get("pdh") if direction == "bullish" else liq.get("pdl")
-        entry = df["close"].iloc[-1]
+        entry = (
+            ob.get("high") if direction == "bearish" else ob.get("low")
+        )
+        if fvgs:
+            last_gap = fvgs[-1]
+            entry = (last_gap["low"] + last_gap["high"]) / 2
+        if entry is None:
+            entry = df["close"].iloc[-1]
         sl = ob.get("low") if direction == "bullish" else ob.get("high")
+        rr_ratio = abs((tp1 - entry) / (entry - sl)) if sl else 0.0
+        label = "SMC-PO3" if detect_po3(df) else "SMC"
         return {
             "entry": float(entry),
             "sl": float(sl),
@@ -56,8 +66,9 @@ class SMCStrategy(BaseStrategy):
             "tp2": float(tp2) if tp2 else None,
             "tp3": float(tp3) if tp3 else None,
             "direction": direction,
-            "label": "SMC",
+            "label": label,
             "regime": bias,
+            "rr_ratio": rr_ratio,
         }
 
     def check_signal(self, symbol: str, timeframe: str, df: pd.DataFrame, regime: str) -> str | None:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate initial strategy_scores.json for all strategies."""
+"""Generate initial strategy_scores.json for all strategies with regime-specific metrics."""
 
 from __future__ import annotations
 
@@ -11,11 +11,11 @@ from copy import deepcopy
 from pathlib import Path
 
 DEFAULT_OUTPUT = "ai_engine/strategy_scores.json"
+REGIMES = ["unknown", "trending", "ranging", "volatile"]
 DEFAULT_METRICS = {
-    "recent_score": 1.0,
-    "win_rate": 0.5,
-    "regime_fit": 1.0,
-    "decay": 0.99,
+    "win_rate": 0.0,
+    "recent_score": 0.05,
+    "regime_fit": 0.05,
 }
 
 
@@ -41,12 +41,13 @@ def find_strategy_classes() -> list[str]:
 
 
 def build_scores() -> dict:
-    """Return mapping of strategy names to default metrics (deep copied)."""
-    return {name: deepcopy(DEFAULT_METRICS) for name in find_strategy_classes()}
+    """Return mapping of strategy names to nested regime metrics."""
+    score_template = {regime: deepcopy(DEFAULT_METRICS) for regime in REGIMES}
+    return {name: deepcopy(score_template) for name in find_strategy_classes()}
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate strategy_scores.json")
+    parser = argparse.ArgumentParser(description="Generate strategy_scores.json with regime breakdown")
     parser.add_argument(
         "--skip-if-exists",
         action="store_true",

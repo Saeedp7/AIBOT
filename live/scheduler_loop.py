@@ -340,11 +340,11 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
                     timestamp=datetime.utcnow().isoformat() + "Z",
                     regime=smc_trade.get("regime"),
                     tp_index=idx,
-                    pattern_detected="SMC",
-                    entry_zone="OB" if smc_trade.get("label") == "SMC" else None,
+                    pattern_detected=smc_trade.get("label", "SMC"),
+                    entry_zone="OB" if smc_trade.get("label", "").startswith("SMC") else None,
                     bias=smc_trade.get("regime"),
                     session_tag=_session_label(datetime.utcnow()),
-                    rr_ratio=0.0,
+                    rr_ratio=smc_trade.get("rr_ratio", 0.0),
                 )
         trade_cache.add((symbol, timeframe))
         return
