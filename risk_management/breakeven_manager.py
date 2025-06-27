@@ -88,7 +88,24 @@ class BreakEvenManager:
                 self.stop_loss = self.sl
                 self._reached.add(1)
                 return self.sl
-        if self.trail_distance > 0 and 1 in self._reached:
+
+        if len(self.tp_levels) > 2 and 2 not in self._reached:
+            hit_tp3 = (
+                current_price >= self.tp_levels[2]
+                if self.direction == "buy"
+                else current_price <= self.tp_levels[2]
+            )
+            if hit_tp3:
+                if self.direction == "buy":
+                    new_sl = self.tp_levels[1] - self.sl_buffer
+                else:
+                    new_sl = self.tp_levels[1] + self.sl_buffer
+                self.sl = round(new_sl, self.precision)
+                self.stop_loss = self.sl
+                self._reached.add(2)
+                return self.sl
+
+        if self.trail_distance > 0 and (1 in self._reached or 2 in self._reached):
             if self.direction == "buy":
                 new_sl = round(current_price - self.trail_distance, self.precision)
                 if new_sl > self.sl:
