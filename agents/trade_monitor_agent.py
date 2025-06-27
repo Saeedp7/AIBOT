@@ -92,7 +92,7 @@ class TradeMonitorAgent:
             exit_reason=outcome,
         )
         handle_order_close(self.ticket, exit_price)
-        update_strategy_score(self.strategy, outcome, self.regime)
+        update_strategy_score(self.strategy, outcome, self.regime, score_file_path)
         logger.debug(
             "Trade closed: %s %s result=%s net_pct=%.2f", self.symbol, self.timeframe, outcome, net_pct
         )

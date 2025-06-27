@@ -119,24 +119,12 @@ def update_strategy_score(
     alpha : float, optional
         Exponential smoothing factor for ``win_rate``.
     """
-    if net_profit_pct is None:
-        # Ensure strategy entry exists even when no result yet
-        scores = _load_json(score_path)
-        regime = regime or "unknown"
-        scores.setdefault(strategy_name, {}).setdefault(
-            regime,
-                       {
-                "recent_score": MIN_BASE_SCORE,
-                "win_rate": 0.0,
-                "regime_fit": MIN_BASE_SCORE,
-                "decay": 0.99,
-            },
-        )
-        _save_json(scores, score_path)
-        return
     scores = _load_json(score_path)
+    if not isinstance(scores, dict):
+        scores = {}
     regime = regime or "unknown"
-    metrics = scores.get(strategy_name, {}).get(
+    strat_map = scores.setdefault(strategy_name, {})
+    metrics = strat_map.get(
         regime,
        {
             "recent_score": MIN_BASE_SCORE,
@@ -145,6 +133,12 @@ def update_strategy_score(
             "decay": 0.99,
         },
     )
+    if net_profit_pct is None:
+        # Just ensure the structure exists
+        strat_map[regime] = metrics
+        scores[strategy_name] = strat_map
+        _save_json(scores, score_path)
+        return
 
     win = str(result).lower() == "win"
     prev_recent = float(metrics.get("recent_score", MIN_BASE_SCORE))
