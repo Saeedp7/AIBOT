@@ -53,6 +53,12 @@ def record_trade(
     trail_distance: float | None = None,
     timestamp: str | None = None,
     tp_index: int | None = None,
+    *,
+    pattern_detected: str | None = None,
+    entry_zone: str | None = None,
+    bias: str | None = None,
+    session_tag: str | None = None,
+    rr_ratio: float | None = None,
 ) -> None:
     """Append a trade entry to the history log."""
     history = _load_history()
@@ -81,6 +87,11 @@ def record_trade(
         "ticket": ticket,
         "timestamp": timestamp,
         "trail_distance": trail_distance,
+        "pattern_detected": pattern_detected,
+        "entry_zone": entry_zone,
+        "bias": bias,
+        "session_tag": session_tag,
+        "rr_ratio": rr_ratio,
     }
     if regime is not None:
         trade["regime"] = regime

@@ -70,6 +70,14 @@ from recovery.restart_manager import recover_state
 import MetaTrader5 as mt5
 from utils.market_status import is_market_open
 from utils.stop_level import enforce_min_stop_distance
+from strategies.smc_strategy import SMCStrategy
+from risk_management.lot_sizing_module import calculate_lot_size
+from strategy_components.session_filter import (
+    in_killzone,
+    LONDON_OPEN,
+    NEWYORK_OPEN,
+    NEWYORK_PM,
+)
 
 logger = logging.getLogger("scheduler")
 
@@ -93,6 +101,16 @@ def scale_risk_by_confidence(confidence: float, threshold: float) -> float:
     scale = confidence / threshold
     return max(MIN_RISK_SCALE, round(scale, 2))
 
+
+def _session_label(ts: datetime) -> str:
+    t = ts.time()
+    if LONDON_OPEN[0] <= t <= LONDON_OPEN[1]:
+        return "London"
+    if NEWYORK_OPEN[0] <= t <= NEWYORK_OPEN[1]:
+        return "NYO"
+    if NEWYORK_PM[0] <= t <= NEWYORK_PM[1]:
+        return "PM"
+    return "Off"
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Live trading scheduler loop")
@@ -119,6 +137,7 @@ daily_guard_trigger_date: date | None = None
 trade_cache: set[tuple[str, str]] = set()
 strategy_selector_agent = StrategySelectorAgent(StrategySelector().strategies)
 risk_manager_agent = RiskManagerAgent()
+smc_strategy = SMCStrategy()
 
 # Restore state from previous session if possible
 executed_trades, exposure_guard = recover_state()
@@ -271,6 +290,63 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         logger.warning(
             f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Missing market data"
         )
+        return
+
+    smc_trade = smc_strategy.generate_signal(df.copy())
+    if smc_trade and not force_trade:
+        logger.info(
+            f"[SMC SIGNAL] {symbol} {timeframe} → {smc_trade['direction'].upper()}"
+        )
+        acct = mt5.account_info()
+        lot = calculate_lot_size(
+            acct.balance,
+            abs(smc_trade["entry"] - smc_trade["sl"]),
+            MAX_RISK_PER_TRADE * 100,
+            symbol,
+            df,
+        )
+        tp_levels = [
+            smc_trade.get("tp1"),
+            smc_trade.get("tp2"),
+            smc_trade.get("tp3"),
+        ]
+        tp_levels = [tp for tp in tp_levels if tp]
+        if not tp_levels:
+            logger.warning("SMC trade missing TP levels")
+            return
+        tickets: list[int] = []
+        for idx, ratio in enumerate(PARTIAL_CLOSE_RATIOS[: len(tp_levels)]):
+            sub_lot = round(max(lot * ratio, 0.01), 2)
+            tkt = execute_trade(
+                smc_trade["direction"],
+                symbol,
+                sub_lot,
+                smc_trade["sl"],
+                tp_levels[idx],
+                magic_offset=idx,
+            )
+            if tkt:
+                tickets.append(tkt)
+                record_trade(
+                    symbol=symbol,
+                    timeframe=timeframe,
+                    entry=smc_trade["entry"],
+                    sl=smc_trade["sl"],
+                    tps=tp_levels,
+                    strategy="SMCStrategy",
+                    result="open",
+                    ticket=tkt,
+                    volume=sub_lot,
+                    timestamp=datetime.utcnow().isoformat() + "Z",
+                    regime=smc_trade.get("regime"),
+                    tp_index=idx,
+                    pattern_detected="SMC",
+                    entry_zone="OB" if smc_trade.get("label") == "SMC" else None,
+                    bias=smc_trade.get("regime"),
+                    session_tag=_session_label(datetime.utcnow()),
+                    rr_ratio=0.0,
+                )
+        trade_cache.add((symbol, timeframe))
         return
 
     decision, best_strat, market_regime = strategy_selector_agent.select(symbol, timeframe)
