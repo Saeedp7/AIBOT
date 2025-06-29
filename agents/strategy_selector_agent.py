@@ -31,7 +31,8 @@ class StrategySelectorAgent:
         self.scanner = MarketScannerAgent()
         self.evaluator = StrategyEvaluatorAgent(score_path=score_path)
         self.memory = MemoryEvaluatorAgent(score_path=score_path)
-        self.guard = StreakGuard()
+        # Block strategies after two consecutive losses
+        self.guard = StreakGuard(streak=2)
         self.score_path = score_path
 
     def select(self, symbol: str, timeframe: str) -> Tuple[str | None, str | None, str]:
@@ -41,14 +42,30 @@ class StrategySelectorAgent:
 
         self.memory.run()
 
-        strategy = next(self._strategy_cycle)
-        if self.guard.is_blocked(strategy.__class__.__name__):
-            debug_log(f"Guard blocked {strategy.__class__.__name__}")
-            return None, strategy.__class__.__name__, regime
+        strategies = filter_strategies(self.strategies, regime)
+        if not strategies:
+            return None, None, regime
 
-        evaluation = self.evaluator.evaluate(
-            [strategy], df, regime, symbol=symbol, timeframe=timeframe
-        )[0]
+        evaluations = self.evaluator.evaluate(
+            strategies, df, regime, symbol=symbol, timeframe=timeframe
+        )
+        evaluations.sort(key=lambda e: e["score"], reverse=True)
+
+        if random.random() < EXPLORATION_PROBABILITY:
+            evaluation = random.choice(evaluations)
+        else:
+            evaluation = None
+            for ev in evaluations:
+                name = ev["strategy"].__class__.__name__
+                if not self.guard.is_blocked(name):
+                    evaluation = ev
+                    break
+
+        if evaluation is None:
+            debug_log("All strategies blocked by streak guard")
+            return None, None, regime
+
+        strategy = evaluation["strategy"]
 
         score = evaluation["score"]
         signal = evaluation["signal"]

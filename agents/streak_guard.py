@@ -6,7 +6,8 @@ from utils.trade_journal import load_history
 class StreakGuard:
     """Block strategies after a series of consecutive losses."""
 
-    def __init__(self, streak: int = 3) -> None:
+    def __init__(self, streak: int = 2) -> None:
+        """Initialize guard with consecutive loss threshold."""
         self.streak = streak
 
     def is_blocked(self, strategy_name: str) -> bool:

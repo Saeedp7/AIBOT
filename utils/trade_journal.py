@@ -152,6 +152,7 @@ def update_trade(
     history = _load_history()
     for trade in history:
         if trade.get("ticket") == ticket:
+            net_val = 0.0
             if exit is not None and exit != 0.0:
                 trade["exit"] = exit
             if close_time is not None:
@@ -166,13 +167,13 @@ def update_trade(
                         if net_profit_pct is not None
                         else float(trade.get("net_profit_pct", 0.0))
                     )
-                if net_val > 0:
-                        outcome = "win"
-                elif net_val < 0:
-                        outcome = "loss"
-                else:
-                        outcome = None
-                if outcome:
+            if net_val > 0:
+                    outcome = "win"
+            elif net_val < 0:
+                    outcome = "loss"
+            else:
+                    outcome = None
+            if outcome:
                         update_strategy_score(
                             trade.get("strategy", ""),
                             outcome,
