@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from typing import Iterable, Tuple
 import random
+from itertools import cycle
 
 import pandas as pd
 
 from strategies.base import BaseStrategy
 import logging
+from utils.logger import debug_log
 
 logger = logging.getLogger(__name__)
 from .market_scanner_agent import MarketScannerAgent
@@ -25,6 +27,7 @@ class StrategySelectorAgent:
 
     def __init__(self, strategies: Iterable[BaseStrategy], score_path: str = "ai_engine/strategy_scores.json") -> None:
         self.strategies = list(strategies)
+        self._strategy_cycle = cycle(self.strategies)
         self.scanner = MarketScannerAgent()
         self.evaluator = StrategyEvaluatorAgent(score_path=score_path)
         self.memory = MemoryEvaluatorAgent(score_path=score_path)
@@ -35,35 +38,27 @@ class StrategySelectorAgent:
         df, regime = self.scanner.scan(symbol, timeframe)
         if df is None:
             return None, None, regime
+
         self.memory.run()
-        allowed = filter_strategies(self.strategies, regime)
-        allowed = [s for s in allowed if not self.guard.is_blocked(s.__class__.__name__)]
-        evaluations = self.evaluator.evaluate(
-            allowed, df, regime, symbol=symbol, timeframe=timeframe
+
+        strategy = next(self._strategy_cycle)
+        if self.guard.is_blocked(strategy.__class__.__name__):
+            debug_log(f"Guard blocked {strategy.__class__.__name__}")
+            return None, strategy.__class__.__name__, regime
+
+        evaluation = self.evaluator.evaluate(
+            [strategy], df, regime, symbol=symbol, timeframe=timeframe
+        )[0]
+
+        score = evaluation["score"]
+        signal = evaluation["signal"]
+        name = strategy.__class__.__name__
+        logger.info("Evaluated %s: %.2f -> %s", name, score, signal)
+
+        if signal in ("buy", "sell") and score >= MIN_CONFIDENCE:
+            return signal, name, regime
+
+        debug_log(
+            f"{name} {symbol} {timeframe} signal={signal} score={score:.2f} < {MIN_CONFIDENCE}"
         )
-        score_map = {e["strategy"].__class__.__name__: e["score"] for e in evaluations}
-        logger.info("Evaluated strategies: %s", score_map)
-        scored = [
-            (e["strategy"], e["signal"], e["score"])
-            for e in evaluations
-            if e["signal"] in ("buy", "sell")
-        ]
-        if not scored:
-            return None, None, regime
-
-        scored.sort(key=lambda x: x[2], reverse=True)
-        top_score = scored[0][2]
-        if top_score < MIN_CONFIDENCE:
-            return None, None, regime
-
-        if len(scored) > 1 and top_score - scored[1][2] < EPSILON:
-            chosen = random.choice(scored[:2])
-        else:
-            chosen = scored[0]
-
-        # optional exploration across viable candidates
-        candidates = [s for s in scored if s[2] >= MIN_CONFIDENCE]
-        if candidates and random.random() < EXPLORATION_PROBABILITY:
-            chosen = random.choice(candidates)
-
-        return chosen[1], chosen[0].__class__.__name__, regime
+        return None, name, regime

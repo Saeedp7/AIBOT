@@ -152,13 +152,14 @@ indicator_cache: Dict[Tuple[str, str], pd.DataFrame] = {}
 def refresh_active_symbols() -> None:
     """Update ACTIVE_SYMBOLS_TIMEFRAMES based on market hours."""
     global ACTIVE_SYMBOLS_TIMEFRAMES
-    core = ["XAUUSD.", "NDXUSD.", "DJIUSD."]
-    crypto = ["BTCUSD.", "ETHUSD."]
-    open_core = [s for s in core if is_market_open(s)]
-    if not open_core:
-        ACTIVE_SYMBOLS_TIMEFRAMES = {s: TIMEFRAMES for s in crypto}
+    weekday = datetime.utcnow().weekday()
+    if weekday >= 5:  # Weekend
+        symbols = ["BTCUSD.", "ETHUSD."]
     else:
-        ACTIVE_SYMBOLS_TIMEFRAMES = {s: TIMEFRAMES for s in open_core}
+        symbols = ["XAUUSD.", "NDXUSD.", "DJIUSD."]
+
+    active = [s for s in symbols if is_market_open(s)]
+    ACTIVE_SYMBOLS_TIMEFRAMES = {s: TIMEFRAMES for s in active}
 
 
 def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:

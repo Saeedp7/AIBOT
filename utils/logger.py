@@ -21,3 +21,13 @@ def log_trade_action(message: str):
             f.flush()  # Ensure buffer is written immediately
     except Exception as e:
         print(f"❌ Failed to write to log file: {e}")
+
+
+def debug_log(message: str) -> None:
+    """Append debug information to ``logs/debug.log``."""
+    log_dir = "logs"
+    os.makedirs(log_dir, exist_ok=True)
+    path = os.path.join(log_dir, "debug.log")
+    ts = datetime.utcnow().isoformat() + "Z"
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(f"[{ts}] {message}\n")

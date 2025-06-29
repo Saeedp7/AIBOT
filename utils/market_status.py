@@ -28,17 +28,15 @@ def is_market_open(symbol: str) -> bool:
 
     current_time = tehran_time.time()
     weekday = tehran_time.weekday()  # Monday = 0
-
     session_start = time(1, 30)
     session_end = time(23, 59)
 
-    if weekday >= 5:
+    crypto_symbols = {"BTCUSD.", "ETHUSD."}
+    if weekday >= 5 and symbol not in crypto_symbols:
         return False
 
     if  not (session_start <= current_time <= session_end):
-        print(session_start)
-        print(current_time)
-        print(session_end)
+
         return False
 
     return True

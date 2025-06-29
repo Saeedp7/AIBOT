@@ -5021,5 +5021,42 @@
     "reached_tps": [
       0
     ]
+  },
+  {
+    "symbol": "BTCUSD.",
+    "timeframe": "M1",
+    "strategy": "BreakoutStrategy",
+    "entry": 107166.17,
+    "sl": 107126.17,
+    "tp": [
+      107206.17,
+      107246.17,
+      107286.17,
+      107326.17,
+      107366.17
+    ],
+    "result": "open",
+    "regime": "volatile",
+    "exit": null,
+    "close_time": null,
+    "duration": null,
+    "profit_pct": null,
+    "net_profit_pct": null,
+    "commission_usd": null,
+    "swap_usd": null,
+    "exit_reason": null,
+    "hit": null,
+    "sl_moved": false,
+    "closed_early": false,
+    "volume": 0.05,
+    "ticket": 27545242,
+    "timestamp": "2025-06-27T22:14:05.954795Z",
+    "trail_distance": 8.183571428570888,
+    "pattern_detected": null,
+    "entry_zone": null,
+    "bias": null,
+    "session_tag": null,
+    "rr_ratio": null,
+    "tp_index": 0
   }
 ]
