@@ -63,6 +63,40 @@ def record_trade(
     """Append a trade entry to the history log."""
     history = _load_history()
     timestamp = timestamp or datetime.utcnow().isoformat() + "Z"
+    
+    exit_price = exit
+    commission = commission_usd
+    swap = swap_usd
+
+    if result and result.lower() != "open" and (exit is None or exit == 0.0):
+        try:
+            import MetaTrader5 as mt5  # type: ignore
+
+            deals = getattr(mt5, "history_deals_get", lambda **_: None)(ticket=ticket)
+        except Exception:
+            deals = None
+        if deals:
+            exit_price = getattr(deals[-1], "price", exit_price)
+            if commission is None:
+                commission = -sum(getattr(d, "commission", 0.0) for d in deals)
+            if swap is None:
+                swap = -sum(getattr(d, "swap", 0.0) for d in deals)
+
+    direction = 1
+    if tps:
+        direction = 1 if tps[0] > entry else -1
+    elif sl is not None:
+        direction = 1 if sl < entry else -1
+
+    calc_profit_pct = profit_pct
+    calc_net_pct = net_profit_pct
+
+    if result and result.lower() != "open" and exit_price not in (None, 0.0):
+        diff = (exit_price - entry) * direction
+        calc_profit_pct = diff / entry * 100
+        if volume and commission is not None and swap is not None:
+            charges = commission + swap
+            calc_net_pct = calc_profit_pct - (charges / (entry * volume * 100000.0) * 100)
     trade = {
         "symbol": symbol,
         "timeframe": timeframe,
@@ -72,13 +106,13 @@ def record_trade(
         "tp": tps,
         "result": result,
         "regime": regime,
-        "exit": exit,
+        "exit": exit_price,
         "close_time": close_time,
         "duration": duration,
-        "profit_pct": profit_pct,
-        "net_profit_pct": net_profit_pct,
-        "commission_usd": commission_usd,
-        "swap_usd": swap_usd,
+        "profit_pct": calc_profit_pct,
+        "net_profit_pct": calc_net_pct,
+        "commission_usd": commission,
+        "swap_usd": swap,
         "exit_reason": exit_reason,
         "hit": hit,
         "sl_moved": sl_moved,
