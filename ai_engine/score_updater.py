@@ -122,6 +122,10 @@ def update_strategy_score(
     scores = _load_json(score_path)
     if not isinstance(scores, dict):
         scores = {}
+    
+    if not strategy_name:
+        return
+
     regime = regime or "unknown"
     strat_map = scores.setdefault(strategy_name, {})
     metrics = strat_map.get(
@@ -134,25 +138,35 @@ def update_strategy_score(
         },
     )
     if net_profit_pct is None:
-        # Just ensure the structure exists
         strat_map[regime] = metrics
         scores[strategy_name] = strat_map
         _save_json(scores, score_path)
         return
 
-    win = str(result).lower() == "win"
+    outcome = str(result or "").lower()
+    win = outcome in {"win", "tp", "tp1", "tp2", "tp3"} or outcome.startswith("tp")
+    stop_out = "sl" in outcome or "stop" in outcome
+    missed = "miss" in outcome
     prev_recent = float(metrics.get("recent_score", MIN_BASE_SCORE))
-    prev_wr = float(metrics.get("win_rate", 50.0))
+    prev_wr = float(metrics.get("win_rate", 0.0))
 
-    delta = (abs(net_profit_pct) / 100.0) * (1 if win else -1)
-    recent_score = min(2.0, max(0.1, prev_recent + delta))
+    score_value = 1.0 if win else -1.0
+    if stop_out:
+        score_value -= 0.5
+    if missed:
+        score_value -= 0.2
+
+    recent_score = (1 - alpha) * prev_recent + alpha * score_value
+    recent_score = max(0.0, min(2.0, recent_score))
+
     win_rate = (1 - alpha) * prev_wr + alpha * (100.0 if win else 0.0)
 
     metrics["recent_score"] = recent_score
     metrics["win_rate"] = win_rate
     metrics.setdefault("regime_fit", MIN_BASE_SCORE)
     metrics.setdefault("decay", 0.99)
-    scores.setdefault(strategy_name, {})[regime] = metrics
+    strat_map[regime] = metrics
+    scores[strategy_name] = strat_map
     _save_json(scores, score_path)
 
 def load_scores(path: str = DEFAULT_SCORE_PATH) -> Dict[str, dict]:
