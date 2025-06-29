@@ -118,7 +118,7 @@ def update_trade(
     history = _load_history()
     for trade in history:
         if trade.get("ticket") == ticket:
-            if exit is not None:
+            if exit is not None and exit != 0.0:
                 trade["exit"] = exit
             if close_time is not None:
                 trade["close_time"] = close_time
@@ -130,16 +130,49 @@ def update_trade(
                     net_val = (
                         float(net_profit_pct)
                         if net_profit_pct is not None
-                            else float(trade.get("net_profit_pct", 0.0))
+                        else float(trade.get("net_profit_pct", 0.0))
                     )
-                    win_condition = net_val > 0
-                    outcome = "win" if win_condition else "loss"
-                    update_strategy_score(
-                        trade.get("strategy", ""),
-                        outcome,
-                        net_val,
-                        regime=trade.get("regime", ""),
-                    )
+                if net_val > 0:
+                        outcome = "win"
+                elif net_val < 0:
+                        outcome = "loss"
+                else:
+                        outcome = None
+                if outcome:
+                        update_strategy_score(
+                            trade.get("strategy", ""),
+                            outcome,
+                            net_val,
+                            regime=trade.get("regime", ""),
+                        )
+            # Fetch exit details if missing and trade has closed
+            if result and result.lower() != "open" and trade.get("exit") in (None, 0.0):
+                try:
+                    import MetaTrader5 as mt5  # type: ignore
+
+                    deals = getattr(mt5, "history_deals_get", lambda **_: None)(ticket=ticket)
+                except Exception:
+                    deals = None
+                if deals:
+                    trade["exit"] = getattr(deals[-1], "price", trade.get("exit"))
+                    if commission_usd is None:
+                        commission_usd = -sum(getattr(d, "commission", 0.0) for d in deals)
+                    if swap_usd is None:
+                        swap_usd = -sum(getattr(d, "swap", 0.0) for d in deals)
+
+            if profit_pct is None and trade.get("exit") not in (None, 0.0):
+                direction = 1
+                tps = trade.get("tp", [])
+                if tps:
+                    direction = 1 if tps[0] > trade["entry"] else -1
+                elif trade.get("sl") is not None:
+                    direction = 1 if trade["sl"] < trade["entry"] else -1
+                diff = (float(trade["exit"]) - float(trade["entry"])) * direction
+                profit_pct = diff / float(trade["entry"]) * 100
+            if net_profit_pct is None and profit_pct is not None and commission_usd is not None and swap_usd is not None and trade.get("volume"):
+                charges = commission_usd + swap_usd
+                vol = float(trade.get("volume", 0.0))
+                net_profit_pct = profit_pct - (charges / (float(trade["entry"]) * vol * 100000.0) * 100)
             if profit_pct is not None:
                 trade["profit_pct"] = profit_pct
             if net_profit_pct is not None:
