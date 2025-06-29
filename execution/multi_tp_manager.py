@@ -66,7 +66,7 @@ def handle_order_close(ticket: int, price: float) -> None:
         return
 
     log_trade_action(f"TP{idx + 1} hit for ticket {ticket} @ {price}")
-    update_trade(ticket, hit=f"TP{idx + 1}", result=f"TP{idx + 1}")
+    update_trade(ticket, hit=f"TP{idx + 1}", result=f"TP{idx + 1}", exit_reason="target")
 
     remaining = [t for t in data["tickets"] if t != ticket and t in _ticket_map]
     entry = data["entry"]

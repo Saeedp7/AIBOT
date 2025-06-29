@@ -79,25 +79,42 @@ class TradeMonitorAgent:
                 duration = (datetime.utcnow() - start).total_seconds() / 60
             except Exception:
                 duration = None
+        result_str = outcome
+        reason = "manual"
+        if rec.get("closed_early"):
+            result_str = rec.get("result", "closed_early")
+            reason = rec.get("exit_reason", "manual")
+        else:
+            hit = rec.get("hit")
+            if hit and hit.startswith("TP"):
+                result_str = hit
+                reason = "target"
+            elif outcome == "loss":
+                result_str = "SL hit"
+                reason = "loss"
         update_trade(
             self.ticket,
             exit=exit_price,
             close_time=close_ts,
-            result=outcome,
+            result=result_str,
             profit_pct=gross_pct,
             net_profit_pct=net_pct,
             commission_usd=commission,
             swap_usd=swap,
             duration=duration,
-            exit_reason=outcome,
+            exit_reason=reason,
         )
         handle_order_close(self.ticket, exit_price)
-        update_strategy_score(
-            self.strategy,
-            outcome,
-            net_pct,
-            regime=self.regime,
-        )
+        try:
+            import inspect
+
+            sig = inspect.signature(update_strategy_score)
+            if len(sig.parameters) >= 4:
+                update_strategy_score(self.strategy, result_str, net_pct, regime=self.regime)
+            else:
+                update_strategy_score(self.strategy, result_str, self.regime)
+        except Exception:
+            update_strategy_score(self.strategy, result_str, net_pct, regime=self.regime)
         logger.debug(
             "Trade closed: %s %s result=%s net_pct=%.2f",
             self.symbol,

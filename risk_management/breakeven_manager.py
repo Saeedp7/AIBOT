@@ -48,7 +48,9 @@ class BreakEvenManager:
         if not self.tp_levels or self.entry is None or self.sl is None:
             return self.sl
 
-         # Handle TP1 move
+        moved = False
+
+        # --- TP1: move stop to break even with buffer ---
         if 0 not in self._reached:
             hit_tp1 = (
                 current_price >= self.tp_levels[0]
@@ -63,57 +65,54 @@ class BreakEvenManager:
                 pip_value = tick_value / tick_size if tick_size > 0 else 1.0
                 buffer_pips = commission / pip_value if pip_value > 0 else 0.0
                 buffer_pips += self.sl_buffer
-                if self.direction == "buy":
-                    new_sl = self.entry + buffer_pips
-                else:
-                    new_sl = self.entry - buffer_pips
+                new_sl = (
+                    self.entry + buffer_pips
+                    if self.direction == "buy"
+                    else self.entry - buffer_pips
+                )
                 self.sl = round(new_sl, self.precision)
                 self.stop_loss = self.sl
                 self._reached.add(0)
-                return self.sl
+                moved = True
 
-                # Handle TP2 move
-        if len(self.tp_levels) > 1 and 1 not in self._reached:
-            hit_tp2 = (
-                current_price >= self.tp_levels[1]
+        # --- TP2+: start trailing using configured distance ---
+        if (len(self.tp_levels) > 1 and 1 not in self._reached) or (
+            len(self.tp_levels) > 2 and 2 not in self._reached
+        ):
+            target_idx = 1 if 1 not in self._reached else 2
+            hit_tp = (
+                current_price >= self.tp_levels[target_idx]
                 if self.direction == "buy"
-                else current_price <= self.tp_levels[1]
+                else current_price <= self.tp_levels[target_idx]
             )
-            if hit_tp2:
+            if hit_tp:
+                base_price = current_price
                 if self.direction == "buy":
-                    new_sl = self.tp_levels[1] - self.sl_buffer
+                    new_sl = base_price - self.trail_distance
                 else:
-                    new_sl = self.tp_levels[1] + self.sl_buffer
+                    new_sl = base_price + self.trail_distance
                 self.sl = round(new_sl, self.precision)
                 self.stop_loss = self.sl
-                self._reached.add(1)
-                return self.sl
+                self._reached.add(target_idx)
+                moved = True
 
-        if len(self.tp_levels) > 2 and 2 not in self._reached:
-            hit_tp3 = (
-                current_price >= self.tp_levels[2]
-                if self.direction == "buy"
-                else current_price <= self.tp_levels[2]
-            )
-            if hit_tp3:
-                if self.direction == "buy":
-                    new_sl = self.tp_levels[1] - self.sl_buffer
-                else:
-                    new_sl = self.tp_levels[1] + self.sl_buffer
-                self.sl = round(new_sl, self.precision)
-                self.stop_loss = self.sl
-                self._reached.add(2)
-                return self.sl
-
-        if self.trail_distance is not None and self.trail_distance > 0 and (1 in self._reached or 2 in self._reached):
+# --- Trailing after TP2 ---
+        if (
+            self.trail_distance is not None
+            and self.trail_distance > 0
+            and any(i in self._reached for i in (1, 2))
+        ):
             if self.direction == "buy":
                 new_sl = round(current_price - self.trail_distance, self.precision)
                 if new_sl > self.sl:
                     self.sl = new_sl
-                    self.stop_loss = self.sl
+                    moved = True
             else:
                 new_sl = round(current_price + self.trail_distance, self.precision)
                 if new_sl < self.sl:
                     self.sl = new_sl
-                    self.stop_loss = self.sl
+                    moved = True
+            if moved:
+                self.stop_loss = self.sl
+
         return self.sl
