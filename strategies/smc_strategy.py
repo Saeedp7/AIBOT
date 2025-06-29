@@ -31,6 +31,7 @@ class SMCStrategy(BaseStrategy):
             return None
         if not in_killzone(df.index[-1].to_pydatetime()):
             return None
+        self._log_context(df, pattern_detected="SMC", entry_zone="OB")
         ms = detect_bos_mss(df)
         if not ms["bos"]:
             return None

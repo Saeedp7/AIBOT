@@ -52,4 +52,5 @@ class TrendFollowingStrategy(BaseStrategy):
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
         self.analyze(df)
+        self._log_context(df, pattern_detected="TrendFollowing")
         return self.last_signal

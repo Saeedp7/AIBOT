@@ -43,4 +43,5 @@ class EMACrossoverScalpingStrategy(BaseStrategy):
         return self.signal
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
-        return self.signal
+        self.analyze(df)
+        self._log_context(df, pattern_detected="EMACrossover")

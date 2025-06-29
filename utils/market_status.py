@@ -1,3 +1,6 @@
+from datetime import datetime, time, timedelta
+import MetaTrader5 as mt5
+
 def is_market_open(symbol: str) -> bool:
     """Return True if market is open for the given symbol based on Tehran time (01:30–23:59, Mon–Fri)."""
     info = mt5.symbol_info(symbol)

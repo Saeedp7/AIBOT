@@ -17,6 +17,18 @@ def in_killzone(ts: datetime) -> bool:
     return any(start <= t <= end for start, end in (LONDON_OPEN, NEWYORK_OPEN, NEWYORK_PM))
 
 
+def killzone_label(ts: datetime) -> str:
+    """Return human-readable killzone label for ``ts``."""
+    t = ts.time()
+    if LONDON_OPEN[0] <= t <= LONDON_OPEN[1]:
+        return "London AM"
+    if NEWYORK_OPEN[0] <= t <= NEWYORK_OPEN[1]:
+        return "NY Open"
+    if NEWYORK_PM[0] <= t <= NEWYORK_PM[1]:
+        return "NY PM"
+    return "Off"
+
+
 def detect_session_high_low_sweep(candles: pd.DataFrame) -> bool:
     """Detect wick sweeps of session highs or lows."""
     if candles.empty:

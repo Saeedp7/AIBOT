@@ -45,4 +45,5 @@ class OrderBlockScalpingStrategy(BaseStrategy):
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
         self.analyze(df)
+        self._log_context(df, pattern_detected="OrderBlockScalping", entry_zone="OB")
         return self.signal

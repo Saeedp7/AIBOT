@@ -44,4 +44,5 @@ class TrendPullbackStrategy(BaseStrategy):
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
         self.analyze(df)
+        self._log_context(df, pattern_detected="TrendPullback")
         return self.signal

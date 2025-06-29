@@ -12,10 +12,14 @@ class ICTSmartMoneyStrategy(BaseStrategy):
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
         if len(df) < 5:
+            self._log_context(df, pattern_detected="ICTSmartMoney")
             return None
+        self._log_context(df, pattern_detected="ICTSmartMoney")
         if detect_liquidity_grab(df) and detect_breaker_block(df):
+            self._log_context(df, pattern_detected="ICTSmartMoney", entry_zone="Breaker")
             return "buy" if df["close"].iloc[-1] > df["open"].iloc[-1] else "sell"
         if detect_fvg(df):
+            self._log_context(df, pattern_detected="ICTSmartMoney", entry_zone="FVG")
             return "buy" if df["close"].iloc[-1] > df["open"].iloc[-1] else "sell"
         return None
     def check_signal(

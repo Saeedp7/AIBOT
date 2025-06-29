@@ -14,7 +14,9 @@ class PriceActionStrategy(BaseStrategy):
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
         if len(df) < 5:
+            self._log_context(df, pattern_detected="PriceAction")
             return None
+        self._log_context(df, pattern_detected="PriceAction")
         recent = df.tail(2)
         rsi = calculate_rsi(df["close"]).iloc[-1]
 
