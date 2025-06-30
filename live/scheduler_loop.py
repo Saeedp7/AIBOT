@@ -134,7 +134,8 @@ daily_guard = DailyGuard(
 daily_guard_alert_sent = False
 daily_guard_trigger_date: date | None = None
 
-trade_cache: set[tuple[str, str]] = set()
+# Track currently open trades per symbol/timeframe
+active_trades: dict[tuple[str, str], bool] = {}
 strategy_selector_agent = StrategySelectorAgent(StrategySelector().strategies)
 risk_manager_agent = RiskManagerAgent()
 smc_strategy = SMCStrategy()
@@ -143,24 +144,17 @@ smc_strategy = SMCStrategy()
 executed_trades, exposure_guard = recover_state()
 for sym, tf_map in executed_trades.items():
     for tf in tf_map:
-        trade_cache.add((sym, tf))
+        active_trades[(sym, tf)] = True
 
 # Cache OHLCV and indicator data per symbol/timeframe
 ohlcv_cache: Dict[Tuple[str, str], pd.DataFrame] = {}
 indicator_cache: Dict[Tuple[str, str], pd.DataFrame] = {}
 
 def refresh_active_symbols() -> None:
-    """Update ACTIVE_SYMBOLS_TIMEFRAMES based on market hours."""
+    """Update ACTIVE_SYMBOLS_TIMEFRAMES based on is_market_open()."""
     global ACTIVE_SYMBOLS_TIMEFRAMES
-    weekday = datetime.utcnow().weekday()
-    if weekday >= 5:  # Weekend
-        symbols = ["BTCUSD.", "ETHUSD."]
-    else:
-        symbols = ["XAUUSD.", "NDXUSD.", "DJIUSD."]
-
-    active = [s for s in symbols if is_market_open(s)]
+    active = [s for s in SYMBOLS if is_market_open(s)]
     ACTIVE_SYMBOLS_TIMEFRAMES = {s: TIMEFRAMES for s in active}
-
 
 def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:
     """Fetch and cache OHLCV data with indicators for a symbol/timeframe."""
@@ -287,7 +281,12 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
             daily_guard_trigger_date = today
         return
 
-    if (symbol, timeframe) in trade_cache and not force_trade:
+    # Ensure active_trades reflects actual open positions
+    if not mt5.positions_get(symbol=symbol):
+        if active_trades.pop((symbol, timeframe), None) is not None:
+            logger.debug(f"Cleaning up stale trade slot: {symbol} {timeframe}")
+
+    if (symbol, timeframe) in active_trades and not force_trade:
         logger.warning(
             f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: Max open trades"
         )
@@ -358,7 +357,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
                     session_tag=_session_label(datetime.utcnow()),
                     rr_ratio=smc_trade.get("rr_ratio", 0.0),
                 )
-        trade_cache.add((symbol, timeframe))
+        active_trades[(symbol, timeframe)] = True
         return
 
     decision, best_strat, market_regime = strategy_selector_agent.select(symbol, timeframe)
@@ -577,7 +576,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         daily_guard.record_trade(0)
         exposure_guard.record(symbol, timeframe, decision, confidence)
         executed_trades.setdefault(symbol, {}).setdefault(timeframe, []).extend(tickets)
-        trade_cache.add((symbol, timeframe))
+        active_trades[(symbol, timeframe)] = True
         logger.info(
             f"[EXECUTED] Opened multi-TP orders: {symbol} {timeframe} tickets={tickets}"
         )
@@ -602,7 +601,7 @@ def run_live_trade_manager() -> None:
                 tf_map[tf] = remaining
             else:
                 tf_map.pop(tf, None)
-                trade_cache.discard((sym, tf))
+                active_trades.pop((sym, tf), None)
                 exposure_guard.remove(sym, tf)
     for pos in positions:
         ticket = pos.ticket
@@ -745,7 +744,7 @@ def run_live_trade_manager() -> None:
                     lst.remove(ticket)
                 if not lst:
                     executed_trades.get(pos.symbol, {}).pop(rec["timeframe"], None)
-                trade_cache.discard((pos.symbol, rec["timeframe"]))
+                active_trades.pop((pos.symbol, rec["timeframe"]), None)
                 exposure_guard.remove(pos.symbol, rec["timeframe"])
                 alert_trade_closed(pos.symbol, rec["timeframe"], "closed_early")
                 update_ai_from_trade(

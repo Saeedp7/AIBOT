@@ -122,3 +122,9 @@ class TradeMonitorAgent:
             outcome,
             net_pct,
         )
+        from live import scheduler_loop
+        removed = scheduler_loop.active_trades.pop((self.symbol, self.timeframe), None)
+        if removed is not None:
+            logger.debug(
+                f"Cleaning up stale trade slot: {self.symbol} {self.timeframe}"
+            )

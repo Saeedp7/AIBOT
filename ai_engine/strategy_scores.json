@@ -2,463 +2,468 @@
   "BreakoutStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "DeltaDivergenceScalpingStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "EMACrossoverScalpingStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "FibonacciSwingStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "win_rate": 100.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
     }
   },
   "IchimokuDayStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "ICTSmartMoneyStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "LondonBreakoutStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "MACDDivergenceStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "MACrossoverSwingStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "MeanReversionStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "MicroBreakoutScalpingStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "OrderBlockScalpingStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "PriceActionStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "SMCStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 100.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
     }
   },
   "SupertrendADXRSIStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "SupplyDemandSwingStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "win_rate": 100.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
     }
   },
   "TrendBreakoutStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "TrendFollowingStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "TrendPullbackStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "VolumeBreakoutStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "VWAPReversionStrategy": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "trending": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "ranging": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     },
     "volatile": {
       "win_rate": 0.0,
-      "recent_score": 0.05,
-      "regime_fit": 0.05
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   }
 }
