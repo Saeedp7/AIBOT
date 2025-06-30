@@ -11,6 +11,8 @@ class ICTSmartMoneyStrategy(BaseStrategy):
     """Strategy leveraging ICT style concepts."""
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
+        if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
+            return None
         if len(df) < 5:
             self._log_context(df, pattern_detected="ICTSmartMoney")
             return None
@@ -29,6 +31,8 @@ class ICTSmartMoneyStrategy(BaseStrategy):
         df: pd.DataFrame,
         regime: str,
     ) -> str | None:
+        if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
+            return None
         import logging
 
         self.logger = logging.getLogger(__name__)

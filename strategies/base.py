@@ -14,6 +14,10 @@ class BaseStrategy:
     # Allowed market regimes for this strategy. Scheduler will block trades if
     # the detected regime is not listed here.  Defaults to trending only.
     ALLOWED_REGIMES: set[str] = {"trending", "volatile"}
+
+    def is_volatile_enough(self, atr_series: pd.Series, threshold: float = 1.0) -> bool:
+        """Return True if the latest ATR value exceeds the threshold."""
+        return atr_series.iloc[-1] > threshold
     
     def allowed_regimes(self) -> list[str]:
         """Return allowed market regimes for this strategy."""

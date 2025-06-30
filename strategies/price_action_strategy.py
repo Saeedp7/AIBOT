@@ -13,6 +13,8 @@ class PriceActionStrategy(BaseStrategy):
     """Basic strategy using price action utilities."""
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
+        if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
+            return None
         if len(df) < 5:
             self._log_context(df, pattern_detected="PriceAction")
             return None
@@ -34,6 +36,8 @@ class PriceActionStrategy(BaseStrategy):
         df: pd.DataFrame,
         regime: str,
     ) -> str | None:
+        if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
+            return None
         import logging
 
         self.logger = logging.getLogger(__name__)

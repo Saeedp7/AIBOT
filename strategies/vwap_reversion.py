@@ -44,6 +44,9 @@ class VWAPReversionStrategy(BaseStrategy):
         df: pd.DataFrame,
         regime: str,
     ) -> str | None:
+        if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
+            self.signal = None
+            return None
         import logging
 
         self.logger = logging.getLogger(__name__)
@@ -54,6 +57,9 @@ class VWAPReversionStrategy(BaseStrategy):
         return self.signal
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
+        if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
+            self.signal = None
+            return None
         self.analyze(df)
         self._log_context(df, pattern_detected="VWAPReversion", entry_zone="VWAP")
         return self.signal
