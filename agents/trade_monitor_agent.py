@@ -110,11 +110,23 @@ class TradeMonitorAgent:
 
             sig = inspect.signature(update_strategy_score)
             if len(sig.parameters) >= 4:
-                update_strategy_score(self.strategy, result_str, net_pct, regime=self.regime)
+                update_strategy_score(
+                    self.strategy,
+                    result_str,
+                    net_pct,
+                    regime=self.regime,
+                    symbol=self.symbol,
+                )
             else:
                 update_strategy_score(self.strategy, result_str, self.regime)
         except Exception:
-            update_strategy_score(self.strategy, result_str, net_pct, regime=self.regime)
+            update_strategy_score(
+                self.strategy,
+                result_str,
+                net_pct,
+                regime=self.regime,
+                symbol=self.symbol,
+            )
         logger.debug(
             "Trade closed: %s %s result=%s net_pct=%.2f",
             self.symbol,

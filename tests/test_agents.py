@@ -56,8 +56,14 @@ def test_strategy_selector_agent(tmp_path, monkeypatch):
 
     from ai_engine import strategy_selector as ss
     monkeypatch.setattr(ss, "load_scores", lambda path=str(score_path): json.load(open(path)))
+    from ai_engine import score_updater as su
+    monkeypatch.setattr(su, "load_asset_scores", lambda path="": {})
 
-    agent = StrategySelectorAgent([GoodStrategy(), BadStrategy()], score_path=str(score_path))
+    agent = StrategySelectorAgent(
+        [GoodStrategy(), BadStrategy()],
+        score_path=str(score_path),
+        asset_score_path=str(score_path),
+    )
     decision, strat_name, regime = agent.select("XAUUSD", "M1")
     assert decision == "buy"
     assert strat_name == "GoodStrategy"

@@ -12,6 +12,7 @@ import os
 from typing import Dict, Iterable
 
 DEFAULT_SCORE_PATH = "ai_engine/strategy_scores.json"
+DEFAULT_ASSET_SCORE_PATH = "ai_engine/strategy_scores_by_asset.json"
 MIN_BASE_SCORE = 0.05
 
 def _load_json(path: str) -> Dict[str, dict]:
@@ -30,6 +31,28 @@ def _save_json(data: Dict[str, dict], path: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
+
+
+def load_asset_scores(path: str = DEFAULT_ASSET_SCORE_PATH) -> Dict[str, dict]:
+    """Return per-symbol strategy scores from ``path``."""
+    return _load_json(path)
+
+
+def _update_asset_score(
+    symbol: str,
+    strategy_name: str,
+    score: float,
+    *,
+    path: str = DEFAULT_ASSET_SCORE_PATH,
+    alpha: float = 0.1,
+) -> None:
+    """Update ``strategy_scores_by_asset.json`` for ``symbol`` and strategy."""
+    data = load_asset_scores(path)
+    sym_map = data.setdefault(symbol, {})
+    prev = float(sym_map.get(strategy_name, score))
+    sym_map[strategy_name] = (1 - alpha) * prev + alpha * score
+    data[symbol] = sym_map
+    _save_json(data, path)
 
 def initialize_scores(
     strategy_names: Iterable[str],
@@ -97,9 +120,12 @@ def update_scores(results: Dict[str, dict], score_path: str = DEFAULT_SCORE_PATH
 def update_strategy_score(
     strategy_name: str,
     result: str,
-    net_profit_pct: float,
+    net_profit_pct: float | None,
     regime: str,
+    *,
+    symbol: str | None = None,
     score_path: str = DEFAULT_SCORE_PATH,
+    asset_score_path: str = DEFAULT_ASSET_SCORE_PATH,
     alpha: float = 0.1,
 ) -> None:
     """Update metrics for ``strategy_name`` after a closed trade.
@@ -141,6 +167,14 @@ def update_strategy_score(
         strat_map[regime] = metrics
         scores[strategy_name] = strat_map
         _save_json(scores, score_path)
+        if symbol:
+            _update_asset_score(
+                symbol,
+                strategy_name,
+                calculate_composite_score(metrics),
+                path=asset_score_path,
+                alpha=alpha,
+            )
         return
 
     outcome = str(result or "").lower()
@@ -168,6 +202,14 @@ def update_strategy_score(
     strat_map[regime] = metrics
     scores[strategy_name] = strat_map
     _save_json(scores, score_path)
+    if symbol:
+        _update_asset_score(
+            symbol,
+            strategy_name,
+            calculate_composite_score(metrics),
+            path=asset_score_path,
+            alpha=alpha,
+        )
 
 def load_scores(path: str = DEFAULT_SCORE_PATH) -> Dict[str, dict]:
     """Load score metrics from ``path``."""

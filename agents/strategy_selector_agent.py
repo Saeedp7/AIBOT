@@ -25,15 +25,23 @@ EPSILON = 0.05
 class StrategySelectorAgent:
     """High level decision maker for choosing a trading direction."""
 
-    def __init__(self, strategies: Iterable[BaseStrategy], score_path: str = "ai_engine/strategy_scores.json") -> None:
+    def __init__(
+        self,
+        strategies: Iterable[BaseStrategy],
+        score_path: str = "ai_engine/strategy_scores.json",
+        asset_score_path: str = "ai_engine/strategy_scores_by_asset.json",
+    ) -> None:
         self.strategies = list(strategies)
         self._strategy_cycle = cycle(self.strategies)
         self.scanner = MarketScannerAgent()
-        self.evaluator = StrategyEvaluatorAgent(score_path=score_path)
+        self.evaluator = StrategyEvaluatorAgent(
+            score_path=score_path, asset_score_path=asset_score_path
+        )
         self.memory = MemoryEvaluatorAgent(score_path=score_path)
         # Block strategies after two consecutive losses
         self.guard = StreakGuard(streak=2)
         self.score_path = score_path
+        self.asset_score_path = asset_score_path
 
     def select(self, symbol: str, timeframe: str) -> Tuple[str | None, str | None, str]:
         df, regime = self.scanner.scan(symbol, timeframe)

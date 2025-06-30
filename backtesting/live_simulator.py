@@ -125,7 +125,13 @@ def run_simulation():
                     regime,
                 )
                 pct = (pnl / (entry * volume * 100000.0) * 100) if entry and volume else 0.0
-                update_strategy_score(strategy_name, result, pct, regime)
+                update_strategy_score(
+                    strategy_name,
+                    result,
+                    pct,
+                    regime,
+                    symbol=symbol,
+                )
                 print(f"📊 {strategy_name} → {result.upper()} | PnL: ${round(pnl, 2)} | New Balance: ${round(balance, 2)}")
 
         time.sleep(CHECK_INTERVAL_SECONDS)

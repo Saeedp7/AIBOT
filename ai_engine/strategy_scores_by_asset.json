@@ -1,0 +1,8 @@
+{
+  "BTCUSD": {
+    "SMCStrategy": 0.78
+  },
+  "XAUUSD": {
+    "EMA2CrossStrategy": 0.61
+  }
+}

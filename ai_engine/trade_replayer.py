@@ -73,7 +73,14 @@ class ReplayEngine:
             outcome = "win" if result.startswith("tp") or result == "win" else "loss"
             net_pct = float(t.get("net_profit_pct", 0.0))
             if not dry_run:
-                update_strategy_score(strat, outcome, net_pct, regime=regime, score_path=self.score_path)
+                update_strategy_score(
+                    strat,
+                    outcome,
+                    net_pct,
+                    regime=regime,
+                    symbol=str(t.get("symbol", "")),
+                    score_path=self.score_path,
+                )
             c = counts.setdefault(strat, {"wins": 0, "losses": 0, "processed": 0})
             c["processed"] += 1
             if outcome == "win":
