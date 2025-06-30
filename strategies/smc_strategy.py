@@ -27,6 +27,8 @@ class SMCStrategy(BaseStrategy):
     strategy_group = "day"
 
     def generate_signal(self, df: pd.DataFrame) -> Dict | None:
+        if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
+            return None
         if df is None or df.empty:
             return None
         if not in_killzone(df.index[-1].to_pydatetime()):
@@ -76,6 +78,8 @@ class SMCStrategy(BaseStrategy):
         }
 
     def check_signal(self, symbol: str, timeframe: str, df: pd.DataFrame, regime: str) -> str | None:
+        if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
+            return None
         trade = self.generate_signal(df)
         if trade:
             return trade.get("direction")
