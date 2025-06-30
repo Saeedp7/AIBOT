@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import List, Dict
 import pandas as pd
-
+from .liquidity_engine import detect_fvgs
 
 def detect_order_blocks(candles: pd.DataFrame, lookback: int = 5) -> List[Dict[str, float]]:
     """Identify simple bullish/bearish order blocks."""
@@ -39,3 +39,12 @@ def validate_ob_with_volume(candles: pd.DataFrame, ob: Dict[str, float]) -> bool
     if idx is None or "volume" not in candles.columns or idx == 0:
         return True
     return candles["volume"].iloc[idx] > candles["volume"].iloc[idx - 1]
+
+def detect_fvg_zones(candles: pd.DataFrame) -> List[Dict[str, float]]:
+    """Wrapper around ``detect_fvgs`` for naming consistency."""
+    return detect_fvgs(candles)
+
+
+def find_order_blocks(candles: pd.DataFrame, lookback: int = 5) -> List[Dict[str, float]]:
+    """Alias for ``detect_order_blocks`` with default lookback."""
+    return detect_order_blocks(candles, lookback=lookback)

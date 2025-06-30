@@ -69,3 +69,7 @@ def detect_stop_runs(candles: pd.DataFrame) -> bool:
     prev_high = candles["high"].iloc[-2]
     prev_low = candles["low"].iloc[-2]
     return last["high"] > prev_high and last["close"] < prev_high or last["low"] < prev_low and last["close"] > prev_low
+
+def detect_liquidity_sweep(candles: pd.DataFrame) -> bool:
+    """Alias for ``detect_stop_runs`` for semantic clarity."""
+    return detect_stop_runs(candles)
