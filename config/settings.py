@@ -86,6 +86,11 @@ MIN_REWARD_TO_RISK = float(os.getenv("MIN_REWARD_TO_RISK", 1.2))
 ALLOW_RANGING_ENTRIES = os.getenv("ALLOW_RANGING_ENTRIES", "true").lower() == "true"
 BOLLINGER_FILTER_ENABLED = os.getenv("BOLLINGER_FILTER_ENABLED", "false").lower() == "true"
 
+# Minimum percentage price movement for a candle to be considered
+MIN_VOLATILITY_PCT = float(
+    os.getenv("MIN_VOLATILITY_PCT", get_config("min_volatility_pct", 0.001))
+)
+
 # --- Regime-based SL/TP multipliers ---
 REGIME_SL_MULTIPLIERS = {
     "volatile": float(os.getenv("VOLATILE_SL_MULTIPLIER", 1.5)),

@@ -4,6 +4,7 @@ from datetime import time
 import pandas as pd
 
 from .base import BaseStrategy
+from config.settings import MIN_VOLATILITY_PCT
 from strategy_components.liquidity_engine import detect_liquidity_sweep
 from strategy_components.smc_engine import detect_fvg_zones, find_order_blocks
 
@@ -13,7 +14,43 @@ class ICT10AMManipulationStrategy(BaseStrategy):
 
     strategy_group = "day"
 
-    def generate_signal(self, df: pd.DataFrame, context: dict | None = None) -> dict | None:
+    def _confirm_ltf_entry(self, ltf_df: pd.DataFrame | None, direction: str) -> bool:
+        """Confirm entry on a lower timeframe via engulfing or BOS."""
+        if ltf_df is None or len(ltf_df) < 2:
+            return False
+
+        last = ltf_df.iloc[-1]
+        prev = ltf_df.iloc[-2]
+
+        bullish_engulf = (
+            last["close"] > last["open"]
+            and prev["close"] < prev["open"]
+            and last["close"] >= prev["open"]
+            and last["open"] <= prev["close"]
+        )
+        bearish_engulf = (
+            last["close"] < last["open"]
+            and prev["close"] > prev["open"]
+            and last["open"] >= prev["close"]
+            and last["close"] <= prev["open"]
+        )
+
+        lookback = 3
+        bos_up = last["high"] > ltf_df["high"].iloc[-(lookback + 1) : -1].max() and last["close"] > last["open"]
+        bos_down = last["low"] < ltf_df["low"].iloc[-(lookback + 1) : -1].min() and last["close"] < last["open"]
+
+        if direction == "buy":
+            return bullish_engulf or bos_up
+        else:
+            return bearish_engulf or bos_down
+
+    def generate_signal(
+        self,
+        df: pd.DataFrame,
+        context: dict | None = None,
+        *,
+        ltf_df: pd.DataFrame | None = None,
+    ) -> dict | None:
         if df is None or df.empty:
             return None
 
@@ -41,11 +78,25 @@ class ICT10AMManipulationStrategy(BaseStrategy):
         if body <= wick:
             return None
 
+        candle_range_pct = wick / last["close"]
+        if candle_range_pct < MIN_VOLATILITY_PCT:
+            return None
+
         direction = "buy" if bias == "bullish" else "sell"
         if zone.get("type") == "bearish":
             direction = "sell"
         elif zone.get("type") == "bullish":
             direction = "buy"
+
+        upper_wick = last["high"] - max(last["open"], last["close"])
+        lower_wick = min(last["open"], last["close"]) - last["low"]
+        if direction == "buy" and lower_wick < body * 1.5:
+            return None
+        if direction == "sell" and upper_wick < body * 1.5:
+            return None
+
+        if not self._confirm_ltf_entry(ltf_df, direction):
+            return None
 
         sl = last["low"] if direction == "buy" else last["high"]
         entry = last["close"]
