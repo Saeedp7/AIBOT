@@ -15,7 +15,7 @@ class BaseStrategy:
     # the detected regime is not listed here.  Defaults to trending only.
     ALLOWED_REGIMES: set[str] = {"trending", "volatile"}
 
-    def is_volatile_enough(self, atr_series: pd.Series, threshold: float = 1.0) -> bool:
+    def is_volatile_enough(self, atr_series: pd.Series, threshold: float = 0.001) -> bool:
         """Return True if the latest ATR value exceeds the threshold."""
         return atr_series.iloc[-1] > threshold
     
