@@ -25,7 +25,7 @@ def main() -> None:
     args = parse_args()
     os.environ["LIVE_MODE"] = "true" if args.live else "false"
     if args.force_trade:
-        os.environ["FORCE_TRADE"] = "true"
+        os.environ["FORCE_TRADE"]  = "true"
 
     logging.basicConfig(
         level=logging.DEBUG if args.debug else logging.INFO,
