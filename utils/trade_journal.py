@@ -179,6 +179,7 @@ def update_trade(
                             outcome,
                             net_val,
                             regime=trade.get("regime", ""),
+                            symbol=trade.get("symbol", ""),
                         )
             # Fetch exit details if missing and trade has closed
             if result and result.lower() != "open" and trade.get("exit") in (None, 0.0):
