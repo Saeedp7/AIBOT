@@ -7,6 +7,7 @@ Welcome to the AutoTrade AI Bot — an intelligent, modular, and fully automated
 ## 🚀 Project Features
 
 * ✅ AI-powered strategy selection
+* ✅ Symbol-specific scoring via `strategy_scores_by_asset.json`
 * ✅ Modular agent-based architecture
 * ✅ Multi-symbol, multi-timeframe support
 * ✅ Dynamic SL/TP & breakeven logic
