@@ -1,0 +1,3 @@
+{
+  "VWAPReversionStrategy": {"valid_regimes": ["range", "volatile"]}
+}
