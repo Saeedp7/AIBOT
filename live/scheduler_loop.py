@@ -4,17 +4,50 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import pandas as pd
 
 from execution.order_manager import execute_fake_order
 from config.manager import get_config
+from utils.market_status import is_market_open
+from utils.time_utils import is_crypto_weekend
 
 logger = logging.getLogger("scheduler")
 
-SYMBOLS = [s.strip() for s in get_config("SYMBOLS", "XAUUSD.").split(",") if s.strip()]
+FOREX_SYMBOLS = [
+    s.strip() for s in get_config("FOREX_SYMBOLS", "XAUUSD.,NDXUSD.,DJIUSD.").split(",") if s.strip()
+]
+CRYPTO_SYMBOLS = [
+    s.strip() for s in get_config("CRYPTO_SYMBOLS", "BTCUSD.,ETHUSD.").split(",") if s.strip()
+]
+SYMBOLS = FOREX_SYMBOLS + CRYPTO_SYMBOLS
 TIMEFRAMES = [t.strip() for t in get_config("TIMEFRAMES", "M5").split(",") if t.strip()]
 CHECK_INTERVAL_SECONDS = int(get_config("CHECK_INTERVAL_SECONDS", 60))
 MAX_RISK_PER_TRADE = float(get_config("MAX_RISK", 0.01))
-active_trades: dict[tuple[str,str], bool] = {}
+active_trades: dict[tuple[str, str], bool] = {}
+ACTIVE_SYMBOLS_TIMEFRAMES: dict[str, list[str]] = {}
+ohlcv_cache: dict[tuple[str, str], pd.DataFrame] = {}
+
+
+async def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:
+    """Fetch and cache OHLCV+indicator data for a symbol/timeframe."""
+    DataFetcher, _, _, _ = _lazy_imports(True)
+    fetcher = DataFetcher(symbol, timeframe, limit)
+    df = await fetcher.fetch()
+    if df is not None:
+        ohlcv_cache[(symbol, timeframe)] = df
+
+
+def refresh_active_symbols() -> None:
+    """Update ACTIVE_SYMBOLS_TIMEFRAMES based on market status and weekend."""
+    global ACTIVE_SYMBOLS_TIMEFRAMES
+    base = CRYPTO_SYMBOLS if is_crypto_weekend() else FOREX_SYMBOLS
+    active = [s for s in base if is_market_open(s)]
+    ACTIVE_SYMBOLS_TIMEFRAMES = {s: TIMEFRAMES for s in active}
+
+
+def active_symbols() -> list[str]:
+    refresh_active_symbols()
+    return list(ACTIVE_SYMBOLS_TIMEFRAMES.keys())
 
 
 def _lazy_imports(include_data: bool = True):
@@ -39,9 +72,11 @@ async def process(symbol: str, timeframe: str) -> None:
         trade_manager = TradeManager()
     if selector is None:
         selector = StrategySelector()
+    if not is_market_open(symbol):
+        return
     try:
-        fetcher = DataFetcher(symbol, timeframe)
-        data = await fetcher.fetch()
+        await refresh_data(symbol, timeframe)
+        data = ohlcv_cache.get((symbol, timeframe))
         if data is None:
             return
         processor = SignalProcessor(selector.strategies)
@@ -61,7 +96,8 @@ async def process(symbol: str, timeframe: str) -> None:
 
 async def scheduler_loop() -> None:
     while True:
-        tasks = [process(sym, tf) for sym in SYMBOLS for tf in TIMEFRAMES]
+        syms = active_symbols()
+        tasks = [process(sym, tf) for sym in syms for tf in TIMEFRAMES]
         await asyncio.gather(*tasks)
         await asyncio.sleep(CHECK_INTERVAL_SECONDS)
 
