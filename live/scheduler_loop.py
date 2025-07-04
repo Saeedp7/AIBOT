@@ -9,7 +9,6 @@ import pandas as pd
 from execution.order_manager import execute_fake_order
 from config.manager import get_config
 from utils.market_status import is_market_open
-from utils.time_utils import is_crypto_weekend
 
 logger = logging.getLogger("scheduler")
 
@@ -38,10 +37,13 @@ async def refresh_data(symbol: str, timeframe: str, limit: int = 300) -> None:
 
 
 def refresh_active_symbols() -> None:
-    """Update ACTIVE_SYMBOLS_TIMEFRAMES based on market status and weekend."""
+    """Update ``ACTIVE_SYMBOLS_TIMEFRAMES`` depending on market status."""
     global ACTIVE_SYMBOLS_TIMEFRAMES
-    base = CRYPTO_SYMBOLS if is_crypto_weekend() else FOREX_SYMBOLS
-    active = [s for s in base if is_market_open(s)]
+    forex_active = [s for s in FOREX_SYMBOLS if is_market_open(s)]
+    if forex_active:
+        active = forex_active
+    else:
+        active = [s for s in CRYPTO_SYMBOLS if is_market_open(s)]
     ACTIVE_SYMBOLS_TIMEFRAMES = {s: TIMEFRAMES for s in active}
 
 
