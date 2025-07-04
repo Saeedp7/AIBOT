@@ -1,102 +1,215 @@
-Here's a **comprehensive review** of your **AutoTrade AI Bot Project**, combining:
+🚀 AutoTrade AI Unified Roadmap
+🎯 Target: 90%+ win rate and 10–15% daily net growth
+Structure: 8 Phases aligned with weekly milestones and ongoing learning
 
-* ✅ Your **current implementation progress**
-* 📄 The **Codex-generated final phase roadmap**
-* 🧠 My analysis of system readiness, gaps, and next logical moves
+🔹 Phase 1: Codebase Audit & Architecture Refactoring
+Duration: Week 1
+🎯 Objective: Improve maintainability, scalability, and configuration coherence.
 
----
+🔑 Key Tasks:
+Modularize scheduler_loop.py into:
 
-## 🧩 Part 1: 📊 Current Implementation Status (vs. Roadmap)
+DataFetcher, SignalProcessor, RiskEvaluator, TradeExecutor, Monitor.
 
-| Roadmap Phase                            | Status     | Notes                                                                      |
-| ---------------------------------------- | ---------- | -------------------------------------------------------------------------- |
-| 🔍 Strategy Audit & Refactor (M1)        | ✅ Done     | All 18 strategies present, some refactored into `BaseStrategy`.            |
-| 🧠 AI Decision Engine (M2)               | ✅ Done     | `StrategySelectorAgent`, `MemoryEvaluatorAgent`, `score_manager.py`.       |
-| ⚡ Scalping Optimization (M3)             | ⚠️ Partial | Scalping strategies exist; missing `spread_guard`, `session_guard`.        |
-| 🕰️ Multi-TF/Multi-Symbol (M4)           | ✅ Done     | Fully integrated in `scheduler_loop` using `MultiSymbolCoordinator`.       |
-| 🛡️ Risk Management Layer (M5)           | ✅ Done     | Daily guard, exposure guard, SL/TP logic, breakeven manager working.       |
-| 🤖 MT5 Automation & Execution (M6)       | ✅ Done     | `order_manager.py`, `mt5_connector`, fake/live trade routing ready.        |
-| 📈 Scoring & Feedback Loop (Phase C)     | ✅ Done     | `strategy_scores.json`, decay logic, regime fit via `score_manager.py`.    |
-| 🚨 Monitoring/Alerts System              | ⚠️ Partial | Alert system stubbed; not fully connected to trades/risk events.           |
-| 📊 Dashboard & Visualization             | ❌ Missing  | No `dashboard_server` yet. CLI or lightweight web view planned.            |
-| 💾 Trade Replay & AI Learning (Replay)   | ❌ Missing  | Replay engine not yet reading `trade_history.json`.                        |
-| 🔒 Config Consolidation & Crash Recovery | ⚠️ Partial | `.env` and `settings.json` split; crash recovery planned.                  |
-| 🧪 Final Test Suite (Meta Runner)        | ✅ Done     | Phase tests passing, including `test_agents.py`, `test_exposure_guard.py`. |
+Centralize Risk & Execution Logic into a reusable TradeManager class (core/ layer).
 
----
+Refactor Strategy Selector:
 
-## 🔍 Part 2: Key Gaps & Attention Areas
+Combine AI memory score + real-time signal confidence.
 
-### 🔧 **Still To Do (before LIVE\_MODE):**
+Add regime-sensitivity flags for each strategy (trend, range, volatility).
 
-* [ ] Merge `.env` and `settings.json` into a single config interface (`config.manager`)
-* [ ] Add trade **deduplication lock** to `scheduler_loop.py`
-* [ ] Finalize `alert_manager.py` → Telegram, email alerts (trade, SL, shutdown, errors)
-* [ ] Build **trade replay engine** to run `logs/trade_history.json` for AI learning
-* [ ] Create optional **dashboard viewer** (React or simple CLI)
-* [ ] Write **VPS startup & recovery script** for restart-on-crash
+Consolidate Configuration Files:
 
----
+Merge .env and settings.json via get_config() utility.
 
-## ✅ Part 3: Recommended Strategic Actions
+Apply async logic for faster data and order handling.
 
-### 🎯 **Immediate Priorities (Critical to Go Live)**
+🔹 Phase 2: AI Engine & Reinforcement Learning Upgrades
+Duration: Week 2
+🎯 Objective: Make strategy switching intelligent, adaptive, and responsive to market dynamics.
 
-| Task                                       | Reason                                         |
-| ------------------------------------------ | ---------------------------------------------- |
-| 🔐 Config Merge (`.env` + `settings.json`) | Avoids config conflicts, centralizes safety    |
-| 🚫 Trade Locking                           | Prevents accidental stacking or overtrading    |
-| 📲 Alert Manager                           | Notifies you of trade events and risk triggers |
-| ⛑️ Crash Recovery                          | Ensures bot auto-restarts on VPS/live demo     |
+🔑 Key Tasks:
+Scoring Enhancements:
 
-### 📚 **Short-Term Enhancements (Before Scaling)**
+Add score decay per strategy and regime.
 
-| Task                        | Reason                                      |
-| --------------------------- | ------------------------------------------- |
-| 📊 Dashboard Viewer         | Monitor trades, PnL, strategy performance   |
-| 🔁 Replay Engine            | Train AI using past trades, detect patterns |
-| 🧠 Smart Strategy Blacklist | Auto-disable low performers in live mode    |
+Penalize consecutive losses (streak tracking).
 
-### 🚀 **Optional Power-Ups**
+Introduce ensemble scoring (multi-strategy signal stacking).
 
-| Task                        | Benefit                                   |
-| --------------------------- | ----------------------------------------- |
-| Reinforcement Learning Core | True adaptive AI engine via feedback loop |
-| Telegram Bot UI             | Mobile interaction & status view          |
-| SQLite-based Trade Journal  | Enables analytics and dashboards          |
+Reinforcement Learning:
 
----
+Expand adaptive_learning.py to auto-update strategy_scores.json.
 
-## 📅 Finalized Execution Timeline (Condensed View)
+Replay engine updates ai_memory.json based on live/backtest results.
 
-| Phase | Label                       | ETA   | Priority    |
-| ----- | --------------------------- | ----- | ----------- |
-| C1    | Config & Safety Hardening   | 1 day | 🔥 High     |
-| C2    | Monitoring & Alerts         | 0.5 d | 🔥 High     |
-| C3    | Replay & AI Reinforcement   | 1 day | 🧠 Medium   |
-| C4    | Dashboard Visualization     | 1 day | 🟡 Optional |
-| C5    | Deployment & Crash Recovery | 0.5 d | 🚀 High     |
-| C6    | Final Live Demo             | 0.5 d | ✅ Final     |
+Early-Exit Conditions:
 
----
+Implement logic for early exits based on volume divergence or liquidity voids.
 
-## 🧠 Final Thoughts
+🔹 Phase 3: Risk & Money Management Optimization
+Duration: Weeks 3–4
+🎯 Objective: Enhance capital protection, enforce discipline, and adapt sizing.
 
-You are **90% complete**. The **core brain, AI selection, trade execution, SL/TP management, and live monitoring** are all functional and integrated.
+🔑 Key Tasks:
+Dynamic Position Sizing:
 
-To launch confidently into **LIVE\_MODE (demo or real)**:
+Adjust lot sizes based on confidence, win rate, volatility, and drawdown.
 
-* Finalize safety net (Phase C1)
-* Add visibility (alerts + dashboard, Phase C2–C4)
-* Confirm resilience (crash-safe Phase C5)
-* Do a dry-run demo (Phase C6)
+Optional fallback: Kelly Criterion.
 
----
+Risk Guards:
 
-Would you like to:
+Daily loss cap: stop after −5% equity drop or 5 failed trades.
 
-* ✅ Start Phase C1 implementation now (config merge + lock)?
-* ⚙️ Ask Codex to generate `alert_manager.py` with Telegram + email?
-* 🎯 Build the replay engine next?
+Factor in volatility & correlation in exposure guard.
 
-Let’s move forward based on your next move.
+Trade Cooldown & Re-entry Logic:
+
+Per-symbol cooldown (e.g., X bars).
+
+Re-entry only if regime or structure shifts.
+
+BreakEvenManager Enhancements:
+
+ATR-based trailing stops.
+
+Optional third TP trigger after breakeven.
+
+🔹 Phase 4: Strategy & Data Quality Expansion
+Duration: Week 4
+🎯 Objective: Expand strategy capabilities and improve data fidelity for decision making.
+
+🔑 Key Tasks:
+Strategy Improvements:
+
+Finalize advanced models: ict_10am_manipulation, PO3, FVG.
+
+Tag each strategy with a regime profile (e.g., trending, volatile).
+
+Data Validation & Enrichment:
+
+Validate historical and live OHLCV (wick gaps, bad ticks).
+
+Add spread, volume, and tick-level metrics to feeds and backtests.
+
+Sentiment Integration:
+
+Connect sentiment_analyzer.py to influence trade filtering or sizing near news events.
+
+🔹 Phase 5: Backtesting, Replay, and Validation
+Duration: Week 5
+🎯 Objective: Validate strategy quality, stability, and edge through comprehensive testing.
+
+🔑 Key Tasks:
+Backtesting Engine Expansion:
+
+Add metrics: equity curve, Sharpe ratio, drawdown, win rate histogram.
+
+Support Monte Carlo simulation and rolling window testing (3 months+).
+
+Journal & Metrics Logging:
+
+Improve trade_journal.py with signal confidence, reason codes, and slippage logging.
+
+Regression Tests (pytest):
+
+SL/TP logic
+
+Score/streak updates
+
+Replay engine behavior
+
+Journal integrity
+
+Replay Engine Execution:
+
+Run daily/weekly replays to refine and reinforce scoring behavior.
+
+🔹 Phase 6: Monitoring System & Dashboard Finalization
+Duration: Week 5–6
+🎯 Objective: Real-time oversight and performance visualization.
+
+🔑 Key Tasks:
+Finalize dashboard/app.py to show:
+
+Live trades
+
+Signal confidence and strategy scores
+
+Equity growth, regime tags
+
+Implement alerts (Telegram/email):
+
+Trade execution
+
+Daily loss breach
+
+System errors/failures
+
+Improve visualization of:
+
+Confidence vs. signal alignment
+
+Performance per strategy/session
+
+🔹 Phase 7: Demo Account Testing
+Duration: Week 6
+🎯 Objective: Validate real-time behavior and edge in near-live conditions.
+
+🔑 Key Tasks:
+Run the system in demo mode with full logging for 1–2 weeks.
+
+Instruments: BTCUSD, ETHUSD, XAUUSD, NDXUSD.
+
+Monitor:
+
+Win rate consistency
+
+Strategy switching behavior
+
+Latency and slippage impact
+
+Guard triggers and cooldown behavior
+
+🔹 Phase 8: Full Live Deployment & Continuous Learning
+Duration: Post Week 6 (Ongoing)
+🎯 Objective: Achieve long-term growth, stability, and continuous strategy improvement.
+
+🔑 Key Tasks:
+Deploy to live account with strict risk thresholds and fallback logic.
+
+Automate:
+
+Daily replay sessions (trade_replayer.py)
+
+Daily summaries (performance_reporter.py)
+
+Weekly reviews and RL model updates
+
+Weekly audit of:
+
+Score integrity
+
+Risk parameters
+
+Strategy effectiveness by regime
+
+✅ Final Summary Table
+Phase	Title	Duration	Key Outcomes
+1	Codebase Audit & Refactoring	Week 1	Modular design, centralized logic, config consolidation
+2	AI & RL Engine Upgrades	Week 2	Adaptive scoring, signal weighting, memory updates
+3	Risk & Money Management	Weeks 3–4	Dynamic sizing, guards, cooldown/re-entry rules
+4	Strategy & Data Expansion	Week 4	More strategies, enriched features, sentiment input
+5	Testing & Backtest Validation	Week 5	Monte Carlo testing, journal improvements, regression coverage
+6	Monitoring System & Dashboard	Weeks 5–6	Real-time visibility, alerts, confidence logs
+7	Demo Forward Testing	Week 6	Validate full logic in live-like conditions
+8	Live Deployment & Continuous Learning	Week 6+ Ongoing	Fully automated, adaptive, and monitored live trading system
+
+🧩 Integration Notes
+✅ Overlap handled: Combined RL, AI scoring, cooldown logic, signal confidence, and multi-TP handling from both sources.
+
+✅ No conflicts: Similar goals, merged naming and logic under cohesive tasks.
+
+✅ Structured Delivery: Dependencies respected (e.g., refactor before scoring logic).
