@@ -4,5 +4,28 @@
   },
   "XAUUSD": {
     "EMA2CrossStrategy": 0.61
+  },
+  "XAUUSD.": {
+    "LondonBreakoutStrategy": 0.19,
+    "DeltaDivergenceScalpingStrategy": 0.16075,
+    "PriceActionStrategy": 0.7359455263852441,
+    "EMACrossoverScalpingStrategy": 0.48391438477665516,
+    "BreakoutStrategy": 0.675,
+    "FibonacciSwingStrategy": 0.7156419874165522,
+    "SupplyDemandSwingStrategy": 0.675,
+    "TrendPullbackStrategy": 0.08238709043999998
+  },
+  "NDXUSD.": {
+    "PriceActionStrategy": 0.19,
+    "EMACrossoverScalpingStrategy": 0.8508598913273385
+  },
+  "DJIUSD.": {
+    "EMACrossoverScalpingStrategy": 0.0,
+    "VWAPReversionStrategy": 0.0,
+    "PriceActionStrategy": 0.9237859850967536,
+    "LondonBreakoutStrategy": 0.8746013718020844,
+    "FibonacciSwingStrategy": 0.7077928433380779,
+    "DeltaDivergenceScalpingStrategy": 0.720279,
+    "BreakoutStrategy": 0.6500250000000001
   }
 }

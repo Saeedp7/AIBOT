@@ -32,7 +32,7 @@ class BreakEvenManager:
         self.lot = lot
         self.precision = precision
         self.sl_buffer = sl_buffer
-        self.trail_distance = trail_distance
+        self.trail_distance = trail_distance if trail_distance is not None else 0.0
         # Track which TP levels have been reached already
         self._reached = set(reached) if reached else set()
     @property
@@ -97,11 +97,7 @@ class BreakEvenManager:
                 moved = True
 
 # --- Trailing after TP2 ---
-        if (
-            self.trail_distance is not None
-            and self.trail_distance > 0
-            and any(i in self._reached for i in (1, 2))
-        ):
+        if self.trail_distance > 0 and any(i in self._reached for i in (1, 2)):
             if self.direction == "buy":
                 new_sl = round(current_price - self.trail_distance, self.precision)
                 if new_sl > self.sl:

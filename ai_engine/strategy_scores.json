@@ -16,9 +16,9 @@
       "regime_fit": 0.5
     },
     "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
+      "win_rate": 100.0,
+      "recent_score": 1.0882,
+      "regime_fit": 1.0882
     }
   },
   "DeltaDivergenceScalpingStrategy": {
@@ -38,9 +38,9 @@
       "regime_fit": 0.5
     },
     "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
+      "win_rate": 100.0,
+      "recent_score": 1.02491752,
+      "regime_fit": 1.02491752
     }
   },
   "EMACrossoverScalpingStrategy": {
@@ -60,9 +60,9 @@
       "regime_fit": 0.5
     },
     "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
+      "win_rate": 100.0,
+      "recent_score": 1.2223040234891394,
+      "regime_fit": 1.2223040234891394
     }
   },
   "FibonacciSwingStrategy": {
@@ -83,8 +83,8 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.0,
-      "regime_fit": 1.0
+      "recent_score": 1.1965523677523096,
+      "regime_fit": 1.1965523677523096
     }
   },
   "IchimokuDayStrategy": {
@@ -170,9 +170,9 @@
       "regime_fit": 0.5
     },
     "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
+      "win_rate": 100.0,
+      "recent_score": 1.1614575088,
+      "regime_fit": 1.1614575088
     }
   },
   "MACDDivergenceStrategy": {
@@ -302,9 +302,9 @@
       "regime_fit": 0.5
     },
     "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
+      "win_rate": 100.0,
+      "recent_score": 1.2728421650457034,
+      "regime_fit": 1.2728421650457034
     }
   },
   "SMCStrategy": {
@@ -329,6 +329,11 @@
       "regime_fit": 0.5
     },
     "bearish": {
+      "win_rate": 100.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
+    },
+    "bullish": {
       "win_rate": 100.0,
       "recent_score": 1.0,
       "regime_fit": 1.0
@@ -439,9 +444,9 @@
       "regime_fit": 0.5
     },
     "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
+      "win_rate": 100.0,
+      "recent_score": 1.0882,
+      "regime_fit": 1.0882
     }
   },
   "VolumeBreakoutStrategy": {
@@ -483,9 +488,9 @@
       "regime_fit": 0.5
     },
     "volatile": {
-      "win_rate": 0.0,
-      "recent_score": 0.5,
-      "regime_fit": 0.5
+      "win_rate": 100.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
     }
   }
 }
