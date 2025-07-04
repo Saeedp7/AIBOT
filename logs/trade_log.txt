@@ -6960,3 +6960,168 @@
 [2025-07-04T20:58:54.908862Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
 [2025-07-04T20:58:54.973700Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
 [2025-07-04T20:58:54.973700Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T20:59:55.088658Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T20:59:56.253199Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T20:59:56.253199Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T20:59:56.320065Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T20:59:56.320065Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:00:57.136419Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:00:57.136419Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:00:57.203357Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:00:57.203357Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:01:57.331808Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:01:58.575718Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:01:58.575718Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:01:58.644182Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:01:58.644182Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:02:58.754967Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:02:59.968993Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:02:59.968993Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:03:00.037253Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:03:00.038251Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:04:00.152389Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:04:01.567290Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:04:01.567290Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:05:01.682443Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:05:02.891899Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:05:02.891899Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:05:02.961758Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:05:02.961758Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:06:03.095419Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:06:04.370399Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:06:04.371394Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:06:04.443205Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:06:04.443205Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:07:04.558741Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:07:05.761784Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:07:05.761784Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:07:05.840533Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:07:05.841549Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:08:05.961144Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:08:07.528179Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:08:07.529177Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:08:07.598779Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:08:07.598779Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:09:07.715818Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:09:08.958544Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:09:08.958719Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:10:09.077937Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:10:10.375185Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:10:10.376182Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:10:10.443304Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:10:10.443304Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:11:10.556753Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:12:11.967629Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:12:13.251184Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:12:13.251184Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:13:13.668201Z] Confidence 4.1667 th=0.25 scale=1.00 for XAUUSD. H1 using DeltaDivergenceScalpingStrategy
+[2025-07-04T21:13:14.680990Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:13:14.680990Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:14:14.885608Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:14:17.702718Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:14:17.702718Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:15:17.893466Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:15:19.149116Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:15:19.149116Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:16:19.345370Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:16:20.602429Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:16:20.602429Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:16:20.676521Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:16:20.677525Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:17:20.789821Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:17:21.996351Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:17:21.996351Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:17:22.068952Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:17:22.069949Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:18:22.184688Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:18:23.715719Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:18:23.715719Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:18:23.791901Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:18:23.791901Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:19:24.614937Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:19:24.614937Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:19:24.683327Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:19:24.683327Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:20:24.809384Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:20:26.041597Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:20:26.041597Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:20:26.126193Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:20:26.127192Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:21:26.250729Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:21:27.737555Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:21:27.738554Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:21:27.807524Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:21:27.807524Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:22:27.927367Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:22:29.179090Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:22:29.179090Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:22:29.253972Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:22:29.253972Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:23:29.376194Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:23:30.745428Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:23:30.746426Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:23:30.813974Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:23:30.813974Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:24:30.927364Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:24:32.168179Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:24:32.169175Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:24:32.239191Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:24:32.240184Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:25:32.363478Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:25:33.585832Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:25:33.585832Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:25:33.665716Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:25:33.666715Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:26:33.786697Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:26:35.142109Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:26:35.143103Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:26:35.267875Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:26:35.267875Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:27:35.385337Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:27:36.560965Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:27:36.560965Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:27:36.630410Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:27:36.630410Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:28:36.751339Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:28:37.973890Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:28:37.973890Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:28:38.054679Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:28:38.055673Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:29:38.167868Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:29:39.420844Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:29:39.420844Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:29:39.488170Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:29:39.489173Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:30:39.598683Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:30:40.847252Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:30:40.847252Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:30:40.914699Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:30:40.914699Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:31:41.025752Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:31:42.193993Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:31:42.193993Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:31:42.262180Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:31:42.262180Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:32:42.384467Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:32:43.528335Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:32:43.528335Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:32:43.595129Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:32:43.596126Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:33:43.705246Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:33:44.868433Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:33:44.869468Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:33:44.936499Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:33:44.936499Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:34:45.048394Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:34:46.353433Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:34:46.353433Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:34:46.419283Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:34:46.420262Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:35:46.532692Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:35:47.767880Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy
+[2025-07-04T21:35:47.767880Z] 🚫 Exposure guard blocked trade: DJIUSD. H1 buy
+[2025-07-04T21:35:47.838500Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:35:47.839504Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
+[2025-07-04T21:36:47.967057Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-04T21:36:49.232837Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
+[2025-07-04T21:36:49.233835Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
