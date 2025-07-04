@@ -19,19 +19,35 @@ class DataFetcher:
     timeframe: str
     limit: int = 300
 
-    async def fetch(self) -> pd.DataFrame:
-        """Return processed OHLCV data asynchronously."""
+    async def fetch(self) -> pd.DataFrame | None:
+        """Return processed OHLCV data asynchronously.
 
-        def _load() -> pd.DataFrame:
-            raw = {
-                self.symbol: {
-                    self.timeframe: get_ohlcv(
-                        self.symbol, self.timeframe, num_bars=self.limit
-                    )
+        If fetching fails, ``None`` is returned so callers can
+        gracefully skip the symbol/timeframe without crashing the
+        scheduler loop.
+        """
+
+        def _load() -> pd.DataFrame | None:
+            try:
+                raw = {
+                    self.symbol: {
+                        self.timeframe: get_ohlcv(
+                            self.symbol, self.timeframe, num_bars=self.limit
+                        )
+                    }
                 }
-            }
-            cleaned = preprocess_ohlcv_data(raw)
-            enriched = add_indicators(cleaned)
-            return enriched[self.symbol][self.timeframe]
+                cleaned = preprocess_ohlcv_data(raw)
+                enriched = add_indicators(cleaned)
+                return enriched[self.symbol][self.timeframe]
+            except Exception as exc:  # pragma: no cover - network/mt5 failure
+                import logging
+
+                logging.getLogger(__name__).error(
+                    "Data fetch failed for %s %s: %s",
+                    self.symbol,
+                    self.timeframe,
+                    exc,
+                )
+                return None
 
         return await asyncio.to_thread(_load)

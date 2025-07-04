@@ -39,20 +39,25 @@ async def process(symbol: str, timeframe: str) -> None:
         trade_manager = TradeManager()
     if selector is None:
         selector = StrategySelector()
-    fetcher = DataFetcher(symbol, timeframe)
-    data = await fetcher.fetch()
-    processor = SignalProcessor(selector.strategies)
-    evaluations = await processor.evaluate(data)
-    for ev in evaluations:
-        sig = ev["signal"]
-        direction = sig if isinstance(sig, str) else getattr(sig, "signal", None)
-        if direction in {"buy", "sell"}:
-            if trade_manager.validate_trade(symbol, MAX_RISK_PER_TRADE):
-                entry = data.iloc[-1]["close"]
-                sl = entry - 1 if direction == "buy" else entry + 1
-                tp = [entry + 2] if direction == "buy" else [entry - 2]
-                trade_manager.execute_trade(symbol, entry, sl, tp)
-        break
+    try:
+        fetcher = DataFetcher(symbol, timeframe)
+        data = await fetcher.fetch()
+        if data is None:
+            return
+        processor = SignalProcessor(selector.strategies)
+        evaluations = await processor.evaluate(data)
+        for ev in evaluations:
+            sig = ev["signal"]
+            direction = sig if isinstance(sig, str) else getattr(sig, "signal", None)
+            if direction in {"buy", "sell"}:
+                if trade_manager.validate_trade(symbol, MAX_RISK_PER_TRADE):
+                    entry = data.iloc[-1]["close"]
+                    sl = entry - 1 if direction == "buy" else entry + 1
+                    tp = [entry + 2] if direction == "buy" else [entry - 2]
+                    trade_manager.execute_trade(symbol, entry, sl, tp)
+            break
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.error("Process failure for %s %s: %s", symbol, timeframe, exc)
 
 async def scheduler_loop() -> None:
     while True:
