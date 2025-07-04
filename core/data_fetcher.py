@@ -28,6 +28,13 @@ class DataFetcher:
         """
 
         def _load() -> pd.DataFrame | None:
+            if not self.symbol or not self.timeframe:
+                import logging
+
+                logging.getLogger(__name__).error(
+                    "Data fetch failed: blank symbol or timeframe"
+                )
+                return None
             try:
                 raw = {
                     self.symbol: {

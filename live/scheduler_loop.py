@@ -10,8 +10,8 @@ from config.manager import get_config
 
 logger = logging.getLogger("scheduler")
 
-SYMBOLS = get_config("SYMBOLS", "XAUUSD.").split(",")
-TIMEFRAMES = get_config("TIMEFRAMES", "M5").split(",")
+SYMBOLS = [s.strip() for s in get_config("SYMBOLS", "XAUUSD.").split(",") if s.strip()]
+TIMEFRAMES = [t.strip() for t in get_config("TIMEFRAMES", "M5").split(",") if t.strip()]
 CHECK_INTERVAL_SECONDS = int(get_config("CHECK_INTERVAL_SECONDS", 60))
 MAX_RISK_PER_TRADE = float(get_config("MAX_RISK", 0.01))
 active_trades: dict[tuple[str,str], bool] = {}
