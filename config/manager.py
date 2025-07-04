@@ -16,14 +16,17 @@ def _load_config() -> dict[str, str]:
     data: dict[str, str] = {}
     if _CONFIG_PATH.exists():
         try:
-            with open(_CONFIG_PATH, "r") as f:
+            with open(_CONFIG_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except Exception:
             data = {}
-    load_dotenv(dotenv_path=_ENV_PATH, override=False)
+    if _ENV_PATH.exists():
+        load_dotenv(dotenv_path=_ENV_PATH, override=False)
     return data
 
-def get_config(key: str, default: str | None = None) -> str | None:
-    """Return configuration value from env or settings.json."""
+
+def get_config(key: str, fallback: str | None = None) -> str | None:
+    """Returns a config value from env or settings.json with fallback."""
     data = _load_config()
-    return os.getenv(key, data.get(key, default))
+    return os.getenv(key, data.get(key, fallback))
+
