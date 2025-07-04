@@ -70,7 +70,7 @@ def detect_market_regime(
        regime = "ranging"
 
     logger.info(
-        f"[REGIME] EMA {ema_start:.2f}→{ema_end:.2f} ({ema_slope:+.2f}%) | "
+        f"[REGIME] SYMBOL {symbol or ''} EMA {ema_start:.2f}→{ema_end:.2f} ({ema_slope:+.2f}%) | "
         f"ATR {atr_start:.5f}→{atr_end:.5f} ({atr_change:+.2f}%) | "
         f"Structure: {structure} → Regime: {regime}"
     )

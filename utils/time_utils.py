@@ -62,7 +62,7 @@ def session_risk_multiplier(now: datetime | None = None) -> float:
 
 def now_tehran() -> datetime:
     """Return current time in Tehran timezone."""
-    return datetime.now(timezone.utc) + timedelta(hours=3, minutes=30)
+    return datetime.now(timezone.utc) + timedelta(minutes=30)
 
 
 def is_crypto_weekend(now: datetime | None = None) -> bool:
