@@ -17,8 +17,18 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.0882,
-      "regime_fit": 1.0882
+      "recent_score": 1.4026932941288568,
+      "regime_fit": 1.4026932941288568
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "DeltaDivergenceScalpingStrategy": {
@@ -39,8 +49,18 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.02491752,
-      "regime_fit": 1.02491752
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "EMACrossoverScalpingStrategy": {
@@ -61,8 +81,18 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.2223040234891394,
-      "regime_fit": 1.2223040234891394
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "FibonacciSwingStrategy": {
@@ -83,8 +113,18 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.1965523677523096,
-      "regime_fit": 1.1965523677523096
+      "recent_score": 1.1614575088,
+      "regime_fit": 1.1614575088
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "IchimokuDayStrategy": {
@@ -104,6 +144,16 @@
       "regime_fit": 0.5
     },
     "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
@@ -129,6 +179,16 @@
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "ICTSmartMoneyStrategy": {
@@ -148,6 +208,16 @@
       "regime_fit": 0.5
     },
     "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
@@ -171,8 +241,18 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.1614575088,
-      "regime_fit": 1.1614575088
+      "recent_score": 1.2223040234891394,
+      "regime_fit": 1.2223040234891394
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "MACDDivergenceStrategy": {
@@ -192,6 +272,16 @@
       "regime_fit": 0.5
     },
     "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
@@ -217,6 +307,16 @@
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "MeanReversionStrategy": {
@@ -236,6 +336,16 @@
       "regime_fit": 0.5
     },
     "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
@@ -261,6 +371,16 @@
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "OrderBlockScalpingStrategy": {
@@ -280,6 +400,16 @@
       "regime_fit": 0.5
     },
     "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
@@ -303,8 +433,18 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.2728421650457034,
-      "regime_fit": 1.2728421650457034
+      "recent_score": 1.0882,
+      "regime_fit": 1.0882
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "SMCStrategy": {
@@ -328,12 +468,12 @@
       "recent_score": 0.5,
       "regime_fit": 0.5
     },
-    "bearish": {
+    "bullish": {
       "win_rate": 100.0,
       "recent_score": 1.0,
       "regime_fit": 1.0
     },
-    "bullish": {
+    "bearish": {
       "win_rate": 100.0,
       "recent_score": 1.0,
       "regime_fit": 1.0
@@ -359,6 +499,16 @@
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "SupplyDemandSwingStrategy": {
@@ -379,8 +529,18 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.0,
-      "regime_fit": 1.0
+      "recent_score": 1.03,
+      "regime_fit": 1.03
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "TrendBreakoutStrategy": {
@@ -400,6 +560,16 @@
       "regime_fit": 0.5
     },
     "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
@@ -425,6 +595,16 @@
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "TrendPullbackStrategy": {
@@ -445,8 +625,18 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.0882,
-      "regime_fit": 1.0882
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   },
   "VolumeBreakoutStrategy": {
@@ -466,6 +656,16 @@
       "regime_fit": 0.5
     },
     "volatile": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
       "win_rate": 0.0,
       "recent_score": 0.5,
       "regime_fit": 0.5
@@ -489,8 +689,18 @@
     },
     "volatile": {
       "win_rate": 100.0,
-      "recent_score": 1.0,
-      "regime_fit": 1.0
+      "recent_score": 1.2223040234891394,
+      "regime_fit": 1.2223040234891394
+    },
+    "bullish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
+    },
+    "bearish": {
+      "win_rate": 0.0,
+      "recent_score": 0.5,
+      "regime_fit": 0.5
     }
   }
 }

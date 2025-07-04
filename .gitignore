@@ -14,5 +14,7 @@ config/config.json
 # Log and data files
 logs/*
 !logs/trade_history.json
+!logs/trade_log.txt
+!logs/ReportHistory-213173.xlsx
 backtesting/logs/
 *.csv

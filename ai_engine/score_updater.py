@@ -165,7 +165,9 @@ def update_strategy_score(
     )
     if net_profit_pct is None:
         strat_map[regime] = metrics
-        scores[strategy_name] = strat_map
+        existing = scores.get(strategy_name, {})
+        existing.update(strat_map)
+        scores[strategy_name] = existing
         _save_json(scores, score_path)
         if symbol:
             _update_asset_score(
@@ -200,7 +202,9 @@ def update_strategy_score(
     metrics.setdefault("regime_fit", MIN_BASE_SCORE)
     metrics.setdefault("decay", 0.99)
     strat_map[regime] = metrics
-    scores[strategy_name] = strat_map
+    existing = scores.get(strategy_name, {})
+    existing.update(strat_map)
+    scores[strategy_name] = existing
     _save_json(scores, score_path)
     if symbol:
         _update_asset_score(

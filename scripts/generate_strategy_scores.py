@@ -11,11 +11,11 @@ from copy import deepcopy
 from pathlib import Path
 
 DEFAULT_OUTPUT = "ai_engine/strategy_scores.json"
-REGIMES = ["unknown", "trending", "ranging", "volatile"]
+REGIMES = ["unknown", "trending", "ranging", "volatile", "bullish", "bearish"]
 DEFAULT_METRICS = {
     "win_rate": 0.0,
-    "recent_score": 0.05,
-    "regime_fit": 0.05,
+    "recent_score": 0.5,
+    "regime_fit": 0.5,
 }
 
 
