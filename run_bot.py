@@ -5,6 +5,7 @@ import argparse, logging, os
 from config.manager import get_config
 from connectors.mt5_connector import initialize_mt5, shutdown_mt5
 from live.scheduler_loop import scheduler_loop
+import asyncio
 import MetaTrader5 as mt5
 import sys
 
@@ -38,11 +39,7 @@ def main() -> None:
         return
 
     try:
-        scheduler_loop(
-            argparse.Namespace(
-                debug=args.debug, silent=False, force_trade=args.force_trade
-            )
-        )
+        asyncio.run(scheduler_loop())
     finally:
         shutdown_mt5()
         print("🛑 Bot stopped.")

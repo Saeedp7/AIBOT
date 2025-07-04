@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Utility functions for session-based timing logic."""
 
-from datetime import datetime, time, timezone
+from datetime import datetime, time, timezone, timedelta
 from typing import List, Tuple
 import logging
 
@@ -58,3 +58,15 @@ def session_risk_multiplier(now: datetime | None = None) -> float:
         return REDUCED_RISK_OUTSIDE_SESSION
     logger.debug(f"Current UTC time: {now_dt}. Session: LOW. Trading disabled.")
     return 0.0
+
+
+def now_tehran() -> datetime:
+    """Return current time in Tehran timezone."""
+    return datetime.now(timezone.utc) + timedelta(hours=3, minutes=30)
+
+
+def is_crypto_weekend(now: datetime | None = None) -> bool:
+    """Return ``True`` if it is the crypto trading window (Saturday in Tehran)."""
+    dt = now if now is not None else now_tehran()
+    return dt.weekday() == 5  # Saturday
+
