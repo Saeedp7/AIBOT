@@ -1,7 +1,6 @@
 import pandas as pd
-import pandas_ta as ta
+from utils.indicators import calculate_rsi, calculate_vwap
 from .base import BaseStrategy
-from utils.indicators import calculate_rsi
 from core.ict_utils import detect_liquidity_grab
 
 class VWAPReversionStrategy(BaseStrategy):
@@ -20,7 +19,7 @@ class VWAPReversionStrategy(BaseStrategy):
 
         # Calculate VWAP
         data.index = data.index.tz_localize(None)
-        data.loc[:, 'vwap'] = ta.vwap(high=data['high'], low=data['low'], close=data['close'], volume=data['volume'])
+        data.loc[:, 'vwap'] = calculate_vwap(data)
 
         last_price = data['close'].iloc[-1]
         vwap_val = data['vwap'].iloc[-1]

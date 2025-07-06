@@ -1,5 +1,5 @@
+# ⛔ No indicators required – this strategy uses raw price-action triggers only.
 import pandas as pd
-import pandas_ta as ta
 from .base import BaseStrategy
 
 class MicroBreakoutScalpingStrategy(BaseStrategy):

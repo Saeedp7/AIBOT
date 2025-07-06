@@ -1,3 +1,4 @@
+# ⛔ No indicators required – this strategy uses raw price-action triggers only.
 import pandas as pd
 from .base import BaseStrategy
 
