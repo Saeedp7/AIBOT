@@ -1,23 +1,20 @@
-from __future__ import annotations
-
-import inspect
+import os
 import importlib
-import pkgutil
+from inspect import isclass
 from pathlib import Path
 
-from .base import BaseStrategy
-
-
-def discover_strategies() -> list[BaseStrategy]:
-    """Dynamically load and instantiate all strategy classes."""
-    strategies: list[BaseStrategy] = []
-    package_dir = Path(__file__).resolve().parent
-    for module_info in pkgutil.iter_modules([str(package_dir)]):
-        name = module_info.name
-        if name in {"base", "strategy_selector"}:
+def discover_strategies():
+    strategy_dir = Path(__file__).parent
+    strategies = []
+    for file in os.listdir(strategy_dir):
+        name, ext = os.path.splitext(file)
+        if ext != ".py" or name in {"__init__", "base", "strategy_selector"}:
             continue
-        module = importlib.import_module(f"{__name__}.{name}")
-        for _, obj in inspect.getmembers(module, inspect.isclass):
-            if issubclass(obj, BaseStrategy) and obj is not BaseStrategy:
-                strategies.append(obj())
+        
+        module = importlib.import_module(f"strategies.{name}")
+        for attr in dir(module):
+            obj = getattr(module, attr)
+            if isclass(obj) and hasattr(obj, "generate_signal"):
+                strategies.append(obj)
+
     return strategies
