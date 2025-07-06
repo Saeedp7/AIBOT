@@ -1,6 +1,10 @@
 import pandas as pd
 import pandas_ta as ta
 from .base import BaseStrategy
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 class EMACrossoverScalpingStrategy(BaseStrategy):
     def __init__(self):
@@ -11,8 +15,8 @@ class EMACrossoverScalpingStrategy(BaseStrategy):
         if len(data) < 50:
             return
 
-        data.loc[:, 'ema_fast'] = ta.ema(data['close'], length=9)
-        data.loc[:, 'ema_slow'] = ta.ema(data['close'], length=21)
+        data.loc[:, 'ema_fast'] = calculate_ema(data['close'], 9)
+        data.loc[:, 'ema_slow'] = calculate_ema(data['close'], 21)
 
         if data['ema_fast'].iloc[-2] < data['ema_slow'].iloc[-2] and data['ema_fast'].iloc[-1] > data['ema_slow'].iloc[-1]:
             self.signal = 'buy'

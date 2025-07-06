@@ -1,6 +1,10 @@
 import pandas as pd
 import pandas_ta as ta
 from .base import BaseStrategy
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 class IchimokuDayStrategy(BaseStrategy):
     def __init__(self):
@@ -17,6 +21,7 @@ class IchimokuDayStrategy(BaseStrategy):
             data.index = pd.to_datetime(data['time'])
 
         data = data.sort_index()
+        data['ema_20'] = calculate_ema(data['close'], 20)
 
         # Get Ichimoku components
         conv_base, cloud = ta.ichimoku(

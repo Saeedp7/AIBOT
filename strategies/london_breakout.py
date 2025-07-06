@@ -1,6 +1,10 @@
 # ⛔ No indicators required – this strategy uses raw price-action triggers only.
 import pandas as pd
 from .base import BaseStrategy
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 class LondonBreakoutStrategy(BaseStrategy):
     def __init__(self):
@@ -10,6 +14,9 @@ class LondonBreakoutStrategy(BaseStrategy):
         self.signal = None
         if len(data) < 40:
             return
+
+        data['ema_20'] = calculate_ema(data['close'], 20)
+        data['rsi_14'] = calculate_rsi(data['close'], 14)
 
         breakout_high = data['high'].iloc[-30:-10].max()
         breakout_low = data['low'].iloc[-30:-10].min()

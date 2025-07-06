@@ -13,3 +13,4 @@ for file in os.listdir("strategies"):
         content = f.read()
         found = any(kw in content for kw in indicator_keywords)
         print(f"{file:<35} → {'✅' if found else '❌ NO INDICATORS'}")
+

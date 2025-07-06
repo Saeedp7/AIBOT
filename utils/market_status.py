@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 import MetaTrader5 as mt5
 
 def is_market_open(symbol: str) -> bool:
-    """Return True if market is open for the given symbol based on Tehran time (01:30–23:59, Mon–Fri)."""
+    """Return ``True`` if trading is allowed for ``symbol`` right now."""
     info = mt5.symbol_info(symbol)
     tick = mt5.symbol_info_tick(symbol)
 
@@ -27,7 +27,7 @@ def is_market_open(symbol: str) -> bool:
     current_time = tehran_time.time()
     weekday = tehran_time.weekday()  # Monday = 0, Sunday = 6
 
-    # Define symbol type
+    # Define restricted types
     crypto_symbols = {"BTCUSD.", "ETHUSD."}
     is_crypto = symbol in crypto_symbols
 
@@ -39,10 +39,14 @@ def is_market_open(symbol: str) -> bool:
     session_end = time(23, 59)
 
     # === Enforcement ===
-    if is_crypto and not is_weekend:
-        return False  # Crypto allowed only on weekend
-    if not is_crypto and is_weekend:
-        return False  # Forex/indices allowed only on weekdays
+    # Disable crypto entirely
+    if is_crypto:
+        return False
+
+    # Block all trading on weekends
+    if is_weekend:
+        return False
+
     if not (session_start <= current_time <= session_end):
         return False
 
