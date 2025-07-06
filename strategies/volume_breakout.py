@@ -1,4 +1,5 @@
 import pandas as pd
+from utils.indicators import calculate_ema
 from .base import BaseStrategy
 
 class VolumeBreakoutStrategy(BaseStrategy):
@@ -10,11 +11,14 @@ class VolumeBreakoutStrategy(BaseStrategy):
         if len(data) < 30 or 'volume' not in data.columns:
             return
 
-        avg_volume = data['volume'].rolling(20).mean().iloc[-1]
-        if data['volume'].iloc[-1] > 1.5 * avg_volume:
-            if data['close'].iloc[-1] > data['high'].iloc[-5:-1].max():
+        data = data.copy()
+        data['ema_volume'] = calculate_ema(data['volume'], 20)
+        latest = data.iloc[-1]
+
+        if latest['volume'] > 1.5 * latest['ema_volume']:
+            if latest['close'] > data['high'].rolling(20).max().iloc[-1]:
                 self.signal = 'buy'
-            elif data['close'].iloc[-1] < data['low'].iloc[-5:-1].min():
+            elif latest['close'] < data['low'].rolling(20).min().iloc[-1]:
                 self.signal = 'sell'
 
     def should_buy(self):
@@ -44,8 +48,20 @@ class VolumeBreakoutStrategy(BaseStrategy):
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
         if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
-            self.signal = None
             return None
-        self.analyze(df)
-        self._log_context(df, pattern_detected="VolumeBreakout")
-        return self.signal
+        df = df.copy()
+        df["ema_volume"] = calculate_ema(df["volume"], 20)
+        latest = df.iloc[-1]
+
+        if latest["volume"] > 1.5 * latest["ema_volume"]:
+            if latest["close"] > df["high"].rolling(20).max().iloc[-1]:
+                signal = "buy"
+            elif latest["close"] < df["low"].rolling(20).min().iloc[-1]:
+                signal = "sell"
+            else:
+                signal = None
+        else:
+            signal = None
+        if signal:
+            self._log_context(df, pattern_detected="VolumeBreakout")
+        return signal

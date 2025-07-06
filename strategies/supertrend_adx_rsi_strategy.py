@@ -12,7 +12,8 @@ class SupertrendADXRSIStrategy(BaseStrategy):
             return
 
         supertrend_dir = calculate_supertrend(data, period=10, multiplier=3.0)
-        adx_series = calculate_adx(data, di_length=7, adx_smoothing=7)
+        # ``calculate_adx`` only requires a period; default 14 works well here
+        adx_series = calculate_adx(data, period=14)
         rsi_dict = calculate_multi_rsi(data['close'], [3, 21, 28])
 
         st_now = supertrend_dir.iloc[-1]
