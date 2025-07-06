@@ -18,6 +18,10 @@ from strategy_components.bias_framework import (
     determine_daily_bias,
     align_with_institutional_flow,
 )
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 from strategy_components.session_filter import in_killzone
 
 
@@ -31,6 +35,9 @@ class SMCStrategy(BaseStrategy):
             return None
         if df is None or df.empty:
             return None
+        df['sma_20'] = calculate_sma(df['close'], 20)
+        df['rsi_14'] = calculate_rsi(df['close'], 14)
+        df['vwap'] = calculate_vwap(df)
         if not in_killzone(df.index[-1].to_pydatetime()):
             return None
         self._log_context(df, pattern_detected="SMC", entry_zone="OB")

@@ -8,6 +8,10 @@ from .base import BaseStrategy
 from config.settings import MIN_VOLATILITY_PCT
 from strategy_components.liquidity_engine import detect_liquidity_sweep
 from strategy_components.smc_engine import detect_fvg_zones, find_order_blocks
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 
 class ICT10AMManipulationStrategy(BaseStrategy):
@@ -54,6 +58,9 @@ class ICT10AMManipulationStrategy(BaseStrategy):
     ) -> dict | None:
         if df is None or df.empty:
             return None
+
+        df['ema_20'] = calculate_ema(df['close'], 20)
+        df['vwap'] = calculate_vwap(df)
 
         ts = df.index[-1].to_pydatetime()
         if ts.time() != time(10, 0):

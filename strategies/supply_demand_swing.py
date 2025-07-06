@@ -1,5 +1,9 @@
 import pandas as pd
 from .base import BaseStrategy
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 class SupplyDemandSwingStrategy(BaseStrategy):
     def __init__(self):
@@ -9,6 +13,9 @@ class SupplyDemandSwingStrategy(BaseStrategy):
         self.signal = None
         if len(data) < 40:
             return
+
+        data['ema_20'] = calculate_ema(data['close'], 20)
+        data['adx_14'] = calculate_adx(data)
 
         support = data['low'].rolling(20).min()
         resistance = data['high'].rolling(20).max()

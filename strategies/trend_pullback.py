@@ -1,6 +1,10 @@
 import pandas as pd
 import pandas_ta as ta
 from .base import BaseStrategy
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 class TrendPullbackStrategy(BaseStrategy):
     def __init__(self):
@@ -11,8 +15,9 @@ class TrendPullbackStrategy(BaseStrategy):
         if len(data) < 50:
             return
 
-        data.loc[:, 'ema_20'] = ta.ema(data['close'], length=20)
-        data.loc[:, 'ema_50'] = ta.ema(data['close'], length=50)
+        data.loc[:, 'ema_20'] = calculate_ema(data['close'], 20)
+        data.loc[:, 'ema_50'] = calculate_ema(data['close'], 50)
+        data.loc[:, 'rsi_14'] = calculate_rsi(data['close'], 14)
 
         if data['ema_20'].iloc[-1] > data['ema_50'].iloc[-1] and data['close'].iloc[-1] < data['ema_20'].iloc[-1]:
             self.signal = 'buy'

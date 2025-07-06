@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 from .base import BaseStrategy
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 class FibonacciSwingStrategy(BaseStrategy):
     def __init__(self):
@@ -15,6 +19,8 @@ class FibonacciSwingStrategy(BaseStrategy):
         high = recent['high'].max()
         low = recent['low'].min()
         close = recent['close'].iloc[-1]
+
+        data['ema_20'] = calculate_ema(data['close'], 20)
 
         retracement_618 = high - (high - low) * 0.618
 
