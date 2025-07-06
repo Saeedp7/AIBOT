@@ -2,7 +2,41 @@ import os
 import pandas as pd
 from data.chart_data_handler import get_ohlcv
 from risk_management.stop_loss_manager import get_required_timeframes
-from ai_engine.score_updater import get_strategy_win_rate, load_scores
+from ai_engine.score_updater import (
+    get_strategy_win_rate,
+    load_scores,
+    calculate_composite_score,
+)
+from config.thresholds import get_confidence_threshold
+
+
+def get_current_regime() -> str:
+    """Return most recently detected market regime if available."""
+    path = "logs/current_regime.txt"
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                value = f.read().strip()
+                if value:
+                    return value
+        except Exception:
+            pass
+    return "unknown"
+
+
+def get_strategy_score(strategy_name: str, regime: str) -> float:
+    """Return composite score for ``strategy_name`` in ``regime``."""
+    scores = load_scores()
+    data = scores.get(strategy_name, {})
+    metrics = {}
+    if isinstance(data, dict):
+        if regime in data and isinstance(data[regime], dict):
+            metrics = data[regime]
+        elif "unknown" in data and isinstance(data["unknown"], dict):
+            metrics = data["unknown"]
+        elif all(k in data for k in ("win_rate", "recent_score", "regime_fit")):
+            metrics = data
+    return calculate_composite_score(metrics) if metrics else 0.0
 import numpy as np
 
 from strategies import discover_strategies
@@ -28,10 +62,21 @@ class StrategySelector:
         self.strategy_memory = load_scores()
 
     def _filter_by_regime_and_score(self, strategies):
-        """Return ``strategies`` after applying basic regime/score filters."""
-        # This basic implementation simply returns the list unchanged. It can
-        # be extended to leverage score files or regime configuration.
-        return list(strategies)
+        filtered = []
+        for strat in strategies:
+            try:
+                regime = get_current_regime()
+                threshold = get_confidence_threshold(symbol="XAUUSD", timeframe="M15", regime=regime, strategy_name=strat.__name__)
+                score = get_strategy_score(strat.__name__, regime)
+
+                if score >= threshold:
+                    filtered.append(strat)
+                else:
+                    print(f"[Filter] Strategy {strat.__name__} skipped due to score ({score} < {threshold})")
+            except Exception as e:
+                print(f"[Filter] Strategy {strat.__name__} error: {e}")
+
+        return filtered
 
     def fetch_multitimeframe_data(self, timeframes):
         tf_data = {}

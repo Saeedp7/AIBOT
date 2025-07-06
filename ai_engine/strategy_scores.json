@@ -702,5 +702,12 @@
       "recent_score": 0.5,
       "regime_fit": 0.5
     }
+  },
+  "type": {
+    "unknown": {
+      "win_rate": 0.0,
+      "recent_score": 1.0,
+      "regime_fit": 1.0
+    }
   }
 }
