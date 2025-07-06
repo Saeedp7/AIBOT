@@ -75,7 +75,12 @@ class BaseStrategy:
         regime: str,
     ) -> str | None:
         """Fallback wrapper used by external modules."""
-        df = df.copy(deep=True)
-        df['ema_20'] = calculate_ema(df['close'], 20)
-        df['vwap'] = calculate_vwap(df)
-        return self.generate_signal(df)
+        df_copy = df.copy(deep=True) if hasattr(df, "copy") else df
+        try:
+            close_series = df_copy["close"]  # type: ignore[index]
+            df_copy["ema_20"] = calculate_ema(close_series, 20)
+            df_copy["vwap"] = calculate_vwap(df_copy)
+        except Exception:
+            # minimal df object provided
+            pass
+        return self.generate_signal(df_copy)

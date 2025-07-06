@@ -88,6 +88,10 @@ def record_trade(
             if swap is None:
                 swap = -sum(getattr(d, "swap", 0.0) for d in deals)
 
+    # ✅ fallback exit price if still missing
+    if result and result.lower() != "open" and exit_price in (None, 0.0):
+        exit_price = tps[-1] if result == "win" else sl
+
     direction = 1
     if tps:
         direction = 1 if tps[0] > entry else -1
