@@ -706,8 +706,8 @@
   "type": {
     "unknown": {
       "win_rate": 0.0,
-      "recent_score": 1.0,
-      "regime_fit": 1.0
+      "recent_score": 0.94,
+      "regime_fit": 0.94
     }
   }
 }
