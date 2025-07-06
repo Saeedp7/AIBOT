@@ -12,11 +12,26 @@ from ai_engine.score_manager import ensure_base_scores
 class StrategySelector:
     def __init__(self):
         self.strategies = discover_strategies()
-        ensure_base_scores(
-            [s.__class__.__name__ for s in self.strategies]
+        print(
+            "[StrategySelector] All loaded strategies:",
+            [s.__name__ for s in self.strategies],
         )
+        ensure_base_scores([s.__class__.__name__ for s in self.strategies])
+
+        self.active_strategies = self._filter_by_regime_and_score(self.strategies)
+        print(
+            "[StrategySelector] Active strategies selected:",
+            [s.__name__ for s in self.active_strategies],
+        )
+
         self.cooldowns = {}
         self.strategy_memory = load_scores()
+
+    def _filter_by_regime_and_score(self, strategies):
+        """Return ``strategies`` after applying basic regime/score filters."""
+        # This basic implementation simply returns the list unchanged. It can
+        # be extended to leverage score files or regime configuration.
+        return list(strategies)
 
     def fetch_multitimeframe_data(self, timeframes):
         tf_data = {}
