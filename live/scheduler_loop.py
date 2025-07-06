@@ -55,6 +55,7 @@ from utils.trade_journal import record_trade, update_trade, load_history
 from utils.logger import log_trade_action
 from risk_management.breakeven_manager import BreakEvenManager
 from execution.order_manager import execute_fake_order
+from ai_engine.strategy_score_manager import recover_old_scores
 from monitoring.alert_manager import (
     alert_trade_opened,
     alert_sl_moved,
@@ -764,6 +765,7 @@ def scheduler_loop(args: argparse.Namespace) -> None:
     logging.basicConfig(level=level, format="%(asctime)s - %(levelname)s - %(message)s")
     while True:
         print("🔁 Loop is running...")
+        recover_old_scores()
         global daily_guard_alert_sent, daily_guard_trigger_date
         if daily_guard_trigger_date and date.today() != daily_guard_trigger_date:
             daily_guard_alert_sent = False

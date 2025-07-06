@@ -8,7 +8,11 @@ from ai_engine.score_updater import (
     calculate_composite_score,
 )
 from config.thresholds import get_confidence_threshold
+from config.scoring_config import EXPLORATION_INTERVAL
+import random
+from utils.suppressed_logger import log_suppressed_strategy
 
+cycle_counter = 0
 
 def get_current_regime() -> str:
     """Return most recently detected market regime if available."""
@@ -64,24 +68,34 @@ class StrategySelector:
         self.strategy_memory = load_scores()
 
     def _filter_by_regime_and_score(self, strategies):
+        global cycle_counter
+        cycle_counter += 1
+
+        symbol = "XAUUSD"
+        timeframe = "M15"
+        regime = get_current_regime()
+    
         filtered = []
+        suppressed = []
+
         for strat in strategies:
-            try:
-                regime = get_current_regime()
-                name = strat.__class__.__name__
-                threshold = get_confidence_threshold(symbol="XAUUSD", timeframe="M15", regime=regime, strategy_name=name)
-                score = get_strategy_score(name, regime)
+            if is_strategy_on_cooldown(strat.__class__.__name__, symbol, timeframe):
+                print(f"[Cooldown] {strat.__class__.__name__} is cooling down. Skipped.")
+                continue
+            name = strat.__class__.__name__
+            score = get_strategy_score(name, regime)
+            threshold = get_confidence_threshold(symbol, timeframe, regime, name)
 
-                if is_strategy_on_cooldown(name, "XAUUSD", "M15"):
-                    print(f"[Cooldown] {name} is cooling down. Skipped.")
-                    continue
+            if score >= threshold:
+                filtered.append(strat)
+            else:
+                suppressed.append(strat)
+                log_suppressed_strategy(name, score, regime, threshold)
 
-                if score >= threshold:
-                    filtered.append(strat)
-                else:
-                    print(f"[Filter] {name} score too low: {score} < {threshold}")
-            except Exception as e:
-                print(f"[Filter] Strategy {name} error: {e}")
+        if cycle_counter % EXPLORATION_INTERVAL == 0:
+            sample = random.sample(suppressed, min(3, len(suppressed)))
+            print(f"[Exploration] Retrying suppressed strategies: {[s.__class__.__name__ for s in sample]}")
+            filtered.extend(sample)
 
         return filtered
 
