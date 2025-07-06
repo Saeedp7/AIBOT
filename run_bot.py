@@ -5,10 +5,25 @@ import argparse, logging, os
 from config.manager import get_config
 from connectors.mt5_connector import initialize_mt5, shutdown_mt5
 from live.scheduler_loop import scheduler_loop
-from utils.time_utils import is_weekend
 from ai_engine.learning_mode import run_learning_mode_ml
+from datetime import datetime
+import pytz
 import MetaTrader5 as mt5
 import sys
+
+def is_market_open() -> bool:
+    now = datetime.now(pytz.timezone("UTC"))
+    weekday = now.weekday()
+    hour = now.hour
+
+    # Forex closes Friday 21:00 UTC, reopens Sunday 21:00 UTC
+    if weekday == 5:  # Saturday
+        return False
+    if weekday == 6 and hour < 21:  # Sunday before 21:00
+        return False
+    if weekday == 4 and hour >= 21:  # Friday after 21:00
+        return False
+    return True
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run AutoTrade AI Bot")
@@ -25,10 +40,13 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    if is_weekend():
+    if not is_market_open():
         print("\U0001F4DA Entering Weekend AI Learning Mode...")
         run_learning_mode_ml()
-        return
+    print("🔄 Learning mode complete. Bot will idle until market reopens.")
+    while not is_market_open():
+        import time
+        time.sleep(3600)  # Sleep 5 minutes before checking again
     os.environ["LIVE_MODE"] = "true" if args.live else "false"
     if args.force_trade:
         os.environ["FORCE_TRADE"]  = "true"

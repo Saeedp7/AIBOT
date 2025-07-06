@@ -17,12 +17,25 @@ def run_learning_mode_ml(trade_file="logs/trade_history.json"):
     if df.empty or "result" not in df.columns:
         print("\u26A0\ufe0f No usable trades for learning.")
         return
-
+    df = df[df["result"].isin(["win", "loss"])].copy()
     df["result"] = df["result"].map({"win": 1, "loss": 0})
     df["strategy"] = df["strategy"].astype("category")
     df["symbol"] = df["symbol"].astype("category")
     df["regime"] = df["regime"].astype("category")
-    df["hour"] = pd.to_datetime(df["entry_time"]).dt.hour
+
+    # ✅ Patch: detect the correct time column
+    time_col = None
+    for candidate in ["entry_time", "open_time", "timestamp", "time_open"]:
+        if candidate in df.columns:
+            time_col = candidate
+            break
+
+    if time_col:
+        df["hour"] = pd.to_datetime(df[time_col]).dt.hour
+    else:
+        print("⚠️ No entry time column found. Using default hour=12.")
+        df["hour"] = 12
+
     df["duration_min"] = df.get("duration_min", 30)
 
     X = df[["strategy", "symbol", "regime", "hour", "duration_min"]].apply(
@@ -30,6 +43,9 @@ def run_learning_mode_ml(trade_file="logs/trade_history.json"):
     )
     y = df["result"]
 
+    if X.empty or y.empty:
+        print("⚠️ No valid trades available for training. Skipping ML learning.")
+        return
     model = RandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X, y)
 
