@@ -45,17 +45,18 @@ from ai_engine.score_manager import ensure_base_scores
 
 class StrategySelector:
     def __init__(self):
-        self.strategies = discover_strategies()
+        all_strategies = discover_strategies()
         print(
             "[StrategySelector] All loaded strategies:",
-            [s.__name__ for s in self.strategies],
+            [s.__class__.__name__ for s in all_strategies],
         )
-        ensure_base_scores([s.__class__.__name__ for s in self.strategies])
+        ensure_base_scores([s.__class__.__name__ for s in all_strategies])
 
-        self.active_strategies = self._filter_by_regime_and_score(self.strategies)
+        self.active_strategies = self._filter_by_regime_and_score(all_strategies)
+        self.strategies = list(self.active_strategies)
         print(
             "[StrategySelector] Active strategies selected:",
-            [s.__name__ for s in self.active_strategies],
+            [s.__class__.__name__ for s in self.active_strategies],
         )
 
         self.cooldowns = {}
@@ -66,15 +67,16 @@ class StrategySelector:
         for strat in strategies:
             try:
                 regime = get_current_regime()
-                threshold = get_confidence_threshold(symbol="XAUUSD", timeframe="M15", regime=regime, strategy_name=strat.__name__)
-                score = get_strategy_score(strat.__name__, regime)
+                name = strat.__class__.__name__
+                threshold = get_confidence_threshold(symbol="XAUUSD", timeframe="M15", regime=regime, strategy_name=name)
+                score = get_strategy_score(name, regime)
 
                 if score >= threshold:
                     filtered.append(strat)
                 else:
-                    print(f"[Filter] Strategy {strat.__name__} skipped due to score ({score} < {threshold})")
+                    print(f"[Filter] Strategy {name} skipped due to score ({score} < {threshold})")
             except Exception as e:
-                print(f"[Filter] Strategy {strat.__name__} error: {e}")
+                print(f"[Filter] Strategy {name} error: {e}")
 
         return filtered
 
