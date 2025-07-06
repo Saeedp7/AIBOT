@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 from typing import Dict, Iterable
+from utils.heatmap_logger import log_strategy_heatmap
 
 DEFAULT_SCORE_PATH = "ai_engine/strategy_scores.json"
 DEFAULT_ASSET_SCORE_PATH = "ai_engine/strategy_scores_by_asset.json"
@@ -76,9 +77,12 @@ def initialize_scores(
         _save_json(scores, path)
 
 
-def calculate_composite_score(metrics: dict) -> float:
+def calculate_composite_score(metrics: dict, bootstrap_score: float = 0.4) -> float:
     """Return composite score identical to ``get_best_signal`` logic."""
     win_rate = float(metrics.get("win_rate", 0.0))
+    if win_rate == 0.0:
+        # Strategy is new; return default bootstrap score for testing
+        return bootstrap_score
     recent_score = float(metrics.get("recent_score", 0.0))
     regime_fit = float(metrics.get("regime_fit", 0.0))
     return (win_rate / 100.0) * recent_score * regime_fit
@@ -124,6 +128,7 @@ def update_strategy_score(
     regime: str,
     *,
     symbol: str | None = None,
+    timeframe: str | None = None,
     score_path: str = DEFAULT_SCORE_PATH,
     asset_score_path: str = DEFAULT_ASSET_SCORE_PATH,
     alpha: float = 0.1,
@@ -140,6 +145,10 @@ def update_strategy_score(
         Net profit or loss percentage of the trade.
     regime : str
         Market regime label used during the trade.
+    symbol : str, optional
+        Trading symbol associated with the trade.
+    timeframe : str, optional
+        Timeframe of the trade for heatmap logging.
     score_path : str, optional
         Path to the JSON score file.
     alpha : float, optional
@@ -214,6 +223,17 @@ def update_strategy_score(
             path=asset_score_path,
             alpha=alpha,
         )
+        # Log to heatmap for strategy performance tracking
+    try:
+        log_strategy_heatmap(
+            strategy_name=strategy_name,
+            symbol=symbol or "",
+            timeframe=timeframe or "",
+            regime=regime,
+            outcome="win" if win else "loss",
+        )
+    except Exception:
+        pass
 
 def load_scores(path: str = DEFAULT_SCORE_PATH) -> Dict[str, dict]:
     """Load score metrics from ``path``."""

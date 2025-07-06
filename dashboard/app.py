@@ -7,7 +7,7 @@ app = Flask(__name__)
 TRADE_HISTORY = os.path.join('logs', 'trade_history.json')
 SCORES_FILE = os.path.join('ai_engine', 'strategy_scores.json')
 LOG_FILE = os.path.join('logs', 'trade_actions.log')
-
+HEATMAP_FILE = os.path.join('logs', 'strategy_heatmap.json')
 
 def _load_json(path):
     if not os.path.exists(path):
@@ -37,6 +37,7 @@ def dashboard():
     history = _load_json(TRADE_HISTORY)
     scores = _load_json(SCORES_FILE)
     logs = _load_logs(LOG_FILE, lines=100)
+    heatmap = _load_json(HEATMAP_FILE)
 
     open_trades = _get_open_trades(history)
 
@@ -50,6 +51,7 @@ def dashboard():
         history=history,
         scores=scores,
         logs=logs,
+        heatmap=heatmap,
         symbol=symbol,
     )
 

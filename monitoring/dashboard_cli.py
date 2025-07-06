@@ -21,6 +21,7 @@ TRADE_HISTORY = "logs/trade_history.json"
 SCORE_PATH = "ai_engine/strategy_scores.json"
 DAILY_GUARD_PATH = "logs/daily_guard.json"
 TRADE_LOG_PATH = "logs/trade_log.txt"
+HEATMAP_PATH = "logs/strategy_heatmap.json"
 
 console = Console()
 
@@ -42,6 +43,10 @@ def _tail_log(path: str, lines: int = 5) -> List[str]:
         content = f.readlines()
     return [line.rstrip() for line in content[-lines:]]
 
+def _load_heatmap() -> Dict[str, Dict[str, Dict[str, Any]]]:
+    data = _load_json(HEATMAP_PATH)
+    return data if isinstance(data, dict) else {}
+
 
 def _color_pnl(value: float | None) -> str:
     if value is None:
@@ -60,6 +65,7 @@ def build_dashboard() -> Panel:
     scores: Dict[str, Dict[str, Any]] = _load_json(SCORE_PATH)
     guard: Dict[str, Any] = _load_json(DAILY_GUARD_PATH)
     log_lines = _tail_log(TRADE_LOG_PATH)
+    heatmap = _load_heatmap()
 
     trade_table = Table(title="Open Trades", expand=True)
     trade_table.add_column("Symbol")
@@ -101,6 +107,20 @@ def build_dashboard() -> Panel:
     for k, v in guard.items():
         guard_table.add_row(str(k), str(v))
 
+    heat_table = Table(title="Strategy Heatmap", expand=True)
+    heat_table.add_column("Context")
+    heat_table.add_column("Strategy")
+    heat_table.add_column("Wins", justify="right")
+    heat_table.add_column("Losses", justify="right")
+    for context, strat_map in heatmap.items():
+        for strat, stats in strat_map.items():
+            heat_table.add_row(
+                context,
+                strat,
+                str(stats.get("wins", 0)),
+                str(stats.get("losses", 0)),
+            )
+
     log_table = Table(title="Recent Log", expand=True)
     for line in log_lines:
         log_table.add_row(line)
@@ -109,6 +129,7 @@ def build_dashboard() -> Panel:
     container_table.add_row(trade_table)
     container_table.add_row(score_table)
     container_table.add_row(guard_table)
+    container_table.add_row(heat_table)
     container_table.add_row(log_table)
     return Panel(container_table, title="AutoTrade Dashboard")
 

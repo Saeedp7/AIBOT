@@ -103,6 +103,34 @@
         </tbody>
       </table>
 
+      <h2>Strategy Heatmap</h2>
+      <table class="table table-bordered table-sm">
+        <thead class="table-secondary">
+          <tr>
+            <th>Context</th>
+            <th>Strategy</th>
+            <th>Wins</th>
+            <th>Losses</th>
+            <th>Last Used</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ctx, strategies in heatmap.items() %}
+            {% for strat, info in strategies.items() %}
+            <tr>
+              <td>{{ ctx }}</td>
+              <td>{{ strat }}</td>
+              <td>{{ info.wins }}</td>
+              <td>{{ info.losses }}</td>
+              <td>{{ info.last_used }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+          <tr><td colspan="5" class="text-center">No heatmap data</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
       <h2>Recent Logs</h2>
       <pre class="bg-dark text-white p-2" style="max-height:300px; overflow:auto;">
 {% for line in logs %}{{ line }}{% endfor %}

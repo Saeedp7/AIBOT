@@ -79,6 +79,7 @@ class ReplayEngine:
                     net_pct,
                     regime=regime,
                     symbol=str(t.get("symbol", "")),
+                    timeframe=str(t.get("timeframe", "")),
                     score_path=self.score_path,
                 )
             c = counts.setdefault(strat, {"wins": 0, "losses": 0, "processed": 0})

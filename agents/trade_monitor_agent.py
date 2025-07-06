@@ -8,6 +8,7 @@ import MetaTrader5 as mt5
 
 from ai_engine.score_updater import update_strategy_score
 from utils.trade_journal import update_trade, load_history
+from utils.cooldown_tracker import set_strategy_cooldown
 from execution.multi_tp_manager import handle_order_close
 from risk_management.commission_calculator import estimate_commission, estimate_swap
 
@@ -109,16 +110,21 @@ class TradeMonitorAgent:
             import inspect
 
             sig = inspect.signature(update_strategy_score)
-            if len(sig.parameters) >= 4:
+            if len(sig.parameters) >= 5:
                 update_strategy_score(
                     self.strategy,
                     result_str,
                     net_pct,
                     regime=self.regime,
                     symbol=self.symbol,
+                    timeframe=self.timeframe,                    
                 )
             else:
-                update_strategy_score(self.strategy, result_str, self.regime)
+                update_strategy_score(
+                    self.strategy,
+                    result_str,
+                    self.regime,
+                )
         except Exception:
             update_strategy_score(
                 self.strategy,
@@ -126,6 +132,7 @@ class TradeMonitorAgent:
                 net_pct,
                 regime=self.regime,
                 symbol=self.symbol,
+                timeframe=self.timeframe,
             )
         logger.debug(
             "Trade closed: %s %s result=%s net_pct=%.2f",
@@ -140,3 +147,9 @@ class TradeMonitorAgent:
             logger.debug(
                 f"Cleaning up stale trade slot: {self.symbol} {self.timeframe}"
             )
+        # Persist cooldown for the strategy
+        set_strategy_cooldown(
+            strategy_name=self.strategy,
+            symbol=self.symbol,
+            timeframe=self.timeframe,
+        )

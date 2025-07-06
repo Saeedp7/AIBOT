@@ -37,11 +37,12 @@ def get_strategy_score(strategy_name: str, regime: str) -> float:
         elif all(k in data for k in ("win_rate", "recent_score", "regime_fit")):
             metrics = data
     return calculate_composite_score(metrics) if metrics else 0.0
+
 import numpy as np
 
 from strategies import discover_strategies
 from ai_engine.score_manager import ensure_base_scores
-
+from utils.cooldown_tracker import is_strategy_on_cooldown
 
 class StrategySelector:
     def __init__(self):
@@ -71,10 +72,14 @@ class StrategySelector:
                 threshold = get_confidence_threshold(symbol="XAUUSD", timeframe="M15", regime=regime, strategy_name=name)
                 score = get_strategy_score(name, regime)
 
+                if is_strategy_on_cooldown(name, "XAUUSD", "M15"):
+                    print(f"[Cooldown] {name} is cooling down. Skipped.")
+                    continue
+
                 if score >= threshold:
                     filtered.append(strat)
                 else:
-                    print(f"[Filter] Strategy {name} skipped due to score ({score} < {threshold})")
+                    print(f"[Filter] {name} score too low: {score} < {threshold}")
             except Exception as e:
                 print(f"[Filter] Strategy {name} error: {e}")
 
