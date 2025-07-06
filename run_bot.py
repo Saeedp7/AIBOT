@@ -5,6 +5,8 @@ import argparse, logging, os
 from config.manager import get_config
 from connectors.mt5_connector import initialize_mt5, shutdown_mt5
 from live.scheduler_loop import scheduler_loop
+from utils.time_utils import is_weekend
+from ai_engine.learning_mode import run_learning_mode_ml
 import MetaTrader5 as mt5
 import sys
 
@@ -23,6 +25,10 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if is_weekend():
+        print("\U0001F4DA Entering Weekend AI Learning Mode...")
+        run_learning_mode_ml()
+        return
     os.environ["LIVE_MODE"] = "true" if args.live else "false"
     if args.force_trade:
         os.environ["FORCE_TRADE"]  = "true"

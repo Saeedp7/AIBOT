@@ -41,6 +41,9 @@ def record_trade(
     exit: float | None = None,
     close_time: str | None = None,
     duration: float | None = None,
+    entry_time: str | None = None,
+    exit_time: str | None = None,
+    duration_min: float | None = None,
     profit_pct: float | None = None,
     net_profit_pct: float | None = None,
     commission_usd: float | None = None,
@@ -63,7 +66,10 @@ def record_trade(
     """Append a trade entry to the history log."""
     history = _load_history()
     timestamp = timestamp or datetime.utcnow().isoformat() + "Z"
-    
+    entry_time = entry_time or timestamp
+    exit_time = exit_time or close_time
+    duration_min = duration_min or duration
+
     exit_price = exit
     commission = commission_usd
     swap = swap_usd
@@ -108,7 +114,9 @@ def record_trade(
         "regime": regime,
         "exit": exit_price,
         "close_time": close_time,
+        "exit_time": exit_time,
         "duration": duration,
+        "duration_min": duration_min,
         "profit_pct": calc_profit_pct,
         "net_profit_pct": calc_net_pct,
         "commission_usd": commission,
@@ -120,6 +128,7 @@ def record_trade(
         "volume": volume,
         "ticket": ticket,
         "timestamp": timestamp,
+        "entry_time": entry_time,
         "trail_distance": trail_distance,
         "pattern_detected": pattern_detected,
         "entry_zone": entry_zone,
@@ -157,6 +166,7 @@ def update_trade(
                 trade["exit"] = exit
             if close_time is not None:
                 trade["close_time"] = close_time
+                trade["exit_time"] = close_time
             if result is not None:
                 trade["result"] = result
                 if result.lower() != "open" and (
@@ -225,7 +235,9 @@ def update_trade(
                 try:
                     open_ts = datetime.fromisoformat(trade["timestamp"].replace("Z", "+00:00"))
                     close_ts = datetime.fromisoformat(close_time.replace("Z", "+00:00"))
-                    trade["duration"] = (close_ts - open_ts).total_seconds() / 60
+                    dur_min = (close_ts - open_ts).total_seconds() / 60
+                    trade["duration"] = dur_min
+                    trade["duration_min"] = dur_min
                 except Exception:
                     pass
 

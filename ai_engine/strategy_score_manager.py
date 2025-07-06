@@ -42,21 +42,52 @@ def get_strategy_score(strategy_name: str, regime: str) -> float:
     return stats.get("score", 0.0)
 
 
-def update_strategy_score(strategy_name: str, regime: str, result: float) -> None:
+def update_strategy_score(
+    strategy_name: str,
+    regime: str,
+    result: float | None = None,
+    *,
+    score: float | None = None,
+    symbol: str | None = None,
+    result_input: float | None = None,
+    score_input: float | None = None,
+) -> None:
+    """Update score for a strategy/regime combination.
+
+    Parameters
+    ----------
+    strategy_name : str
+        Name of the trading strategy.
+    regime : str
+        Market regime label.
+    result : float | None
+        Binary result value ``1`` for win, ``0`` for loss. Optional if ``score``
+        is provided directly.
+    score : float | None
+        If provided, sets the score directly without exponential smoothing.
+    symbol : str | None
+        Unused placeholder for future per-symbol scoring.
+    result_input, score_input : float | None
+        Backwards compatibility parameters when called via ``ai.strategy_score_manager``.
+    """
+
+    # Backwards compatibility with wrapper
+    if result_input is not None:
+        result = result_input
+    if score_input is not None:
+        score = score_input
     scores = load_strategy_scores()
     strat_data = scores.setdefault(strategy_name, {}).setdefault(
         regime,
         {"score": 0.0, "count": 0, "last_updated": None},
     )
 
-    previous = strat_data["score"]
-    count = strat_data["count"]
-
-    alpha = LOW_TRADE_ALPHA if count < MIN_REQUIRED_TRADES else DEFAULT_ALPHA
-    new_score = (1 - alpha) * previous + alpha * result
-
-    strat_data["score"] = new_score
-    strat_data["count"] = count + 1
+    if score is not None:
+        strat_data["score"] = score
+    elif result is not None:
+        alpha = LOW_TRADE_ALPHA if strat_data["count"] < MIN_REQUIRED_TRADES else DEFAULT_ALPHA
+        strat_data["score"] = (1 - alpha) * strat_data["score"] + alpha * result
+        strat_data["count"] += 1
     strat_data["last_updated"] = datetime.utcnow().isoformat()
 
     save_strategy_scores(scores)

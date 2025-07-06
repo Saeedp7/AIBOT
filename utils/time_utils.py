@@ -58,3 +58,8 @@ def session_risk_multiplier(now: datetime | None = None) -> float:
         return REDUCED_RISK_OUTSIDE_SESSION
     logger.debug(f"Current UTC time: {now_dt}. Session: LOW. Trading disabled.")
     return 0.0
+
+def is_weekend(now: datetime | None = None) -> bool:
+    """Return ``True`` if ``now`` falls on Saturday or Sunday."""
+    dt = now if now is not None else datetime.now(timezone.utc)
+    return dt.weekday() >= 5
