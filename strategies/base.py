@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import pandas as pd
 from utils.logger import debug_log
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 from strategy_components.session_filter import killzone_label
 
 class BaseStrategy:
@@ -71,4 +75,7 @@ class BaseStrategy:
         regime: str,
     ) -> str | None:
         """Fallback wrapper used by external modules."""
+        df = df.copy(deep=True)
+        df['ema_20'] = calculate_ema(df['close'], 20)
+        df['vwap'] = calculate_vwap(df)
         return self.generate_signal(df)

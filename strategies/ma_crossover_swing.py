@@ -1,6 +1,10 @@
 import pandas as pd
 import pandas_ta as ta
 from .base import BaseStrategy
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 class MACrossoverSwingStrategy(BaseStrategy):
     def __init__(self):
@@ -11,8 +15,8 @@ class MACrossoverSwingStrategy(BaseStrategy):
         if len(data) < 200:
             return
 
-        data.loc[:, 'ma_50'] = ta.sma(data['close'], length=50)
-        data.loc[:, 'ma_200'] = ta.sma(data['close'], length=200)
+        data.loc[:, 'ma_50'] = calculate_sma(data['close'], 50)
+        data.loc[:, 'ma_200'] = calculate_sma(data['close'], 200)
 
         data = data.dropna(subset=['ma_50', 'ma_200'])
         if len(data) < 2:

@@ -1,5 +1,9 @@
 import pandas as pd
 from .base import BaseStrategy
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 class BreakoutStrategy(BaseStrategy):
     """Simple breakout strategy using pre-computed indicator columns."""
@@ -13,6 +17,10 @@ class BreakoutStrategy(BaseStrategy):
         self.signal = None
         if len(df) < self.lookback + 1:
             return
+
+        df['ema_14'] = calculate_ema(df['close'], 14)
+        df['ema_50'] = calculate_ema(df['close'], 50)
+        df['rsi_14'] = calculate_rsi(df['close'], 14)
 
         required = {"ema_14", "ema_50", "rsi_14"}
         if not required.issubset(df.columns):

@@ -1,6 +1,10 @@
 # ⛔ No indicators required – this strategy uses raw price-action triggers only.
 import pandas as pd
 from .base import BaseStrategy
+from utils.indicators import (
+    calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
+    calculate_vwap, calculate_bollinger_bands, calculate_adx, calculate_supertrend
+)
 
 class DeltaDivergenceScalpingStrategy(BaseStrategy):
     def __init__(self):
@@ -10,6 +14,9 @@ class DeltaDivergenceScalpingStrategy(BaseStrategy):
         self.signal = None
         if len(data) < 10 or 'volume' not in data.columns:
             return
+
+        data['rsi_14'] = calculate_rsi(data['close'], 14)
+        data['vwap'] = calculate_vwap(data)
 
         # Simulate: Price down + volume up => potential reversal
         if data['close'].iloc[-1] < data['close'].iloc[-2] and data['volume'].iloc[-1] > data['volume'].iloc[-2]:
