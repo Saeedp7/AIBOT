@@ -2522,5 +2522,42 @@
     "reached_tps": [
       0
     ]
+  },
+  {
+    "symbol": "XAUUSD.",
+    "timeframe": "M5",
+    "strategy": "PriceActionStrategy",
+    "entry": 3333.64,
+    "sl": 3329.64,
+    "tp": [
+      3337.64,
+      3341.64,
+      3345.64,
+      3349.64,
+      3353.64
+    ],
+    "result": "open",
+    "regime": "volatile",
+    "exit": null,
+    "close_time": null,
+    "duration": null,
+    "profit_pct": null,
+    "net_profit_pct": null,
+    "commission_usd": null,
+    "swap_usd": null,
+    "exit_reason": null,
+    "hit": null,
+    "sl_moved": false,
+    "closed_early": false,
+    "volume": 0.01,
+    "ticket": 27713594,
+    "timestamp": "2025-07-06T22:59:57.746455Z",
+    "trail_distance": 1.7089587243223008,
+    "pattern_detected": null,
+    "entry_zone": null,
+    "bias": null,
+    "session_tag": null,
+    "rr_ratio": null,
+    "tp_index": 0
   }
 ]

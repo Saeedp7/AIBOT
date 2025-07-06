@@ -1,8 +1,8 @@
 """Lightweight technical indicator helpers.
 
-This module primarily relies on ``pandas_ta`` for indicator calculations.  The
-package may fail to import in minimal environments (for example due to an
-incompatible ``numpy`` release).  In that case, a very small pandas/numpy
+This module primarily relies on ``pandas_ta`` for indicator calculations.  
+The package may fail to import in minimal environments (for example due to an
+incompatible ``numpy`` release). In that case, a very small pandas/numpy
 fallback implementation is used so basic tests and backtests can still run
 without the dependency.
 """
@@ -16,6 +16,14 @@ try:  # pragma: no cover - optional dependency
     import pandas_ta as ta  # type: ignore
 except Exception:  # pragma: no cover - allow tests without the library
     ta = None
+
+
+def strip_timezone(df: pd.DataFrame) -> pd.DataFrame:
+    """Ensure df index has no timezone info to avoid pandas_ta warnings."""
+    if df.index.tz is not None:
+        df = df.copy()
+        df.index = df.index.tz_localize(None)
+    return df
 
 
 def calculate_ema(series: pd.Series, period: int) -> pd.Series:
@@ -89,6 +97,7 @@ def calculate_macd(
 
 
 def calculate_vwap(df: pd.DataFrame) -> pd.Series:
+    df = strip_timezone(df)
     if ta and hasattr(ta, "vwap"):
         try:
             result = ta.vwap(
@@ -128,6 +137,7 @@ def calculate_bollinger_bands(
 
 
 def calculate_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
+    df = strip_timezone(df)
     if ta and hasattr(ta, "adx"):
         try:
             adx_df = ta.adx(df["high"], df["low"], df["close"], length=period)
@@ -152,6 +162,7 @@ def calculate_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
 
 
 def calculate_supertrend(df: pd.DataFrame, period: int = 10, multiplier: float = 3) -> pd.Series:
+    df = strip_timezone(df)
     hl2 = (df["high"] + df["low"]) / 2
     if ta and hasattr(ta, "supertrend"):
         try:
@@ -228,6 +239,7 @@ def calculate_fibonacci_levels(high: float, low: float):
 
 
 def calculate_atr(data: pd.DataFrame, period: int = 14) -> pd.Series:
+    data = strip_timezone(data)
     if ta and hasattr(ta, "atr"):
         try:
             atr = ta.atr(data["high"], data["low"], data["close"], length=period)

@@ -7126,3 +7126,5 @@
 [2025-07-04T21:36:49.232837Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H4 using PriceActionStrategy
 [2025-07-04T21:36:49.233835Z] 🚫 Exposure guard blocked trade: DJIUSD. H4 buy
 [2025-07-06T14:23:46.879527Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
+[2025-07-06T22:59:47.352899Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M5 using PriceActionStrategy
+[2025-07-06T23:05:42.490479Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. M15 using PriceActionStrategy
