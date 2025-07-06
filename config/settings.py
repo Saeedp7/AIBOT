@@ -12,7 +12,7 @@ API_PATH = os.getenv('MT5_PATH', r'C:\Program Files\MetaTrader 5\terminal64.exe'
 
 # --- Trading Settings ---
 # config/settings.py
-SYMBOLS = ["XAUUSD.", "NDXUSD.", "DJIUSD.", "BTCUSD.", "ETHUSD."]
+SYMBOLS = ["XAUUSD.", "NDXUSD.", "DJIUSD."]
 TIMEFRAMES = ["M1", "M5", "M15", "H1", "H4"]
 SYMBOL = os.getenv('TRADE_SYMBOL', 'BTCUSD.')
 CHECK_INTERVAL_SECONDS = 60
@@ -40,20 +40,12 @@ SYMBOL_OVERRIDES = {
         "tick_value": 1.0,
         "contract_size": 100
     },
-    "BTCUSD.": {
-        "tick_size": 0.01,
-        "tick_value": 1.0,
-        "contract_size": 1
-    }
 }
 
 PIP_SIZES = {
     "XAUUSD": 0.1,
     "NDXUSD": 1.0,
     "DJIUSD": 1.0,
-    "BTCUSD": 1.0,
-    "ETHUSD": 1.0,
-
 }
 ACTIVE_SYMBOLS_TIMEFRAMES = {symbol: TIMEFRAMES for symbol in SYMBOLS}
 

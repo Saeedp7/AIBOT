@@ -777,6 +777,10 @@ def scheduler_loop(args: argparse.Namespace) -> None:
             continue
         try:
             refresh_active_symbols()
+            if not ACTIVE_SYMBOLS_TIMEFRAMES:
+                logger.info("No markets open. Sleeping...")
+                time.sleep(3600)
+                continue
             run_live_trade_manager()
             retry_failed_alerts()
             for symbol, tfs in ACTIVE_SYMBOLS_TIMEFRAMES.items():
