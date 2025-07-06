@@ -1,5 +1,5 @@
 import pandas as pd
-import pandas_ta as ta
+from utils.indicators import calculate_macd
 from .base import BaseStrategy
 
 class MACDDivergenceStrategy(BaseStrategy):
@@ -11,9 +11,9 @@ class MACDDivergenceStrategy(BaseStrategy):
         if len(data) < 35:
             return
 
-        macd = ta.macd(data['close'])
-        data.loc[:, 'macd'] = macd['MACD_12_26_9']
-        data.loc[:, 'macd_signal'] = macd['MACDs_12_26_9']
+        macd_line, signal_line, _ = calculate_macd(data['close'])
+        data.loc[:, 'macd'] = macd_line
+        data.loc[:, 'macd_signal'] = signal_line
 
         if data['macd'].iloc[-2] < data['macd_signal'].iloc[-2] and data['macd'].iloc[-1] > data['macd_signal'].iloc[-1]:
             self.signal = 'buy'

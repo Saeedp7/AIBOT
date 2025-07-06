@@ -2,7 +2,7 @@ import pandas as pd
 from utils.stop_level import enforce_min_sl_tp
 import MetaTrader5 as mt5
 from ai_engine.regime_classifier import detect_market_regime
-from utils.indicators import calculate_atr
+from utils.indicators import calculate_atr, calculate_bollinger_bands
 from .base import BaseStrategy
 
 
@@ -22,11 +22,11 @@ def is_trend_continuation(df: pd.DataFrame, regime: str, lookback: int = 10) -> 
 
 
 def add_bollinger_bands(df: pd.DataFrame, period: int = 20, stddev: float = 2.0) -> pd.DataFrame:
-    """Add basic Bollinger Band columns to ``df`` and return it."""
-    df["bb_mid"] = df["close"].rolling(period).mean()
-    df["bb_std"] = df["close"].rolling(period).std()
-    df["bb_upper"] = df["bb_mid"] + stddev * df["bb_std"]
-    df["bb_lower"] = df["bb_mid"] - stddev * df["bb_std"]
+    """Add Bollinger Band columns using the centralized indicator utils."""
+    upper, mid, lower = calculate_bollinger_bands(df["close"], period, stddev)
+    df["bb_upper"] = upper
+    df["bb_mid"] = mid
+    df["bb_lower"] = lower
     return df
 
 

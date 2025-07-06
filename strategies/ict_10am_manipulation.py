@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# ⛔ No indicators required – this strategy uses raw price-action triggers only.
 from datetime import time
 import pandas as pd
 

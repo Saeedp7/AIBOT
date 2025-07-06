@@ -1,4 +1,5 @@
 import pandas as pd
+from utils.indicators import calculate_ema, calculate_rsi
 from .base import BaseStrategy
 
 class MeanReversionStrategy(BaseStrategy):
@@ -12,9 +13,10 @@ class MeanReversionStrategy(BaseStrategy):
         if len(df) < 30:
             return
 
-        required = {"ema_50", "rsi_14"}
-        if not required.issubset(df.columns):
-            return
+        if "ema_50" not in df.columns:
+            df["ema_50"] = calculate_ema(df["close"], 50)
+        if "rsi_14" not in df.columns:
+            df["rsi_14"] = calculate_rsi(df["close"], 14)
 
         close = df["close"].iloc[-1]
         ema = df["ema_50"].iloc[-1]
