@@ -64,9 +64,10 @@ def test_strategy_selector_agent(tmp_path, monkeypatch):
         score_path=str(score_path),
         asset_score_path=str(score_path),
     )
-    decision, strat_name, regime = agent.select("XAUUSD", "M1")
+    decision, strat_name, tf, regime = agent.select("XAUUSD", "M1")
     assert decision == "buy"
     assert strat_name == "GoodStrategy"
+    assert tf == "M15"
     assert regime == "trending"
 
 

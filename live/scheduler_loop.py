@@ -138,6 +138,12 @@ daily_guard_trigger_date: date | None = None
 # Track currently open trades per symbol/timeframe
 active_trades: dict[tuple[str, str], bool] = {}
 strategy_selector_agent = StrategySelectorAgent(StrategySelector().strategies)
+
+# Expand TIMEFRAMES to include each strategy's preferred timeframe
+strategy_tfs = {getattr(s, "preferred_tf", "M15") for s in strategy_selector_agent.strategies}
+TIMEFRAMES = sorted(set(TIMEFRAMES) | strategy_tfs)
+ACTIVE_SYMBOLS_TIMEFRAMES = {s: TIMEFRAMES for s in SYMBOLS}
+
 risk_manager_agent = RiskManagerAgent()
 smc_strategy = SMCStrategy()
 
@@ -361,7 +367,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         active_trades[(symbol, timeframe)] = True
         return
 
-    decision, best_strat, market_regime = strategy_selector_agent.select(symbol, timeframe)
+    decision, best_strat, strat_tf, market_regime = strategy_selector_agent.select(symbol, timeframe)
     if decision not in ("buy", "sell") or not best_strat:
         logger.warning(
             f"[SKIP] Trade skipped: {symbol} {timeframe} - Reason: No valid signal"
@@ -369,7 +375,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         return
     
     logger.info(
-        f"[SIGNAL GENERATED] {best_strat} | {symbol} {timeframe} → {decision.upper()}"
+        f"[SIGNAL GENERATED] {best_strat} | {symbol} {strat_tf} → {decision.upper()}"
     )
     # Regime enforcement: block trades if strategy not allowed in detected regime
     strat_obj = next(

@@ -43,20 +43,44 @@ class StrategySelectorAgent:
         self.score_path = score_path
         self.asset_score_path = asset_score_path
 
-    def select(self, symbol: str, timeframe: str) -> Tuple[str | None, str | None, str]:
-        df, regime = self.scanner.scan(symbol, timeframe)
-        if df is None:
-            return None, None, regime
+    def select(self, symbol: str, timeframe: str | None = None) -> Tuple[str | None, str | None, str | None, str]:
+        """Evaluate all strategies using their preferred timeframes.
 
+        Returns tuple of (signal, strategy_name, strategy_timeframe, regime).
+        """
         self.memory.run()
 
-        strategies = filter_strategies(self.strategies, regime)
-        if not strategies:
-            return None, None, regime
+        data_cache: dict[str, tuple[pd.DataFrame | None, str]] = {}
+        evaluations = []
 
-        evaluations = self.evaluator.evaluate(
-            strategies, df, regime, symbol=symbol, timeframe=timeframe
-        )
+        for strat in self.strategies:
+            tf = getattr(strat, "preferred_tf", timeframe or "M15")
+            if tf not in data_cache:
+                df, reg = self.scanner.scan(symbol, tf)
+                data_cache[tf] = (df, reg)
+            else:
+                df, reg = data_cache[tf]
+
+            if df is None:
+                continue
+
+            allowed = getattr(strat, "regimes", None)
+            if hasattr(strat, "allowed_regimes"):
+                allowed = strat.allowed_regimes()
+            if allowed and reg not in allowed:
+                continue
+
+            result = self.evaluator.evaluate([strat], df, reg, symbol=symbol, timeframe=tf)
+            if not result:
+                continue
+            ev = result[0]
+            ev["timeframe"] = tf
+            ev["regime"] = reg
+            evaluations.append(ev)
+
+        if not evaluations:
+            return None, None, timeframe, "unknown"
+
         evaluations.sort(key=lambda e: e["score"], reverse=True)
 
         if random.random() < EXPLORATION_PROBABILITY:
@@ -71,19 +95,21 @@ class StrategySelectorAgent:
 
         if evaluation is None:
             debug_log("All strategies blocked by streak guard")
-            return None, None, regime
+            return None, None, evaluations[0].get("timeframe"), evaluations[0].get("regime", "unknown")
 
         strategy = evaluation["strategy"]
-
         score = evaluation["score"]
         signal = evaluation["signal"]
+        tf = evaluation.get("timeframe")
+        reg = evaluation.get("regime", "unknown")
         name = strategy.__class__.__name__
-        logger.info("Evaluated %s: %.2f -> %s", name, score, signal)
+
+        logger.info("Evaluated %s (%s): %.2f -> %s", name, tf, score, signal)
 
         if signal in ("buy", "sell") and score >= MIN_CONFIDENCE:
-            return signal, name, regime
+            return signal, name, tf, reg
 
         debug_log(
-            f"{name} {symbol} {timeframe} signal={signal} score={score:.2f} < {MIN_CONFIDENCE}"
+            f"{name} {symbol} {tf} signal={signal} score={score:.2f} < {MIN_CONFIDENCE}"
         )
-        return None, name, regime
+        return None, name, tf, reg
