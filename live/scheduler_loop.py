@@ -88,7 +88,7 @@ def is_valid_sl_tp(symbol: str, order_type: str, price: float, sl: float, tp: fl
     info = mt5.symbol_info(symbol)
     if not info:
         return False
-    stop_level = info.trade_stops_level * info.point
+    stop_level = getattr(info, "trade_stops_level", getattr(info, "stops_level", 0)) * info.point
 
     if order_type == "buy":
         if sl >= price or tp <= price:
@@ -108,7 +108,7 @@ def auto_adjust_sl_tp(symbol: str, order_type: str, price: float, sl: float, tp:
     info = mt5.symbol_info(symbol)
     if not info:
         return sl, tp
-    min_dist = info.trade_stops_level * info.point
+    min_dist = getattr(info, "trade_stops_level", getattr(info, "stops_level", 0)) * info.point
     if order_type == "buy":
         sl = min(sl, price - min_dist)
         tp = max(tp, price + min_dist)
@@ -743,11 +743,18 @@ def run_live_trade_manager() -> None:
                     reached_tps=list(bem.reached_tps),
                 )
                 alert_sl_moved(pos.symbol, rec["timeframe"], new_sl)
-        # simple reversal check
-        if direction == "buy" and price < rec["entry"] - (rec["entry"] - rec["sl"]):
-            close_type = mt5.ORDER_TYPE_SELL
-        elif direction == "sell" and price > rec["entry"] + (rec["sl"] - rec["entry"]):
-            close_type = mt5.ORDER_TYPE_BUY
+        # simple reversal check only after any TP hit
+        tp_hit_flag = any(
+            rec.get(k)
+            for k in ("tp1_hit", "tp2_hit", "tp3_hit")
+        )
+        if tp_hit_flag:
+            if direction == "buy" and price < rec["entry"] - (rec["entry"] - rec["sl"]):
+                close_type = mt5.ORDER_TYPE_SELL
+            elif direction == "sell" and price > rec["entry"] + (rec["sl"] - rec["entry"]):
+                close_type = mt5.ORDER_TYPE_BUY
+            else:
+                close_type = None
         else:
             close_type = None
         if close_type is not None:
