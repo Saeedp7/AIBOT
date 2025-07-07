@@ -7,6 +7,8 @@ from utils.indicators import (
 )
 
 class FibonacciSwingStrategy(BaseStrategy):
+    strategy_type = "swing"
+
     def __init__(self):
         self.signal = None
 

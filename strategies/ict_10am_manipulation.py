@@ -18,6 +18,7 @@ class ICT10AMManipulationStrategy(BaseStrategy):
     """ICT 10AM liquidity manipulation entry."""
 
     strategy_group = "day"
+    strategy_type = "scalp"
 
     def _confirm_ltf_entry(self, ltf_df: pd.DataFrame | None, direction: str) -> bool:
         """Confirm entry on a lower timeframe via engulfing or BOS."""

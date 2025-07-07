@@ -5,6 +5,8 @@ from utils.indicators import calculate_sma
 from .base import BaseStrategy
 
 class TrendFollowingStrategy(BaseStrategy):
+    strategy_type = "swing"
+
     def __init__(self, fast_period=10, slow_period=30):
         self.fast_period = fast_period
         self.slow_period = slow_period

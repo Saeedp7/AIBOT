@@ -7,6 +7,7 @@ from utils.indicators import (
 )
 
 class MicroBreakoutScalpingStrategy(BaseStrategy):
+    strategy_type = "scalp"
     def __init__(self):
         self.signal = None
 

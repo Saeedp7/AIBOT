@@ -4,6 +4,7 @@ from .base import BaseStrategy
 
 class MeanReversionStrategy(BaseStrategy):
     """Mean reversion strategy using RSI and EMA indicators."""
+    strategy_type = "day"
 
     def __init__(self) -> None:
         self.signal: str | None = None

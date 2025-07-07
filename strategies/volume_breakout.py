@@ -3,6 +3,8 @@ from utils.indicators import calculate_ema
 from .base import BaseStrategy
 
 class VolumeBreakoutStrategy(BaseStrategy):
+    strategy_type = "day"
+
     def __init__(self):
         self.signal = None
 

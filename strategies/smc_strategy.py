@@ -29,6 +29,7 @@ class SMCStrategy(BaseStrategy):
     """Unifies basic SMC concepts for trade generation."""
 
     strategy_group = "day"
+    strategy_type = "day"
 
     def generate_signal(self, df: pd.DataFrame) -> Dict | None:
         if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):

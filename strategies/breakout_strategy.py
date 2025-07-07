@@ -7,6 +7,7 @@ from utils.indicators import (
 
 class BreakoutStrategy(BaseStrategy):
     """Simple breakout strategy using pre-computed indicator columns."""
+    strategy_type = "day"
 
     def __init__(self, lookback: int = 20) -> None:
         self.lookback = lookback

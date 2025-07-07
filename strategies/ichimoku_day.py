@@ -7,6 +7,8 @@ from utils.indicators import (
 )
 
 class IchimokuDayStrategy(BaseStrategy):
+    strategy_type = "day"
+
     def __init__(self):
         self.signal = None
 
