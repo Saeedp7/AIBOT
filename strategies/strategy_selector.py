@@ -47,6 +47,7 @@ import numpy as np
 from strategies import discover_strategies
 from ai_engine.score_manager import ensure_base_scores
 from utils.cooldown_tracker import is_strategy_on_cooldown
+from monitoring.alert_manager import send_telegram_alert
 
 class StrategySelector:
     def __init__(self):
@@ -156,6 +157,10 @@ class StrategySelector:
             except Exception as e:
                 print(f"❌ Strategy {name} failed: {e}")
 
+        if selected_strategy:
+            send_telegram_alert(
+                f"\u2699\ufe0f Strategy Selected: {selected_strategy.__class__.__name__}"
+            )
         return selected_strategy
 
     def get_all_strategies(self):

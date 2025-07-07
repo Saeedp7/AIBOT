@@ -754,6 +754,9 @@ def run_live_trade_manager() -> None:
                 active_trades.pop((pos.symbol, rec["timeframe"]), None)
                 exposure_guard.remove(pos.symbol, rec["timeframe"])
                 alert_trade_closed(pos.symbol, rec["timeframe"], "closed_early")
+                send_telegram_alert(
+                    f"\u2705 Trade {ticket} closed early at {price} (Net: {net_pct:+.2f}%)"
+                )
                 update_ai_from_trade(
                     ticket=ticket,
                     result="closed_early",
