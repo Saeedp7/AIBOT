@@ -71,14 +71,18 @@ def handle_order_close(ticket: int, price: float) -> None:
     remaining = [t for t in data["tickets"] if t != ticket and t in _ticket_map]
     entry = data["entry"]
     tp_levels = data["tp_levels"]
-    sl_buffer = data.get("sl_buffer", 0.0)
+    symbol = data.get("symbol", "")
+    info = mt5.symbol_info(symbol)
+    point = getattr(info, "point", 0.0) if info else 0.0
     if idx == 0 and remaining:
+        # Position A hit TP1 -> move B & C SL to entry + 20 pips
+        offset = 20 * point * 10
+        new_sl = entry + offset if data["direction"] == "buy" else entry - offset
         for t in remaining:
-            _modify_sl(t, entry, [0])
+            _modify_sl(t, new_sl, [0])
     elif idx == 1 and remaining:
-        # Only one ticket should remain
-        buffer_adj = sl_buffer if data["direction"] == "buy" else -sl_buffer
-        new_sl = tp_levels[1] - buffer_adj
+        # Position B hit TP2 -> set C SL to TP1 level
+        new_sl = tp_levels[0]
         _modify_sl(remaining[0], new_sl, [0, 1])
 
     if not remaining:
