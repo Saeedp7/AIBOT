@@ -82,6 +82,41 @@ from strategy_components.session_filter import (
 
 logger = logging.getLogger("scheduler")
 
+
+def is_valid_sl_tp(symbol: str, order_type: str, price: float, sl: float, tp: float) -> bool:
+    """Validate SL/TP against broker stop levels."""
+    info = mt5.symbol_info(symbol)
+    if not info:
+        return False
+    stop_level = info.stops_level * info.point
+
+    if order_type == "buy":
+        if sl >= price or tp <= price:
+            return False
+        if (price - sl) < stop_level or (tp - price) < stop_level:
+            return False
+    else:
+        if sl <= price or tp >= price:
+            return False
+        if (sl - price) < stop_level or (price - tp) < stop_level:
+            return False
+    return True
+
+
+def auto_adjust_sl_tp(symbol: str, order_type: str, price: float, sl: float, tp: float) -> tuple[float, float]:
+    """Adjust SL/TP to satisfy minimum stop level requirements."""
+    info = mt5.symbol_info(symbol)
+    if not info:
+        return sl, tp
+    min_dist = info.stops_level * info.point
+    if order_type == "buy":
+        sl = min(sl, price - min_dist)
+        tp = max(tp, price + min_dist)
+    else:
+        sl = max(sl, price + min_dist)
+        tp = min(tp, price - min_dist)
+    return sl, tp
+
 def get_confidence_threshold(symbol: str, timeframe: str, regime: str, strategy_name: str) -> float:
     """Return confidence threshold for a trade context."""
     overrides = load_strategy_thresholds()
@@ -189,16 +224,31 @@ def execute_trade(
         logger.warning(f"{symbol} not tradeable now (market closed or disabled)")
         return None
 
-    price = mt5.symbol_info_tick(symbol)
-    if price is None:
+    price_tick = mt5.symbol_info_tick(symbol)
+    if price_tick is None:
         logging.warning(f"No price data for {symbol}")
         return None
 
-    entry_price = price.ask if direction == "buy" else price.bid
+    entry_price = price_tick.ask if direction == "buy" else price_tick.bid
+
+    if not is_valid_sl_tp(symbol, direction, entry_price, sl, tp):
+        info = mt5.symbol_info(symbol)
+        stop_level = info.stops_level * info.point if info else 0
+        print(f"[VALIDATION FAILED] {symbol} ({direction})")
+        print(
+            f"Entry={entry_price:.2f}, SL={sl:.2f}, TP={tp:.2f}, MinStop={stop_level:.2f}"
+        )
+        print(
+            f"\u274c Invalid SL/TP for {symbol} - Order rejected due to broker stop limits."
+        )
+        return None
 
     sl, _, valid = enforce_min_stop_distance(symbol, entry_price, sl, tp, direction)
     if not valid:
         return None
+
+    print(f"\U0001F4E4 Executing {direction.upper()} on {symbol} @ {entry_price:.2f}")
+    print(f"    SL: {sl:.2f} | TP: {tp:.2f}")
     if get_config("LIVE_MODE", "false").lower() != "true":
         logger.debug(
             "[SIM MODE] %s %s lot=%.2f price=%.5f sl=%s tp=%s",
@@ -227,7 +277,6 @@ def execute_trade(
             mt5.ORDER_FILLING_RETURN,
         ):
             type_filling = symbol_info.filling_mode
-    print(tp)            
     request = {
         "action": mt5.TRADE_ACTION_DEAL,
         "symbol": symbol,
@@ -406,7 +455,11 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
         return
 
 
-    entry = df["close"].iloc[-1]
+    tick = mt5.symbol_info_tick(symbol)
+    if tick:
+        entry = tick.ask if decision == "buy" else tick.bid
+    else:
+        entry = df["close"].iloc[-1]
     scores = load_scores()
     metrics = scores.get(best_strat, {})
     confidence = (
