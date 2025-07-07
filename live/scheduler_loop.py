@@ -88,7 +88,7 @@ def is_valid_sl_tp(symbol: str, order_type: str, price: float, sl: float, tp: fl
     info = mt5.symbol_info(symbol)
     if not info:
         return False
-    stop_level = info.stops_level * info.point
+    stop_level = info.trade_stops_level * info.point
 
     if order_type == "buy":
         if sl >= price or tp <= price:
@@ -108,7 +108,7 @@ def auto_adjust_sl_tp(symbol: str, order_type: str, price: float, sl: float, tp:
     info = mt5.symbol_info(symbol)
     if not info:
         return sl, tp
-    min_dist = info.stops_level * info.point
+    min_dist = info.trade_stops_level * info.point
     if order_type == "buy":
         sl = min(sl, price - min_dist)
         tp = max(tp, price + min_dist)
@@ -233,7 +233,7 @@ def execute_trade(
 
     if not is_valid_sl_tp(symbol, direction, entry_price, sl, tp):
         info = mt5.symbol_info(symbol)
-        stop_level = info.stops_level * info.point if info else 0
+        stop_level = info.trade_stops_level * info.point if info else 0
         print(f"[VALIDATION FAILED] {symbol} ({direction})")
         print(
             f"Entry={entry_price:.2f}, SL={sl:.2f}, TP={tp:.2f}, MinStop={stop_level:.2f}"
