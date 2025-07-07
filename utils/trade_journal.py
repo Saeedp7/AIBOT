@@ -28,6 +28,16 @@ def _save_history(history: List[Dict[str, Any]]) -> None:
         json.dump(history, f, indent=2)
 
 
+def infer_exit_reason(entry: float, exit_price: float | None, sl: float, tps: List[float], result: str | None) -> str:
+    """Best-effort guess of why a trade closed."""
+    if result == "win" and tps:
+        if abs((exit_price or 0) - tps[0]) < 1e-4:
+            return "tp1_hit"
+    if result == "loss" and exit_price is not None and abs(exit_price - sl) < 1e-4:
+        return "sl_hit"
+    return "manual_or_unknown"
+
+
 def record_trade(
     symbol: str,
     timeframe: str,
@@ -107,6 +117,8 @@ def record_trade(
         if volume and commission is not None and swap is not None:
             charges = commission + swap
             calc_net_pct = calc_profit_pct - (charges / (entry * volume * 100000.0) * 100)
+    if exit_reason is None:
+        exit_reason = infer_exit_reason(entry, exit_price, sl, tps, result)
     trade = {
         "symbol": symbol,
         "timeframe": timeframe,

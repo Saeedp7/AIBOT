@@ -3,6 +3,8 @@ from utils.indicators import calculate_macd
 from .base import BaseStrategy
 
 class MACDDivergenceStrategy(BaseStrategy):
+    strategy_type = "swing"
+
     def __init__(self):
         self.signal = None
 

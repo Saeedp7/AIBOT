@@ -13,6 +13,8 @@ class BaseStrategy:
     """Common interface for all strategies."""
 
     strategy_group: str = "day"
+    # Categorize strategies for time-based management
+    strategy_type: str = "day"
     preferred_tf: str = "M15"
     regimes: list[str] | None = None
     # Allowed market regimes for this strategy. Scheduler will block trades if

@@ -4,6 +4,8 @@ from .base import BaseStrategy
 from core.ict_utils import detect_liquidity_grab
 
 class VWAPReversionStrategy(BaseStrategy):
+    strategy_type = "scalp"
+
     def __init__(self):
         self.signal = None
 

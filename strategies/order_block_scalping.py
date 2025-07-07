@@ -4,6 +4,7 @@ from utils.indicators import calculate_ema
 from core.price_action import is_bullish_engulfing, is_bearish_engulfing
 
 class OrderBlockScalpingStrategy(BaseStrategy):
+    strategy_type = "scalp"
     def __init__(self):
         self.signal = None
 

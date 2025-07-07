@@ -3,6 +3,8 @@ from utils.indicators import calculate_supertrend, calculate_adx, calculate_mult
 from .base import BaseStrategy
 
 class SupertrendADXRSIStrategy(BaseStrategy):
+    strategy_type = "day"
+
     def __init__(self):
         self.signal = None
 

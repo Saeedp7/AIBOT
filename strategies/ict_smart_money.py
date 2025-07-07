@@ -13,6 +13,7 @@ from core.ict_utils import (
 
 class ICTSmartMoneyStrategy(BaseStrategy):
     """Strategy leveraging ICT style concepts."""
+    strategy_type = "day"
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
         if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):

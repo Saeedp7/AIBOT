@@ -58,6 +58,7 @@ def calculate_sl_tp(entry_price: float, regime: str, atr: float, direction: str,
 
 class TrendBreakoutStrategy(BaseStrategy):
     """Breakout strategy that waits for pullbacks within a trend."""
+    strategy_type = "day"
 
     def __init__(self) -> None:
         self.signal: str | None = None

@@ -11,6 +11,7 @@ from core.price_action import (
 
 class PriceActionStrategy(BaseStrategy):
     """Basic strategy using price action utilities."""
+    strategy_type = "day"
 
     def generate_signal(self, df: pd.DataFrame) -> str | None:
         if "atr" in df.columns and not self.is_volatile_enough(df["atr"]):
