@@ -6,7 +6,7 @@ import logging
 
 import MetaTrader5 as mt5
 
-from ai_engine.score_updater import update_strategy_score
+from core.strategy_score_handler import update_strategy_score
 from utils.trade_journal import update_trade, load_history
 from utils.cooldown_tracker import set_strategy_cooldown
 from execution.multi_tp_manager import handle_order_close

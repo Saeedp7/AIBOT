@@ -1,5 +1,4 @@
 import pandas as pd
-import pandas_ta as ta
 from .base import BaseStrategy
 from utils.indicators import (
     calculate_ema, calculate_sma, calculate_rsi, calculate_macd,
