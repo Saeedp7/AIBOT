@@ -7128,3 +7128,23 @@
 [2025-07-06T14:23:46.879527Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M1 using PriceActionStrategy
 [2025-07-06T22:59:47.352899Z] Confidence 5.9607 th=0.25 scale=1.00 for XAUUSD. M5 using PriceActionStrategy
 [2025-07-06T23:05:42.490479Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. M15 using PriceActionStrategy
+[2025-07-08T00:08:47.690540Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. H1 using EMACrossoverScalpingStrategy
+[2025-07-08T00:09:02.276881Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. H4 using EMACrossoverScalpingStrategy
+[2025-07-08T00:09:02.277879Z] 🚫 Exposure guard blocked trade: NDXUSD. H4 buy
+[2025-07-08T00:09:02.398520Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. M1 using EMACrossoverScalpingStrategy
+[2025-07-08T00:09:02.533080Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. M15 using EMACrossoverScalpingStrategy
+[2025-07-08T00:09:02.533080Z] 🚫 Exposure guard blocked trade: NDXUSD. M15 buy
+[2025-07-08T00:09:02.648785Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. M5 using EMACrossoverScalpingStrategy
+[2025-07-08T00:10:29.002607Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. H4 using EMACrossoverScalpingStrategy
+[2025-07-08T00:10:29.002607Z] 🚫 Exposure guard blocked trade: NDXUSD. H4 buy
+[2025-07-08T00:10:29.122262Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. M1 using EMACrossoverScalpingStrategy
+[2025-07-08T00:10:29.252027Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. M15 using EMACrossoverScalpingStrategy
+[2025-07-08T00:10:29.252534Z] 🚫 Exposure guard blocked trade: NDXUSD. M15 buy
+[2025-07-08T00:10:29.367344Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. M5 using EMACrossoverScalpingStrategy
+[2025-07-08T00:12:08.463598Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. H4 using EMACrossoverScalpingStrategy
+[2025-07-08T00:12:08.464598Z] 🚫 Exposure guard blocked trade: NDXUSD. H4 buy
+[2025-07-08T00:12:08.584374Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. M1 using EMACrossoverScalpingStrategy
+[2025-07-08T00:12:08.718711Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. M15 using EMACrossoverScalpingStrategy
+[2025-07-08T00:12:08.718711Z] 🚫 Exposure guard blocked trade: NDXUSD. M15 buy
+[2025-07-08T00:12:08.851627Z] Confidence 4.1667 th=0.25 scale=1.00 for NDXUSD. M5 using EMACrossoverScalpingStrategy
+[2025-07-08T00:12:08.985369Z] Confidence 5.9607 th=0.25 scale=1.00 for DJIUSD. H1 using PriceActionStrategy

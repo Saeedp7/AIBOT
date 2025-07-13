@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Iterable, Tuple
 import random
 from itertools import cycle
+from datetime import datetime
 
 import pandas as pd
 
@@ -18,9 +19,13 @@ from .regime_filter import filter_strategies
 from .streak_guard import StreakGuard
 
 from config.settings import EXPLORATION_PROBABILITY
+from ai_engine.score_updater import load_asset_scores
 
 MIN_CONFIDENCE = 0.1
 EPSILON = 0.05
+MIN_BASE_SCORE = 0.05
+RETRY_THRESHOLD_SECONDS = 3600 * 6
+TOP_N = 5
 
 class StrategySelectorAgent:
     """High level decision maker for choosing a trading direction."""
@@ -49,11 +54,16 @@ class StrategySelectorAgent:
         Returns tuple of (signal, strategy_name, strategy_timeframe, regime).
         """
         self.memory.run()
+        asset_scores = load_asset_scores(self.asset_score_path).get(symbol, {})
+        sorted_strats = sorted(asset_scores.items(), key=lambda x: x[1], reverse=True)
+        top_names = [s for s, score in sorted_strats if score >= 0.6][:TOP_N]
+        selected = [s for s in self.strategies if s.__class__.__name__ in top_names]
+        strategies = selected or self.strategies
 
         data_cache: dict[str, tuple[pd.DataFrame | None, str]] = {}
         evaluations = []
 
-        for strat in self.strategies:
+        for strat in strategies:
             tf = getattr(strat, "preferred_tf", timeframe or "M15")
             if tf not in data_cache:
                 df, reg = self.scanner.scan(symbol, tf)
@@ -80,6 +90,17 @@ class StrategySelectorAgent:
 
         if not evaluations:
             return None, None, timeframe, "unknown"
+        
+        now = datetime.utcnow()
+        filtered: list[dict] = []
+        for ev in evaluations:
+            if ev["score"] < MIN_BASE_SCORE:
+                last = self.memory.get_last_used_timestamp(ev["strategy"], symbol, ev.get("timeframe"))
+                if last and (now - last).total_seconds() <= RETRY_THRESHOLD_SECONDS:
+                    continue
+            filtered.append(ev)
+            
+        evaluations = filtered
 
         evaluations.sort(key=lambda e: e["score"], reverse=True)
 

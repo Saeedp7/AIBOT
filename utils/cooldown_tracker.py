@@ -41,3 +41,23 @@ def is_strategy_on_cooldown(strategy_name: str, symbol: str, timeframe: str) -> 
 
     last_dt = datetime.fromisoformat(last_used)
     return datetime.utcnow() < last_dt + timedelta(hours=COOLDOWN_HOURS)
+
+
+def get_last_used_timestamp(strategy_name: str, symbol: str, timeframe: str) -> datetime | None:
+    """Return last usage datetime for the strategy if available."""
+    if not os.path.exists(COOLDOWN_FILE):
+        return None
+
+    try:
+        with open(COOLDOWN_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except json.JSONDecodeError:
+        return None
+
+    ts = data.get(f"{strategy_name}_{symbol}_{timeframe}")
+    if not ts:
+        return None
+    try:
+        return datetime.fromisoformat(ts)
+    except ValueError:
+        return None

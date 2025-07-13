@@ -98,6 +98,15 @@ class BreakEvenManager:
 
 # --- Trailing after TP2 ---
         if self.trail_distance > 0 and any(i in self._reached for i in (1, 2)):
+            if 0 not in self._reached:
+                return self.sl
+            if len(self.tp_levels) > 1:
+                tp2 = self.tp_levels[1]
+                threshold = tp2 * 1.02 if self.direction == "buy" else tp2 * 0.98
+                if (self.direction == "buy" and current_price < threshold) or (
+                    self.direction == "sell" and current_price > threshold
+                ):
+                    return self.sl
             if self.direction == "buy":
                 new_sl = round(current_price - self.trail_distance, self.precision)
                 if new_sl > self.sl:

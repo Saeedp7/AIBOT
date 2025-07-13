@@ -54,7 +54,9 @@ class TradeManager:
         strategy_name: str = "",
         strategy_type: str = "day",
     ) -> TradeResult:
-        ticket = self.executor.execute(symbol, entry_price, lot, sl, tp_list)
+        ticket = self.executor.execute(
+            symbol, entry_price, lot, sl, tp_list, strategy=strategy_name
+        )
         self.monitor.log(
             f"Executed {symbol} at {entry_price} SL={sl} TP={tp_list}"
         )
@@ -115,6 +117,11 @@ class TradeManager:
 
         elif trade["tp_hits"] >= 2:
             tp2 = trade["tp_levels"][1]
+            price = trade.get("current_price", 0.0)
+            if not trade.get("tp1_hit"):
+                return
+            if price and price < tp2 * 1.02:
+                return
             new_sl = tp2 - (tp2 - trade["entry"]) * 0.2
             self.modify_sl(trade, new_sl=round(new_sl, 2))
             trade["exit_reason"] = "trailing_sl"

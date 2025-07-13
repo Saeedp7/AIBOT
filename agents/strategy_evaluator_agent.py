@@ -10,6 +10,34 @@ from ai_engine.score_updater import load_asset_scores
 from config.settings import DEFAULT_CONFIDENCE_THRESHOLDS
 import logging
 
+REGIME_MAP = {
+    "FibonacciSwingStrategy": ["ranging", "volatile", "uptrend", "downtrend"],
+    "LondonBreakoutStrategy": ["ranging"],
+    "SMCStrategy": ["bullish", "bearish"],
+
+    "PriceActionStrategy": ["trending", "breakout", "volatile"],
+    "SupplyDemandSwingStrategy": ["ranging", "volatile", "uptrend", "downtrend"],
+    "TrendPullbackStrategy": ["trending", "volatile", "uptrend", "downtrend"],
+    "TrendFollowingStrategy": ["trending", "uptrend", "downtrend"],
+    "VWAPReversionStrategy": ["ranging", "volatile"],
+    "MACDDivergenceStrategy": ["ranging", "reversal", "volatile"],
+    "BreakoutStrategy": ["breakout", "volatile"],
+    "DeltaDivergenceScalpingStrategy": ["volatile", "reversal"],
+
+    "EMACrossoverScalpingStrategy": ["trending", "volatile"],
+    "EMA2CrossStrategy": ["trending", "uptrend", "downtrend"],
+    "RSIBounceStrategy": ["ranging", "reversal"],
+    "RSIDivergenceStrategy": ["reversal", "volatile"],
+    "BollingerBounceStrategy": ["ranging", "volatile"],
+    "BollingerBreakoutStrategy": ["breakout", "volatile"],
+    "StochasticScalpingStrategy": ["ranging", "volatile"],
+    "ADXTrendStrategy": ["trending", "uptrend", "downtrend"],
+    "KeltnerBreakoutStrategy": ["breakout", "volatile"],
+    "HeikinAshiTrendStrategy": ["trending"],
+    "IchimokuReversalStrategy": ["reversal", "transition"]
+}
+
+
 logger = logging.getLogger(__name__)
 
 class StrategyEvaluatorAgent:
@@ -42,6 +70,9 @@ class StrategyEvaluatorAgent:
         for strat in strategies:
             name = strat.__class__.__name__
             signal = strat.check_signal(symbol, timeframe, df, regime)
+            allowed = REGIME_MAP.get(name)
+            if allowed and regime not in allowed:
+                continue
             if signal == "buy" and regime in {"downtrend"}:
                 logger.info(f"Skipping {name}: buy signal blocked in {regime} regime.")
                 continue
@@ -64,3 +95,4 @@ class StrategyEvaluatorAgent:
                         confidence = base_score
             results.append({"strategy": strat, "signal": signal, "score": confidence})
         return results
+    
