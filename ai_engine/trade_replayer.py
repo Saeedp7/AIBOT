@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional
 
-from ai_engine.score_updater import load_scores, update_strategy_score
+from core.strategy_score_handler import load_scores, update_strategy_score
 
 HISTORY_PATH = "logs/trade_history.json"
 SCORE_PATH = "ai_engine/strategy_scores.json"

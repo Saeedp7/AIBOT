@@ -1,7 +1,8 @@
 import types
 
 import MetaTrader5 as mt5
-from live import scheduler_loop
+from core import trade_engine
+from execution import order_manager
 
 
 def test_execute_trade_uses_mock(monkeypatch):
@@ -25,9 +26,9 @@ def test_execute_trade_uses_mock(monkeypatch):
     )
     monkeypatch.setattr(mt5, "symbol_info", lambda symbol: info)
     
-    monkeypatch.setattr(scheduler_loop, "execute_fake_order", lambda *a, **k: calls.append((a, k)) or 123)
+    monkeypatch.setattr(trade_engine, "execute_fake_order", lambda *a, **k: calls.append((a, k)) or 123)
 
-    ticket = scheduler_loop.execute_trade("buy", "XAUUSD.", 0.1, 1.0, 2.0)
+    ticket = trade_engine.execute_trade("buy", "XAUUSD.", 0.1, 1.0, 2.0)
 
     assert isinstance(ticket, int)
     assert calls and calls[0][0][0] == "buy"

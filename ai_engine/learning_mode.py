@@ -2,7 +2,7 @@ import json
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 # Reuse the existing score management utilities
-from ai_engine.strategy_score_manager import update_strategy_score
+from core.strategy_score_handler import update_strategy_score
 
 
 def run_learning_mode_ml(trade_file="logs/trade_history.json"):
