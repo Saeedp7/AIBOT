@@ -51,7 +51,7 @@ from risk_management.commission_calculator import estimate_commission, estimate_
 from risk_management.daily_guard import DailyGuard
 from risk_management.exposure_guard import ExposureGuard
 from connectors.mt5_connector import get_account_info
-from utils.trade_journal import record_trade, update_trade, load_history
+from utils.trade_journal import record_trade, update_trade, load_history, load_history_dict
 from utils.logger import log_trade_action
 from risk_management.breakeven_manager import BreakEvenManager
 from ai_engine.strategy_score_manager import recover_old_scores
@@ -511,7 +511,7 @@ def process_symbol_timeframe(symbol: str, timeframe: str, *, force_trade: bool =
 def run_live_trade_manager() -> None:
     """Monitor open positions and adjust stops or close early."""
     positions = mt5.positions_get()
-    history = {t["ticket"]: t for t in load_history()}
+    history = load_history_dict()
     if positions is None:
         return
     open_tickets = {p.ticket for p in positions}

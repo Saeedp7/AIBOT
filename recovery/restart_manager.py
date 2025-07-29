@@ -17,7 +17,19 @@ def recover_state():
         return executed, exposure
 
     positions = getattr(mt5, "positions_get", lambda: None)()
-    history = {t.get("ticket"): t for t in load_history() if t.get("result") == "open"}
+    raw_history = load_history()
+    history: dict[int, dict] = {}
+    for t in raw_history:
+        if not isinstance(t, dict):
+            continue
+        result = str(t.get("result", "")).lower()
+        if result != "open":
+            continue
+        ticket = t.get("ticket")
+        if isinstance(ticket, list):
+            ticket = ticket[0] if ticket else None
+        if isinstance(ticket, int):
+            history[ticket] = t
     if positions:
         for pos in positions:
             ticket = pos.ticket

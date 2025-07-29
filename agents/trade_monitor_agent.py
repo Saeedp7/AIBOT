@@ -7,7 +7,7 @@ import logging
 import MetaTrader5 as mt5
 
 from core.strategy_score_handler import update_strategy_score
-from utils.trade_journal import update_trade, load_history
+from utils.trade_journal import update_trade, load_history_dict
 from utils.cooldown_tracker import set_strategy_cooldown
 from execution.multi_tp_manager import handle_order_close
 from risk_management.commission_calculator import estimate_commission, estimate_swap
@@ -61,7 +61,7 @@ class TradeMonitorAgent:
             volume,
         ) = analyze_trade_result(self.ticket)
 
-        history = {t["ticket"]: t for t in load_history()}
+        history = load_history_dict()
         rec = history.get(self.ticket, {})
         entry = float(rec.get("entry", 0.0))
         net_profit = profit - commission - swap

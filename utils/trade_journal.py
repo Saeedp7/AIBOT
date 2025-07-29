@@ -272,3 +272,20 @@ def update_trade(
 def load_history() -> List[Dict[str, Any]]:
     """Public helper to load full trade history."""
     return _load_history()
+
+
+
+def load_history_dict() -> Dict[int, Dict[str, Any]]:
+    """Load history keyed by ticket number, ignoring malformed entries."""
+    hist_dict: Dict[int, Dict[str, Any]] = {}
+    for rec in _load_history():
+        if not isinstance(rec, dict):
+            continue
+        ticket = rec.get("ticket")
+        if isinstance(ticket, list):
+            ticket = ticket[0] if ticket else None
+        if isinstance(ticket, str) and ticket.isdigit():
+            ticket = int(ticket)
+        if isinstance(ticket, int):
+            hist_dict[ticket] = rec
+    return hist_dict
